@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: ef3a1d1786b0aa64a927cbd6ac72c4f4
+timeCreated: 1507801287
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 43719
+  packageName: Animated Space Man Set
+  packageVersion: 1.3
+  assetPath: Assets/AnimatedSpaceMan/Prefabs/space_man_orange_rank_01.prefab
+  uploadId: 246465

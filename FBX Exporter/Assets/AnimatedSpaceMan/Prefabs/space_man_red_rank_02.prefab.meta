@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 5206c4aa6628a714e9e854662777f113
+timeCreated: 1507802542
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 43719
+  packageName: Animated Space Man Set
+  packageVersion: 1.3
+  assetPath: Assets/AnimatedSpaceMan/Prefabs/space_man_red_rank_02.prefab
+  uploadId: 246465

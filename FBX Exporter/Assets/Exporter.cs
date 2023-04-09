@@ -1,100 +1,123 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Unity.VisualScripting;
+using UnityEditor.Timeline;
 using UnityEngine;
 
 public class Exporter : MonoBehaviour
 {
-    const int fileMode = 0;
-
-    Mesh ethanMesh = null;
-    Mesh sunglassMesh = null;
-
-    Vector3[] ethanVertices = null;
-    Vector3[] ethanNormals= null;
-    Vector2[] ethanUv0 = null;
-
-    string ethanVerticesText = null;
-
-    MeshRenderer[] ethanMeshRenderer = null;
-
-    Material ethanMaterial = null;
-
     StreamWriter writer = null;
+    BinaryWriter binaryWriter = null;
 
     // Start is called before the first frame update
     void Start()
     {
-        MeshFilter[] meshFilters = this.gameObject.GetComponentsInChildren<MeshFilter>();
-        ethanMeshRenderer=this.gameObject.GetComponentsInChildren<MeshRenderer>();
-
-        ethanMesh = meshFilters[0].mesh;
-        sunglassMesh = meshFilters[1].mesh;
-
-        ethanVertices = ethanMesh.vertices;
-        ethanNormals = ethanMesh.normals;
-        ethanUv0 = ethanMesh.uv;
-
-        ethanMaterial = ethanMeshRenderer[0].material;
-        //ethanMaterial.color
-
-        writer = File.CreateText("EthanFbx.txt");
-        BinaryWriter binaryWriter = new BinaryWriter(File.Open("EthanFBX.model", FileMode.Create));
-
-        ethanVerticesText = ethanVertices.Length.ToString();
-        writer.WriteLine("vertex num : " + ethanVerticesText);
-
-        binaryWriter.Write(ethanVertices.Length);
-        binaryWriter.Write('*');
-
-        writer.Write("vertices : ");
-        for (int i = 0;i<ethanVertices.Length;i++)
+        MeshFilter[] modelMeshFilters = this.gameObject.GetComponentsInChildren<MeshFilter>();
+        Transform[] transforms = new Transform[modelMeshFilters.Length];
+        for (int i = 0; i < modelMeshFilters.Length; ++i)
         {
-            ethanVerticesText = ethanVertices[i].ToString();
-            writer.Write(ethanVerticesText);
-
-            binaryWriter.Write(ethanVertices[i].x);
-            binaryWriter.Write(ethanVertices[i].y);
-            binaryWriter.Write(ethanVertices[i].z);
+            transforms[i] = modelMeshFilters[i].GetComponent<Transform>();
         }
-        binaryWriter.Write('*');
 
-        ethanVerticesText = ethanNormals.Length.ToString();
-        writer.WriteLine("\n\n" + "normal num : " + ethanVerticesText);
 
-        binaryWriter.Write(ethanNormals.Length);
-        binaryWriter.Write('*');
+        // text file
+        writer = File.CreateText("player model data.txt");
 
-        writer.Write("normals : ");
-        for (int i = 0; i < ethanNormals.Length; i++)
+        for (int i=0; i < modelMeshFilters.Length; ++i)
         {
-            ethanVerticesText = ethanNormals[i].ToString();
-            writer.Write(ethanVerticesText);
+            int verticesLength = modelMeshFilters[i].mesh.vertices.Length;
+            int normalsLength = modelMeshFilters[i].mesh.normals.Length;
+            int tangentsLength = modelMeshFilters[i].mesh.tangents.Length;
+            int uv0Length = modelMeshFilters[i].mesh.uv.Length;
 
-            binaryWriter.Write(ethanNormals[i].x);
-            binaryWriter.Write(ethanNormals[i].y);
-            binaryWriter.Write(ethanNormals[i].z);
+            writer.WriteLine(modelMeshFilters[i].name);
+            
+            writer.WriteLine("Vertices");
+            writer.WriteLine(verticesLength);
+            for(int j=0;j< verticesLength; ++j)
+            {
+                writer.Write(modelMeshFilters[i].mesh.vertices[j]);
+            }
+            writer.WriteLine('\n');
+
+            writer.WriteLine("Normals");
+            writer.WriteLine(normalsLength);
+            for (int j = 0; j < normalsLength; ++j)
+            {
+                writer.Write(modelMeshFilters[i].mesh.normals[j]);
+            }
+            writer.WriteLine('\n');
+
+            writer.WriteLine("Tangents");
+            writer.WriteLine(tangentsLength);
+            for (int j = 0; j < tangentsLength; ++j)
+            {
+                writer.Write(modelMeshFilters[i].mesh.tangents[j]);
+            }
+            writer.WriteLine('\n');
+
+            writer.WriteLine("Uv0");
+            writer.WriteLine(uv0Length);
+            for (int j = 0; j < uv0Length; ++j)
+            {
+                writer.Write(modelMeshFilters[i].mesh.uv[j]);
+            }
+            writer.Write('\n');
+            writer.Write("#########################");
+            writer.WriteLine('\n');
         }
-        binaryWriter.Write('*');
 
-        ethanVerticesText = ethanUv0.Length.ToString();
-        writer.WriteLine("\n\n" + "uv0 num : " + ethanVerticesText);
+        // binary file
+        binaryWriter = new BinaryWriter(File.Open("player model data.bin", FileMode.Create));
 
-        binaryWriter.Write(ethanUv0.Length);
-        binaryWriter.Write('*');
-
-        writer.Write("uv0 : ");
-        for (int i = 0; i < ethanUv0.Length; i++)
+        for (int i = 0; i < modelMeshFilters.Length; ++i)
         {
-            ethanVerticesText = ethanUv0[i].ToString();
-            writer.Write(ethanVerticesText);
+            int verticesLength = modelMeshFilters[i].mesh.vertices.Length;
+            int normalsLength = modelMeshFilters[i].mesh.normals.Length;
+            int tangentsLength = modelMeshFilters[i].mesh.tangents.Length;
+            int uv0Length = modelMeshFilters[i].mesh.uv.Length;
 
-            binaryWriter.Write(ethanUv0[i].x);
-            binaryWriter.Write(ethanUv0[i].y);
+            binaryWriter.Write(verticesLength);
+            binaryWriter.Write("*");
+            for (int j = 0; j < verticesLength; ++j)
+            {
+                binaryWriter.Write(modelMeshFilters[i].mesh.vertices[j].x);
+                binaryWriter.Write(modelMeshFilters[i].mesh.vertices[j].y);
+                binaryWriter.Write(modelMeshFilters[i].mesh.vertices[j].z);
+            }
+            binaryWriter.Write("*");
+
+            binaryWriter.Write(normalsLength);
+            binaryWriter.Write("*");
+            for (int j = 0; j < normalsLength; ++j)
+            {
+                binaryWriter.Write(modelMeshFilters[i].mesh.normals[j].x);
+                binaryWriter.Write(modelMeshFilters[i].mesh.normals[j].y);
+                binaryWriter.Write(modelMeshFilters[i].mesh.normals[j].z);
+            }
+            binaryWriter.Write("*");
+
+            binaryWriter.Write(tangentsLength);
+            binaryWriter.Write("*");
+            for (int j = 0; j < tangentsLength; ++j)
+            {
+                binaryWriter.Write(modelMeshFilters[i].mesh.tangents[j].x);
+                binaryWriter.Write(modelMeshFilters[i].mesh.tangents[j].y);
+                binaryWriter.Write(modelMeshFilters[i].mesh.tangents[j].z);
+            }
+            binaryWriter.Write("*");
+
+            binaryWriter.Write(uv0Length);
+            binaryWriter.Write("*");
+            for (int j = 0; j < uv0Length; ++j)
+            {
+                binaryWriter.Write(modelMeshFilters[i].mesh.uv[j].x);
+                binaryWriter.Write(modelMeshFilters[i].mesh.uv[j].y);
+            }
+            binaryWriter.Write("*");
         }
-        binaryWriter.Write('*');
 
-        writer.Close();
         binaryWriter.Close();
     }
 

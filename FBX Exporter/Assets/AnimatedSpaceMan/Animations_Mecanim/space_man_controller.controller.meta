@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: fd5341f7fb9f5c643a91418affe23c1a
+timeCreated: 1507289982
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 43719
+  packageName: Animated Space Man Set
+  packageVersion: 1.3
+  assetPath: Assets/AnimatedSpaceMan/Animations_Mecanim/space_man_controller.controller
+  uploadId: 246465

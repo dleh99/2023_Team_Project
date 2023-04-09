@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 2cf50ae86f23faa44bf6080c685b4ffc
+timeCreated: 1507810072
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 43719
+  packageName: Animated Space Man Set
+  packageVersion: 1.3
+  assetPath: Assets/AnimatedSpaceMan/Prefabs/space_man_blue_rank_01_legacy.prefab
+  uploadId: 246465

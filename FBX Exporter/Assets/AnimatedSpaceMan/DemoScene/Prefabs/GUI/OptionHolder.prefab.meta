@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 6706b5b02f39506478cc5dc0bfaa6104
+timeCreated: 1524583575
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 43719
+  packageName: Animated Space Man Set
+  packageVersion: 1.3
+  assetPath: Assets/AnimatedSpaceMan/DemoScene/Prefabs/GUI/OptionHolder.prefab
+  uploadId: 246465

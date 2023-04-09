@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 7d93a183e61f8ea489cc3abe416d34c2
+timeCreated: 1507803382
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 43719
+  packageName: Animated Space Man Set
+  packageVersion: 1.3
+  assetPath: Assets/AnimatedSpaceMan/Prefabs/space_man_all.prefab
+  uploadId: 246465
