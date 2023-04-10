@@ -71,6 +71,7 @@ public class Exporter : MonoBehaviour
         // binary file
         binaryWriter = new BinaryWriter(File.Open("player model data.bin", FileMode.Create));
 
+        binaryWriter.Write(modelMeshFilters.Length);
         for (int i = 0; i < modelMeshFilters.Length; ++i)
         {
             int verticesLength = modelMeshFilters[i].mesh.vertices.Length;
@@ -79,43 +80,35 @@ public class Exporter : MonoBehaviour
             int uv0Length = modelMeshFilters[i].mesh.uv.Length;
 
             binaryWriter.Write(verticesLength);
-            binaryWriter.Write("*");
             for (int j = 0; j < verticesLength; ++j)
             {
                 binaryWriter.Write(modelMeshFilters[i].mesh.vertices[j].x);
                 binaryWriter.Write(modelMeshFilters[i].mesh.vertices[j].y);
                 binaryWriter.Write(modelMeshFilters[i].mesh.vertices[j].z);
             }
-            binaryWriter.Write("*");
 
             binaryWriter.Write(normalsLength);
-            binaryWriter.Write("*");
             for (int j = 0; j < normalsLength; ++j)
             {
                 binaryWriter.Write(modelMeshFilters[i].mesh.normals[j].x);
                 binaryWriter.Write(modelMeshFilters[i].mesh.normals[j].y);
                 binaryWriter.Write(modelMeshFilters[i].mesh.normals[j].z);
             }
-            binaryWriter.Write("*");
 
             binaryWriter.Write(tangentsLength);
-            binaryWriter.Write("*");
             for (int j = 0; j < tangentsLength; ++j)
             {
                 binaryWriter.Write(modelMeshFilters[i].mesh.tangents[j].x);
                 binaryWriter.Write(modelMeshFilters[i].mesh.tangents[j].y);
                 binaryWriter.Write(modelMeshFilters[i].mesh.tangents[j].z);
             }
-            binaryWriter.Write("*");
 
             binaryWriter.Write(uv0Length);
-            binaryWriter.Write("*");
             for (int j = 0; j < uv0Length; ++j)
             {
                 binaryWriter.Write(modelMeshFilters[i].mesh.uv[j].x);
                 binaryWriter.Write(modelMeshFilters[i].mesh.uv[j].y);
             }
-            binaryWriter.Write("*");
         }
 
         binaryWriter.Close();
