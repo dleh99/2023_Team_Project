@@ -139,12 +139,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="header.h" />
     <ClInclude Include="Overlapped.h" />
     <ClInclude Include="protocol.h" />
+    <ClInclude Include="User_Interface.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Overlapped.cpp" />
+    <ClCompile Include="User_Interface.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
