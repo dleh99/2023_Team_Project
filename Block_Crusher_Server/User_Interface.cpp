@@ -4,7 +4,7 @@ User_Interface::User_Interface()
 {
 	_state = US_EMPTY;
 	_id = -1;
-	x = y = 0;
+	x = y = z = 0;
 	_prev_remain = 0;
 }
 
@@ -29,4 +29,5 @@ void User_Interface::do_send(void* packet)
 
 void User_Interface::send_move_packet(int c_id)
 {
+
 }

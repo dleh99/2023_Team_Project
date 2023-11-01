@@ -5,6 +5,10 @@ constexpr int BUF_SIZE = 200;
 
 constexpr int MAX_USER = 2000;
 
+constexpr int WORLD_WIDTH = 12000;		// 블럭 = 60cm(px), 가로 = 블럭 200개 60 * 200
+constexpr int WORLD_LENGHT = 12000;		// 블럭 = 60cm(px), 세로 = 블럭 200개 60 * 200
+constexpr int WORLD_HEIGHT = 3600;		// 블럭 = 60cm(px), 높이 = 아래 30개, 위 30개 60 * 60
+
 /*
 	패킷 생성 규칙
 	패킷의 맨 처음은 unsigned char size로 패킷의 사이즈를 나타낼 변수로 사용할 것.
@@ -21,5 +25,6 @@ constexpr char CS_MOVE = 1;
 struct CS_MOVE_PACKET {
 	unsigned char		size;
 	char				type;
-	char				direction;
+	char				direction;		// 0 = Up, 1 = Down, 2 = Left, 3 = Right
+	short				x, y;			// 이동하는 좌표, 나중에 바꿀 것
 };

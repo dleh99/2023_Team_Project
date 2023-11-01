@@ -23,8 +23,28 @@ int set_client_id()
 void packet_process(int c_id, char* packet)
 {
 	switch (packet[1]) {
-		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
-		// 패킷에서 보내온 방향에 따라 위치 이동 코드
+		case CS_LOGIN: {
+			// 로그인 시 패킷 처리
+			break;
+		}
+		case CS_MOVE: {
+			CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
+			// 패킷에서 보내온 방향에 따라 위치 이동 코드
+			short x = clients[c_id].x;
+			short y = clients[c_id].y;
+			short z = clients[c_id].z;
+
+			// 방향에 따라 이동
+			switch (p->direction) {
+				case 0: if (y < WORLD_LENGHT) y++; break;
+				case 1: if (y > 0) y--; break;
+				case 2: if (x > 0) x--; break;
+				case 3: if (x < WORLD_WIDTH) x++; break;
+			}
+			clients[c_id].x = x;
+			clients[c_id].y = y;
+			break;
+		}
 	}
 }
 
