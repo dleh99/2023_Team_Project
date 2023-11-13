@@ -1,6 +1,7 @@
 #pragma once
 #include "Timer.h"
 #include "Scene.h"
+#include "Player.h"
 
 class CGameFramework
 {
@@ -94,5 +95,7 @@ public:
 	UINT64 m_nFenceValues[m_nSwapChainBuffers];
 	CScene* m_pScene;
 	CCamera* m_pCamera = NULL;
+	CPlayer* m_pPlayer = NULL;
+	POINT m_ptOldCursorPos; 
 };
 

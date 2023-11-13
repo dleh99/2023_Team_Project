@@ -130,7 +130,7 @@ namespace Vector3
 		return xmf3Result;
 	}
 
-	inline XMFLOAT3 Normalize(XMFLOAT3& xmf3Vector)
+	inline XMFLOAT3 Normalize(XMFLOAT3 xmf3Vector)
 	{
 		XMFLOAT3 m_xmf3Normal;
 
@@ -286,7 +286,7 @@ namespace Matrix4x4
 		return xmmtx4x4Result;
 	}
 
-	inline XMFLOAT4X4 LookAtLH(XMFLOAT3& xmf3EyePosition, XMFLOAT3& xmf3LookAtPosition, XMFLOAT3& xmf3UpDirection)
+	inline XMFLOAT4X4 LookAtLH(XMFLOAT3 xmf3EyePosition, XMFLOAT3 xmf3LookAtPosition, XMFLOAT3 xmf3UpDirection)
 	{
 		XMFLOAT4X4 xmmtx4x4Result;
 
