@@ -20,5 +20,6 @@ public:
 	void do_recv();
 	void do_send(void* packet);
 
+	void send_login_info_packet();
 	void send_move_packet(int c_id);
 };

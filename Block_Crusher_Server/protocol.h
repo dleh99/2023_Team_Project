@@ -1,3 +1,5 @@
+#pragma once
+
 constexpr int SERVER_PORT = 4000;
 constexpr int BUF_SIZE = 1024;
 
@@ -6,8 +8,6 @@ constexpr int MAX_USER = 2000;
 constexpr int WORLD_WIDTH = 12000;		// 블럭 = 60cm(px), 가로 = 블럭 200개 60 * 200
 constexpr int WORLD_LENGHT = 12000;		// 블럭 = 60cm(px), 세로 = 블럭 200개 60 * 200
 constexpr int WORLD_HEIGHT = 3600;		// 블럭 = 60cm(px), 높이 = 아래 30개, 위 30개 60 * 60
-
-string SERVER_IP = "127.0.0.1";
 
 /*
 	패킷 생성 규칙

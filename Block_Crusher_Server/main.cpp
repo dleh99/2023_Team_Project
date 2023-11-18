@@ -29,11 +29,12 @@ void disconnect(int c_id)
 void packet_process(int c_id, char* packet)
 {
 	switch (packet[1]) {
-		case CS_LOGIN: {
-			// 로그인 시 패킷 처리
-			break;
-		}
-		case CS_MOVE: {
+	case CS_LOGIN: {
+		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
+
+		clients[c_id].send_login_info_packet();
+	}
+	case CS_MOVE: {
 			CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
 			// 패킷에서 보내온 방향에 따라 위치 이동 코드
 			short x = clients[c_id].x;
@@ -50,7 +51,7 @@ void packet_process(int c_id, char* packet)
 			clients[c_id].x = x;
 			clients[c_id].y = y;
 			break;
-		}
+	}
 	}
 }
 
@@ -77,7 +78,7 @@ void worker_thread(HANDLE iocp_h)
 
 		// 온 데이터가 없을 때
 		if ((byte_size == 0) && ((ex_over->_overlapped_type == OT_RECV) || (ex_over->_overlapped_type == OT_SEND))) {
-			// 연결 끊는 코드 추가 예정
+			disconnect(key);
 			if (ex_over->_overlapped_type == OT_SEND) delete ex_over;
 			continue;
 		}
@@ -152,7 +153,7 @@ int main()
 	SOCKADDR_IN server_addr;
 	memset(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(PORT_NUM);
+	server_addr.sin_port = htons(SERVER_PORT);
 	server_addr.sin_addr.S_un.S_addr = INADDR_ANY;
 	bind(g_s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
 	listen(g_s_socket, SOMAXCONN);

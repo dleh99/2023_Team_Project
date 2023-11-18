@@ -27,6 +27,15 @@ void User_Interface::do_send(void* packet)
 	WSASend(_socket, &send_data->_wsabuf, 1, 0, 0, &send_data->_over, 0);
 }
 
+void User_Interface::send_login_info_packet()
+{
+	SC_LOGININFO_PACKET p;
+	p.size = sizeof(SC_LOGININFO_PACKET);
+	p.type = SC_LOGIN;
+	p.id = _id;
+	do_send(&p);
+}
+
 void User_Interface::send_move_packet(int c_id)
 {
 

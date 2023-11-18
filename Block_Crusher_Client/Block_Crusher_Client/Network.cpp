@@ -5,6 +5,8 @@ SOCKET g_socket;
 SOCKADDR_IN serveraddr;
 char recvBuf[BUF_SIZE];
 
+string SERVER_IP = "127.0.0.1";
+
 int NetworkInit()
 {
 	int ret;
@@ -27,6 +29,8 @@ int NetworkInit()
 	unsigned long noblock = -1;
 	ioctlsocket(g_socket, FIONBIO, &noblock);
 
+	send_login_packet();
+
 	return ret;
 }
 
@@ -36,6 +40,14 @@ int NetworkInit()
 //	size_t sent = 0;
 //	send(g_socket, p, sizeof(p), 0);
 //}
+
+void send_login_packet()
+{
+	CS_LOGIN_PACKET p{};
+	p.size = sizeof(CS_LOGIN_PACKET);
+	p.type = CS_LOGIN;
+	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
+}
 
 void send_keyboard_packet(int direction)
 {
