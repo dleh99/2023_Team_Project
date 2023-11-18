@@ -20,6 +20,12 @@ int set_client_id()
 	return -1;
 }
 
+void disconnect(int c_id)
+{
+	closesocket(clients[c_id]._socket);
+	clients[c_id]._state = US_EMPTY;
+}
+
 void packet_process(int c_id, char* packet)
 {
 	switch (packet[1]) {
@@ -63,7 +69,7 @@ void worker_thread(HANDLE iocp_h)
 			if (ex_over->_overlapped_type == OT_ACCEPT) std::cout << "Error of Accept";
 			else {
 				std::cout << "Error on client [" << key << "] in GQCS" << std::endl;
-				// 연결 끊는 코드 추가 예정
+				disconnect(key);
 				if (ex_over->_overlapped_type == OT_SEND) delete ex_over;
 				continue;
 			}
@@ -163,6 +169,8 @@ int main()
 	int thread_num = thread::hardware_concurrency();
 	for (int i{}; i < thread_num; ++i)
 		worker_threads.emplace_back(worker_thread, iocp_h);
+	
+	// 타이머로 처리할 것들 처리
 	//thread timer_thread{};
 	
 	for (auto& thread : worker_threads)
