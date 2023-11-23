@@ -376,3 +376,6 @@ FodyWeavers.xsd
 *.tlog
 *.tlog
 *.tlog
+*.exe
+*.pdb
+*.ilk
