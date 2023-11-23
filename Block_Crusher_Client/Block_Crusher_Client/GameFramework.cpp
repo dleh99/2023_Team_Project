@@ -441,7 +441,10 @@ void CGameFramework::BuildObjects()
 	m_pPlayer = pCubePlayer;
 	m_pCamera = m_pPlayer->GetCamera();
 	
+	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
+
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
+	//auto pp = m_pScene->m_pPlayer->GetPosition();
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList.Get() };
@@ -471,6 +474,7 @@ void CGameFramework::ProcessInput()
 		if (pKeyBuffer[0x53] & 0xF0) dwDirection |= DIR_BACKWARD;			// S
 		if (pKeyBuffer[0x41] & 0xF0) dwDirection |= DIR_LEFT;				// A
 		if (pKeyBuffer[0x44] & 0xF0) dwDirection |= DIR_RIGHT;				// D
+		if (pKeyBuffer[VK_SPACE] & 0xF0) dwDirection |= DIR_UP;
 	}
 
 	float cxDelta = 0.0f, cyDelta = 0.0f;
@@ -493,7 +497,7 @@ void CGameFramework::ProcessInput()
 	}
 
 	//마우스 또는 키 입력이 있으면 플레이어를 이동하거나(dwDirection) 회전한다(cxDelta 또는 cyDelta).
-	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+	//if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 	{
 		if (cxDelta || cyDelta)
 		{
