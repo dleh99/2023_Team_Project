@@ -2,6 +2,7 @@
 #include "Timer.h"
 #include "Scene.h"
 #include "Player.h"
+#include "Network.h"
 
 class CGameFramework
 {

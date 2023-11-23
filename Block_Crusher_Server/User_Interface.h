@@ -21,5 +21,6 @@ public:
 	void do_send(void* packet);
 
 	void send_login_info_packet();
-	void send_move_packet(int c_id);
+	void send_start_packet();
+	void send_move_packet(User_Interface* clients, int c_id);
 };

@@ -7,6 +7,11 @@ char recvBuf[BUF_SIZE];
 
 string SERVER_IP = "127.0.0.1";
 
+float start_x, start_y, start_z;
+
+// 게임 시작 변수
+bool m_gameStart = false;
+
 int NetworkInit()
 {
 	int ret;
@@ -49,50 +54,72 @@ void send_login_packet()
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
-void send_keyboard_packet(int direction)
+void send_move_packet(float x, float y, float z)
 {
 	CS_MOVE_PACKET p{};
 	p.size = sizeof(CS_MOVE_PACKET);
 	p.type = CS_MOVE;
-	p.direction = direction;
+	p.x = x;
+	p.y = y;
+	p.z = z;
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
-DWORD WINAPI do_recv()
+void WINAPI do_recv()
 {
 	int ret;
 
-	while (true) {
-		ZeroMemory(recvBuf, BUF_SIZE);
-		ret = recv(g_socket, recvBuf, BUF_SIZE, 0);
-		if (ret == SOCKET_ERROR) err_display("RECV()");
-		char* ptr = recvBuf;
+	ZeroMemory(recvBuf, BUF_SIZE);
+	ret = recv(g_socket, recvBuf, BUF_SIZE, 0);
+	//if (ret == SOCKET_ERROR) err_display("RECV()");
+	char* ptr = recvBuf;
 
-		while (ptr != NULL) {
-			unsigned char size = *ptr;
-			if (size <= 0) {
-				break;
-			}
-			char type = *(ptr + 1);
-
-			// 패킷의 종류에 따라 어떻게 처리할 것인가?
-			// ex) bool start를 true로 바꿔서 게임이 작동되게 한다 
-
-			switch (type) {
-			case SC_LOGIN: {	// 처음 로그인 했을 때 받는 패킷. 아이디를 서버는 클라에게 아이디를 부여한다
-				SC_LOGININFO_PACKET* packet = reinterpret_cast<SC_LOGININFO_PACKET*>(ptr);
-
-				// int id = packet->id
-				break;
-			}
-			case SC_START: {	// 게임 시작 조건이 달성되면(8명) 게임을 시작함. 사람 초기 위치, 초기 지형 위치 보냄
-				SC_START_PACKET* packet = reinterpret_cast<SC_START_PACKET*>(ptr);
-				break;
-			}
-			}
-			ptr += size;
+	while (ptr != NULL) {
+		unsigned char size = *ptr;
+		if (size <= 0) {
+			break;
 		}
+		char type = *(ptr + 1);
+
+		// 패킷의 종류에 따라 어떻게 처리할 것인가?
+		// ex) bool start를 true로 바꿔서 게임이 작동되게 한다 
+
+		switch (type) {
+		case SC_LOGIN: {	// 처음 로그인 했을 때 받는 패킷. 아이디를 서버는 클라에게 아이디를 부여한다
+			SC_LOGININFO_PACKET* packet = reinterpret_cast<SC_LOGININFO_PACKET*>(ptr);
+			cout << "서버에서 클라로 위치를 보냄" << endl;
+			// int id = packet->id
+			start_x = packet->x;
+			start_y = packet->y;
+			start_z = packet->z;
+			break;
+		}
+		case SC_START: {	// 게임 시작 조건이 달성되면(6명) 게임을 시작함. 초기 지형 위치 보냄
+			SC_START_PACKET* packet = reinterpret_cast<SC_START_PACKET*>(ptr);
+			m_gameStart = true;
+			cout << "시작 패킷 받음" << endl;
+			break;
+		}
+		case SC_MOVE_PLAYER: {
+			SC_MOVE_PACKET* packet = reinterpret_cast<SC_MOVE_PACKET*>(ptr);
+			cout << packet->id << "의 위치를 받아왔습니다." << packet->x << ", " << packet->y << ", " << packet->z << endl;
+			break;
+		}
+		}
+		ptr += size;
 	}
+
+}
+
+bool GetGameState()
+{
+	return m_gameStart;
+}
+
+Pos GetStartPos()
+{
+	Pos p = { start_x, start_y, start_z };
+	return p;
 }
 
 void NetCleanup()

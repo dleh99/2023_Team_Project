@@ -33,10 +33,28 @@ void User_Interface::send_login_info_packet()
 	p.size = sizeof(SC_LOGININFO_PACKET);
 	p.type = SC_LOGIN;
 	p.id = _id;
+	p.x = 0.0f;
+	p.y = 0.0f;
+	p.z = -50.f;
 	do_send(&p);
 }
 
-void User_Interface::send_move_packet(int c_id)
+void User_Interface::send_start_packet()
 {
+	SC_START_PACKET p;
+	p.size = sizeof(SC_START_PACKET);
+	p.type = SC_START;
+	do_send(&p);
+}
 
+void User_Interface::send_move_packet(User_Interface* clients, int c_id)
+{
+	SC_MOVE_PACKET p;
+	p.size = sizeof(SC_MOVE_PACKET);
+	p.type = SC_MOVE_PLAYER;
+	p.id = c_id;
+	p.x = clients[c_id].x;
+	p.y = clients[c_id].y;
+	p.z = clients[c_id].z;
+	do_send(&p);
 }

@@ -40,14 +40,20 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hWnd)
 	//CreateRenderTargetViews();
 	CreateDepthStencilView();
 
+	NetworkInit();
+	while (!GetGameState()) {
+		do_recv();
+	}
 	BuildObjects();
+
+	//HANDLE hThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)do_recv, (LPVOID)NULL, 0, NULL);
 
 	return true;
 }
 
 void CGameFramework::OnDestroy()
 {
-
+	NetCleanup();
 }
 
 void CGameFramework::EnumOutputs()
@@ -338,6 +344,8 @@ void CGameFramework::FrameAdvance()
 	//타이머의 시간이 갱신되도록 하고 프레임 레이트를 계산한다.
 	m_GameTimer.Tick(0.0f);
 
+	do_recv();
+
 	ProcessInput();
 
 	AnimateObjects();
@@ -426,8 +434,10 @@ void CGameFramework::BuildObjects()
 	m_pScene = new CScene();
 	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
+	Pos p = GetStartPos();
+
 	CCubePlayer* pCubePlayer = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get());
+		m_pScene->GetGraphicsRootSignature().Get(), p.x, p.y, p.z);
 	m_pPlayer = pCubePlayer;
 	m_pCamera = m_pPlayer->GetCamera();
 	
@@ -500,6 +510,11 @@ void CGameFramework::ProcessInput()
 
 		//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다.
 		m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
+
+		float x = m_pPlayer->GetPosition().x;
+		float y = m_pPlayer->GetPosition().y;
+		float z = m_pPlayer->GetPosition().z;
+		send_move_packet(x, y, z);
 	}
 }
 

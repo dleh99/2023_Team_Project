@@ -11,6 +11,8 @@ Overlapped g_over;
 
 array<User_Interface, MAX_USER> clients;
 
+atomic_int user_number = 0;
+
 int set_client_id()
 {
 	for (int i{}; i < MAX_USER; ++i) {
@@ -24,6 +26,8 @@ void disconnect(int c_id)
 {
 	closesocket(clients[c_id]._socket);
 	clients[c_id]._state = US_EMPTY;
+	cout << "탈퇴함" << endl;
+	user_number--;
 }
 
 void packet_process(int c_id, char* packet)
@@ -31,25 +35,28 @@ void packet_process(int c_id, char* packet)
 	switch (packet[1]) {
 	case CS_LOGIN: {
 		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
-
+		cout << c_id << " 접속 완료" << endl;
+		clients[c_id]._state = US_INGAME;
 		clients[c_id].send_login_info_packet();
+		user_number++;
+		if (user_number == 3)
+			for (auto& cl : clients)
+				if (cl._state == US_INGAME)
+					cl.send_start_packet();
 	}
 	case CS_MOVE: {
 			CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
 			// 패킷에서 보내온 방향에 따라 위치 이동 코드
-			short x = clients[c_id].x;
-			short y = clients[c_id].y;
-			short z = clients[c_id].z;
+			clients[c_id].x = p->x;
+			clients[c_id].y = p->y;
+			clients[c_id].z = p->z;
 
-			// 방향에 따라 이동
-			switch (p->direction) {
-				case 0: if (y < WORLD_LENGHT) y++; break;
-				case 1: if (y > 0) y--; break;
-				case 2: if (x > 0) x--; break;
-				case 3: if (x < WORLD_WIDTH) x++; break;
+			// 다른 클라이언트들에게 뿌리기
+			for (auto& cl : clients) {
+				if (cl._state != US_INGAME) continue;
+				if (cl._id == c_id) continue;
+				cl.send_move_packet(clients.data(), c_id);
 			}
-			clients[c_id].x = x;
-			clients[c_id].y = y;
 			break;
 	}
 	}

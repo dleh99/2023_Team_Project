@@ -24,6 +24,7 @@ constexpr char CS_MOVE = 1;
 
 constexpr char SC_LOGIN = 2;
 constexpr char SC_START = 3;
+constexpr char SC_MOVE_PLAYER = 4;
 
 #pragma pack(push, 1)
 
@@ -35,8 +36,10 @@ struct CS_LOGIN_PACKET {
 struct CS_MOVE_PACKET {
 	unsigned char		size;
 	char				type;
-	char				direction;		// 0 = Up, 1 = Down, 2 = Left, 3 = Right
-	short				x, y;			// 이동하는 좌표, 나중에 바꿀 것
+	float				x;
+	float				y;
+	float				z;
+	float				rotate_angle;
 };
 
 //===========================
@@ -45,13 +48,25 @@ struct SC_LOGININFO_PACKET
 	unsigned char		size;
 	char				type;
 	int					id;
+	float				x;
+	float				y;
+	float				z;
 };
 struct SC_START_PACKET
 {
 	unsigned char		size;
 	char				type;
-	// 초기 값들(위치, 상태)
 	// 초기 지형 위치
+};
+
+struct SC_MOVE_PACKET {
+	unsigned char		size;
+	char				type;
+	int					id;
+	float				x;
+	float				y;
+	float				z;
+	float				rotate_angle;
 };
 
 #pragma pack(pop)

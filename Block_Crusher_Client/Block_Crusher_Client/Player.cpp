@@ -249,7 +249,7 @@ void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 }
 
 CCubePlayer::CCubePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-	ID3D12RootSignature* pd3dGraphicsRootSignature)
+	ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z)
 {
 	//플레이어 메쉬를 생성한다.
 	CMesh* pCubePlayerMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 10.0f, 10.0f, 10.0f);
@@ -262,7 +262,8 @@ CCubePlayer::CCubePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	//플레이어의 위치를 설정한다.
-	SetPosition(XMFLOAT3(0.0f, 0.0f, -50.0f));
+	std::cout << x << ", " << y << ", " << z << std::endl;
+	SetPosition(XMFLOAT3(x, y, z));
 
 	//플레이어 메쉬를 렌더링할 때 사용할 셰이더를 생성한다.
 	CDiffusedShader* pShader = new CDiffusedShader();
