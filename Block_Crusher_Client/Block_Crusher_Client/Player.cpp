@@ -1,7 +1,7 @@
 #include "Player.h"
 #include "Shader.h"
 
-CPlayer::CPlayer()
+CPlayer::CPlayer() : CGameObject()
 {
 	m_pCamera = NULL;
 
@@ -304,4 +304,30 @@ CCamera* CCubePlayer::CreateCamera(float fTimeElapsed)
 	Update(fTimeElapsed);
 
 	return(m_pCamera);
+}
+
+CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	ID3D12RootSignature* pd3dGraphicsRootSignature) : CPlayer()
+{
+	CPlayerMesh* pPlayerMesh = new CPlayerMesh(pd3dDevice, pd3dCommandList);
+	SetMesh(pPlayerMesh);
+
+	SetScale(50.0f);
+	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(-90.0f), 0.0f, 0.0f);
+	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+	SetPos(0.0f, 0.0f, -50.0f);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	/*CDiffusedShader* pShader = new CDiffusedShader();
+	pShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
+	SetShader(pShader);*/
+}
+
+CMainPlayer::~CMainPlayer()
+{
+}
+
+void CMainPlayer::OnPrepareRender()
+{
 }

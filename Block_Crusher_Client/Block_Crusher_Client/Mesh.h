@@ -87,3 +87,44 @@ public:
 		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
 	virtual ~CCubeMeshDiffused();
 };
+
+class CPlayerMesh :public CMesh
+{
+	BoundingBox					m_BoundingBox;
+
+	XMFLOAT3*					m_pxmf3Vertex = NULL;
+	ComPtr<ID3D12Resource>		m_pd3dVertexBuffer = NULL;
+	ComPtr<ID3D12Resource>		m_pd3dVertexUploadBuffer = NULL;
+
+	UINT						m_nNormals = 0;
+	XMFLOAT3*					m_pxmf3Normal = NULL;
+	ComPtr<ID3D12Resource>		m_pd3dNormalBuffer = NULL;
+	ComPtr<ID3D12Resource>		m_pd3dNormalUploadBuffer = NULL;
+
+	UINT						m_nTangents = 0;
+	XMFLOAT4*					m_pxmf4Tangent = NULL;
+	ComPtr<ID3D12Resource>		m_pd3dTangentBuffer = NULL;
+	ComPtr<ID3D12Resource>		m_pd3dTangentUploadBuffer = NULL;
+
+	UINT						m_nUvs = 0;
+	XMFLOAT2*					m_pxmf2Uv = NULL;
+	ComPtr<ID3D12Resource>		m_pd3dUvBuffer = NULL;
+	ComPtr<ID3D12Resource>		m_pd3dUvUploadBuffer = NULL;
+
+	UINT						m_nVertexBufferViews = 0;
+	D3D12_VERTEX_BUFFER_VIEW*	m_pd3dPlayerVertexBufferViews = NULL;
+
+	UINT						m_nIndices;
+	UINT*						m_puiIndex = NULL;
+	ComPtr<ID3D12Resource>		m_pd3dIndexBuffer = NULL;
+	ComPtr<ID3D12Resource>		m_pd3dIndexUploadBuffer = NULL;
+
+	D3D12_INDEX_BUFFER_VIEW		m_pd3dPlayerIndexBufferView;
+
+public:
+	CPlayerMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual ~CPlayerMesh();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
+	void LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const char* pstrFileName);
+};

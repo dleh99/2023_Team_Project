@@ -71,12 +71,22 @@ public:
 	void SetVelocity(XMFLOAT3& xmf3Velocity) { m_xmf3Velocity = xmf3Velocity; }
 	XMFLOAT3& GetVelocity() { return(m_xmf3Velocity); }
 
+	void SetScale(float scale) {
+		m_xmf4x4World._11 *= scale;
+		m_xmf4x4World._22 *= scale;
+		m_xmf4x4World._33 *= scale;
+	}
 	/*플레이어의 위치를 xmf3Position 위치로 설정한다.
 	xmf3Position 벡터에서 현재 플레이어의 위치 벡터를 빼면 현재 플레이어의 위치에서 xmf3Position 방향으로의 벡터가 된다.
 	현재 플레이어의 위치에서 이 벡터 만큼 이동한다.*/
 	void SetPosition(XMFLOAT3 xmf3Position) {
 		Move(XMFLOAT3(xmf3Position.x - m_xmf3Position.x, xmf3Position.y - m_xmf3Position.y, xmf3Position.z - m_xmf3Position.z),
 			false);
+	}
+	void SetPos(float x, float y, float z) {
+		m_xmf4x4World._41 = x;
+		m_xmf4x4World._42 = y;
+		m_xmf4x4World._43 = z;
 	}
 
 	CCamera* GetCamera() { return(m_pCamera); }
@@ -126,5 +136,15 @@ public:
 	virtual ~CCubePlayer();
 
 	virtual CCamera* CreateCamera(float fTimeElapsed);
+	virtual void OnPrepareRender();
+};
+
+class CMainPlayer : public CPlayer
+{
+public:
+	CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual ~CMainPlayer();
+
 	virtual void OnPrepareRender();
 };
