@@ -132,6 +132,8 @@
     <ClInclude Include="..\..\Block_Crusher_Server\protocol.h" />
     <ClInclude Include="Block_Crusher_Client.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="d3dx12.h" />
+    <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="GameFramework.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Network.h" />
@@ -147,6 +149,7 @@
   <ItemGroup>
     <ClCompile Include="Block_Crusher_Client.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Mesh.cpp" />

@@ -23,6 +23,12 @@ protected:
 	CShader* m_pShader = NULL;
 	float m_fBlockBoundingRadius = sqrt(144.f * 3.f) / 2;
 
+	char m_pstrFrameName[64];
+
+	CGameObject* m_pParent = NULL;
+	CGameObject* m_pChild = NULL;
+	CGameObject* m_pSibling = NULL;
+
 public:
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 	void ReleaseUploadBuffers();
@@ -53,6 +59,8 @@ public:
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3 xmf3Position);
 
+	void SetScale(float scale);
+
 	// 게임 객체를 로컬 x-축, y-축, z-축 방향으로 이동한다.
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
@@ -63,6 +71,10 @@ public:
 
 	// 게임 객체를 회전(x-축, y-축, z-축)한다.
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
+
+	void SetChild(CGameObject* pChild);
+	CGameObject* GetParent() { return m_pParent; }
+	CGameObject* FindFrame(char* pstrFrameName);
 };
 
 class CRotatingObject : public CGameObject
@@ -98,3 +110,14 @@ public:
 	float GetBlockType();
 };
 
+class CTexture
+{
+private:
+	int m_nTextures = 0;
+	ComPtr<ID3D12Resource> m_pd3dTexture = NULL;
+	UINT m_nRootParameterIndex = -1;
+	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvGpuHandle;
+
+public:
+	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+};

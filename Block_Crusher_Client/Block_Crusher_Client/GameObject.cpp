@@ -115,6 +115,13 @@ void CGameObject::SetPosition(XMFLOAT3 xmf3Position)
 	SetPosition(xmf3Position.x, xmf3Position.y, xmf3Position.z);
 }
 
+void CGameObject::SetScale(float scale)
+{
+	m_xmf4x4World._11 *= scale;
+	m_xmf4x4World._22 *= scale;
+	m_xmf4x4World._33 *= scale;
+}
+
 // 게임 객체를 로컬 x-축 방향으로 이동한다.
 void CGameObject::MoveStrafe(float fDistance)
 {
@@ -154,6 +161,31 @@ void CGameObject::Rotate(float fPitch, float fYaw, float fRoll)
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
 
+void CGameObject::SetChild(CGameObject* pChild)
+{
+	if (pChild)
+		pChild->m_pParent = this;
+
+	if (m_pChild) {
+		if (pChild)
+			pChild->m_pSibling = m_pChild->m_pSibling;
+		m_pChild->m_pSibling = pChild;
+	}
+	else
+		m_pChild = pChild;
+}
+
+CGameObject* CGameObject::FindFrame(char* pstrFrameName)
+{
+	CGameObject* pFrameObject = NULL;
+	if (!strncmp(m_pstrFrameName, pstrFrameName, strlen(pstrFrameName))) return(this);
+
+	if (m_pSibling) if (pFrameObject = m_pSibling->FindFrame(pstrFrameName)) return(pFrameObject);
+	if (m_pChild) if (pFrameObject = m_pChild->FindFrame(pstrFrameName)) return(pFrameObject);
+
+	return(NULL);
+}
+
 CRotatingObject::CRotatingObject()
 {
 	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
@@ -167,6 +199,10 @@ CRotatingObject::~CRotatingObject()
 void CRotatingObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
+}
+
+void CTexture::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
 }
 
 float CBlockObject::GetBlockType()

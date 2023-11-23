@@ -13,10 +13,13 @@
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
-#include <iostream>
 #include <timeapi.h>					// ::timeGetTime()
 
+// C++ 헤더 파일
+#include <iostream>
 #include <vector>
+#include <fstream>
+#include <string>
 
 // Direct3D 12
 #include <string>
@@ -26,6 +29,7 @@ using Microsoft::WRL::ComPtr;			// ComPtr
 
 #include <dxgi1_4.h>
 #include <d3d12.h>
+#include "d3dx12.h"
 
 #include <d3dcompiler.h>
 #include <dxgidebug.h>
@@ -34,6 +38,8 @@ using Microsoft::WRL::ComPtr;			// ComPtr
 #include <DirectXPackedVector.h>
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
+
+#include "DDSTextureLoader12.h"
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Scene.h"
+#include "Player.h"
 
 CScene::CScene()
 {
@@ -36,7 +37,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	// 가로 x 세로 x 깊이가 12 x 12 x 12인 정육면체 메쉬를 생성한다.
+	// 가로 x 세로 x 깊이가 12 x 12 x 12인 정육면체 메쉬 생성
 	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
 
 	m_nObjects = cnt;
@@ -54,6 +55,14 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 		m_ppObjects[i] = pBlockObject;
 		m_ppObjects[i]->SetPosition(Cubes[i]);
 	}
+	CPlayerShader* pPlayerShader = new CPlayerShader();
+	pPlayerShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
+	pPlayerShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	m_ppObjects[1] = new CMainPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
+	m_ppObjects[1]->SetShader(pPlayerShader);
+	/*m_ppObjects[0]->SetScale(100.0f);
+	m_ppObjects[0]->SetPosition(0.0f, 0.0f, 0.0f);*/
 }
 
 void CScene::ReleaseObjects()
