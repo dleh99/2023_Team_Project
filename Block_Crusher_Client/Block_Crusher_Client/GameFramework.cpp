@@ -497,29 +497,28 @@ void CGameFramework::ProcessInput()
 	}
 
 	//마우스 또는 키 입력이 있으면 플레이어를 이동하거나(dwDirection) 회전한다(cxDelta 또는 cyDelta).
-	//if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 	{
-		if (cxDelta || cyDelta)
-		{
-			/*cxDelta는 y-축의 회전을 나타내고 cyDelta는 x-축의 회전을 나타낸다. 오른쪽 마우스 버튼이 눌려진 경우
-			cxDelta는 z-축의 회전을 나타낸다.*/
-			if (pKeyBuffer[VK_RBUTTON] & 0xF0)
-				m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-			else
-				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
-		}
-		/*플레이어를 dwDirection 방향으로 이동한다(실제로는 속도 벡터를 변경한다).
-		이동 거리는 시간에 비례하도록 한다. 플레이어의 이동 속력은 (50/초)로 가정한다.*/
-		if (dwDirection) m_pPlayer->Move(dwDirection, 300.0f * m_GameTimer.GetTimeElapsed(), true);
-
-		//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다.
-		m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
-
 		float x = m_pPlayer->GetPosition().x;
 		float y = m_pPlayer->GetPosition().y;
 		float z = m_pPlayer->GetPosition().z;
 		send_move_packet(x, y, z);
 	}
+	if (cxDelta || cyDelta)
+	{
+		/*cxDelta는 y-축의 회전을 나타내고 cyDelta는 x-축의 회전을 나타낸다. 오른쪽 마우스 버튼이 눌려진 경우
+		cxDelta는 z-축의 회전을 나타낸다.*/
+		if (pKeyBuffer[VK_RBUTTON] & 0xF0)
+			m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+		else
+			m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+	}
+	/*플레이어를 dwDirection 방향으로 이동한다(실제로는 속도 벡터를 변경한다).
+	이동 거리는 시간에 비례하도록 한다. 플레이어의 이동 속력은 (50/초)로 가정한다.*/
+	if (dwDirection) m_pPlayer->Move(dwDirection, 300.0f * m_GameTimer.GetTimeElapsed(), true);
+
+	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다.
+	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }
 
 void CGameFramework::AnimateObjects()
