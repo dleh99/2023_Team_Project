@@ -13,24 +13,47 @@ CScene::~CScene()
 
 void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	XMFLOAT3 Cubes[1008] = {};
+
+	int cnt = 0;
+	for (int i = 0; i < 10; ++i)
+		for (int j = 0; j < 10; ++j)
+			for (int k = 0; k < 10; ++k) {
+				Cubes[cnt].x = -(float)i * 12.0f + 20.0f;
+				Cubes[cnt].y = -(float)j * 12.0f;
+				Cubes[cnt].z = -(float)k * 12.0f + 40.0f;
+				cnt++;
+			}
+
+	for (int i = 0; i < 2; ++i)
+		for (int j = 0; j < 2; ++j)
+			for (int k = 0; k < 2; ++k) {
+				Cubes[cnt].x = 20.0f -12.0f * (i + 4);
+				Cubes[cnt].y = 12.0f + 12.0f * j;
+				Cubes[cnt].z = 40.0f -12.0f * (k + 4);
+				cnt++;
+			}
+
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	// 가로 x 세로 x 깊이가 12 x 12 x 12인 정육면체 메쉬를 생성한다.
 	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
 
-	m_nObjects = 1;
+	m_nObjects = cnt;
 	m_ppObjects = new CGameObject * [m_nObjects];
-
-	CRotatingObject* pRotatingObject = new CRotatingObject();
-	pRotatingObject->SetMesh(pCubeMesh);
 
 	CDiffusedShader* pShader = new CDiffusedShader();
 	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	pRotatingObject->SetShader(pShader);
+	for (int i = 0; i < m_nObjects; ++i ) {
+		CBlockObject* pBlockObject = new CBlockObject();
+		pBlockObject->SetMesh(pCubeMesh);
+		pBlockObject->SetShader(pShader);
 
-	m_ppObjects[0] = pRotatingObject;
+		m_ppObjects[i] = pBlockObject;
+		m_ppObjects[i]->SetPosition(Cubes[i]);
+	}
 }
 
 void CScene::ReleaseObjects()
@@ -117,6 +140,7 @@ bool CScene::ProcessInput(UCHAR* pKeyBuffer)
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
+
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		m_ppObjects[j]->Animate(fTimeElapsed);
@@ -124,7 +148,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 }
 
 void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
-{
+{ 
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature.Get());
 

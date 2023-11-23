@@ -21,6 +21,7 @@ protected:
 	XMFLOAT4X4 m_xmf4x4World;
 	CMesh* m_pMesh = NULL;
 	CShader* m_pShader = NULL;
+	float m_fBlockBoundingRadius = sqrt(144.f * 3.f) / 2;
 
 public:
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
@@ -46,6 +47,7 @@ public:
 	XMFLOAT3 GetLook();
 	XMFLOAT3 GetUp();
 	XMFLOAT3 GetRight();
+	float GetBoundingRadius() { return m_fBlockBoundingRadius; };
 
 	// 게임 객체의 워치를 설정한다.
 	void SetPosition(float x, float y, float z);
@@ -55,6 +57,9 @@ public:
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
 	void moveForward(float fDistance = 1.0f);
+
+	// BS-> Bounding Sphere 바운딩 스피어끼리 충돌체크
+	void BSCollisionCheck(XMFLOAT3 Position, float Radius) {};
 
 	// 게임 객체를 회전(x-축, y-축, z-축)한다.
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
@@ -75,5 +80,21 @@ public:
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
 
 	virtual void Animate(float fTimeElapsed);
+};
+
+class CBlockObject : public CGameObject
+{
+public:
+	CBlockObject() 
+	{
+		m_iBlockType = 0; 
+	};
+	virtual ~CBlockObject() {};
+
+private:
+	int m_iBlockType;
+
+public:
+	float GetBlockType();
 };
 

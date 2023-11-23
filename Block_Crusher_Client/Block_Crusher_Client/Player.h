@@ -25,6 +25,17 @@ protected:
 	float m_fYaw;
 	float m_fRoll;
 
+	//플레이어 중력적용(y좌표 감소) 여부
+	bool m_bPlayerGravity = false;
+	//플레이어 점프키
+	bool m_bPlayerJump= false;
+	//플레이어 중력적용 시간
+	float m_fPlayerGravityTime;
+	// 플레이어 낙하 속도
+	XMFLOAT3 xmf3JumpShift;
+	// 플레이어 바운딩 볼륨의 반지름
+	float m_fPlayerBoundingRadius;
+
 	//플레이어의 이동 속도를 나타내는 벡터이다.
 	XMFLOAT3 m_xmf3Velocity;
 
@@ -50,6 +61,8 @@ protected:
 	CCamera *m_pCamera = NULL;
 
 public:
+	CGameObject** m_ppObjects = NULL;
+
 	CPlayer();
 	virtual ~CPlayer();
 
@@ -62,6 +75,7 @@ public:
 	float GetYaw() { return(m_fYaw); }
 	float GetRoll() { return(m_fRoll); }
 
+
 	void SetFriction(float fFriction) { m_fFriction = fFriction; }
 	void SetGravity(XMFLOAT3 xmf3Gravity) { m_xmf3Gravity = xmf3Gravity; }
 
@@ -69,6 +83,7 @@ public:
 	void SetMaxVelocityY(float fMaxVelocity) { m_fMaxVelocityY = fMaxVelocity; }
 
 	void SetVelocity(XMFLOAT3& xmf3Velocity) { m_xmf3Velocity = xmf3Velocity; }
+
 	XMFLOAT3& GetVelocity() { return(m_xmf3Velocity); }
 
 	/*플레이어의 위치를 xmf3Position 위치로 설정한다.
@@ -86,6 +101,11 @@ public:
 	void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
 	void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false);
 	void Move(float fxOffset = 0.0f, float fyOffset = 0.0f, float fzOffset = 0.0f);
+	void Jump(float fTimeElapsed);
+	//플레이어 바운딩스피어 충돌체크
+	bool BSCollisionCheck(XMFLOAT3 Position, float Radius);
+	bool SBCollisionCheck(XMFLOAT3 Position);
+	XMFLOAT3 SBCollisionMoveXZ(XMFLOAT3 Position, XMFLOAT3 Velocity);
 
 	//플레이어를 회전하는 함수이다.
 	void Rotate(float x, float y, float z);
@@ -116,6 +136,8 @@ public:
 
 	//플레이어의 카메라가 3인칭 카메라일 때 플레이어(메쉬)를 렌더링한다.
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+
+
 };
 
 class CCubePlayer : public CPlayer

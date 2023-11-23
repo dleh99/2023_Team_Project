@@ -22,13 +22,16 @@ public:
 
 	ComPtr<ID3D12RootSignature> CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 	ComPtr<ID3D12RootSignature> GetGraphicsRootSignature();
+	
+	CGameObject** m_ppObjects = NULL;
 
 protected:
 	/*CShader** m_ppShaders = NULL;
 	int m_nShaders = 0;*/
-	CGameObject** m_ppObjects = NULL;
+	
 	int m_nObjects = 0;
 
 	ComPtr<ID3D12RootSignature> m_pd3dGraphicsRootSignature = NULL;
+	
 };
 
