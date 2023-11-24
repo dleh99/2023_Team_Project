@@ -40,10 +40,12 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hWnd)
 	//CreateRenderTargetViews();
 	CreateDepthStencilView();
 
+#ifdef USE_SERVER
 	NetworkInit();
 	while (!GetGameState()) {
 		do_recv();
 	}
+#endif
 	BuildObjects();
 
 	//HANDLE hThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)do_recv, (LPVOID)NULL, 0, NULL);
@@ -344,7 +346,9 @@ void CGameFramework::FrameAdvance()
 	//타이머의 시간이 갱신되도록 하고 프레임 레이트를 계산한다.
 	m_GameTimer.Tick(0.0f);
 
+#ifdef USE_SERVER
 	do_recv();
+#endif
 
 	ProcessInput();
 
@@ -434,10 +438,15 @@ void CGameFramework::BuildObjects()
 	m_pScene = new CScene();
 	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
+#ifdef USE_SERVER
 	Pos p = GetStartPos();
 
 	CCubePlayer* pCubePlayer = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
 		m_pScene->GetGraphicsRootSignature().Get(), p.x, p.y, p.z);
+#else
+	CCubePlayer* pCubePlayer = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get(), 0.f, 0.f, -50.f);
+#endif
 	m_pPlayer = pCubePlayer;
 	m_pCamera = m_pPlayer->GetCamera();
 	
@@ -497,13 +506,17 @@ void CGameFramework::ProcessInput()
 	}
 
 	//마우스 또는 키 입력이 있으면 플레이어를 이동하거나(dwDirection) 회전한다(cxDelta 또는 cyDelta).
+#ifdef USE_SERVER
 	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 	{
+
 		float x = m_pPlayer->GetPosition().x;
 		float y = m_pPlayer->GetPosition().y;
 		float z = m_pPlayer->GetPosition().z;
 		send_move_packet(x, y, z);
+
 	}
+#endif
 	if (cxDelta || cyDelta)
 	{
 		/*cxDelta는 y-축의 회전을 나타내고 cyDelta는 x-축의 회전을 나타낸다. 오른쪽 마우스 버튼이 눌려진 경우
