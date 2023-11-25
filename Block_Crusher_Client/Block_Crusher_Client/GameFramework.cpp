@@ -352,9 +352,15 @@ void CGameFramework::FrameAdvance()
 	do_recv();
 
 	int otherPlayerId = GetOtherPlayerId();
-	Pos otherPlayerPos = GetOtherPlayerPos();
+	Pos* otherPlayerPos = GetOtherPlayerPos();
 
-	m_vEnemyPlayers[otherPlayerId]->SetPosition(XMFLOAT3(otherPlayerPos.x, otherPlayerPos.y, otherPlayerPos.z));
+	for (int i = 0; i < 3; ++i) {
+		if (m_pPlayer->GetPlayerId() == i)
+			continue;
+		m_vEnemyPlayers[i]->SetPosition(XMFLOAT3(otherPlayerPos[i].x, otherPlayerPos[i].y, otherPlayerPos[i].z));
+	}
+
+	
 #endif
 
 	ProcessInput();
@@ -495,6 +501,8 @@ void CGameFramework::BuildObjects()
 	WaitForGpuComplete();
 
 	if (m_pScene)m_pScene->ReleaseUploadBuffers();
+
+	//m_vEnemyPlayers[0]->Render()
 
 	m_GameTimer.Reset();
 }

@@ -11,6 +11,7 @@ float start_x, start_y, start_z;
 int id;
 
 float otherPlayer_x, otherPlayer_y, otherPlayer_z;
+Pos otherPlayerPos[3];
 int otherPlayer_id;
 
 // 게임 시작 변수
@@ -109,9 +110,10 @@ void WINAPI do_recv()
 			SC_MOVE_PACKET* packet = reinterpret_cast<SC_MOVE_PACKET*>(ptr);
 			cout << packet->id << "의 위치를 받아왔습니다." << packet->x << ", " << packet->y << ", " << packet->z << endl;
 			otherPlayer_id = packet->id;
-			otherPlayer_x = packet->x;
-			otherPlayer_y = packet->y;
-			otherPlayer_z = packet->z;
+			otherPlayerPos[otherPlayer_id].x = packet->x;
+			otherPlayerPos[otherPlayer_id].y = packet->y;
+			otherPlayerPos[otherPlayer_id].z = packet->z;
+
 			break;
 		}
 		}
@@ -152,11 +154,9 @@ int GetPlayerId()
 	return playerId;
 }
 
-Pos GetOtherPlayerPos()
+Pos* GetOtherPlayerPos()
 {
-	Pos p = { otherPlayer_x,otherPlayer_y,otherPlayer_z };
-
-	return p;
+	return otherPlayerPos;
 }
 
 int GetOtherPlayerId()

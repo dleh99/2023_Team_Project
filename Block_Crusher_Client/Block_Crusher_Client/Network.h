@@ -27,5 +27,5 @@ bool GetGameState();
 Pos GetStartPos();
 int GetPlayerId();
 
-Pos GetOtherPlayerPos();
+Pos* GetOtherPlayerPos();
 int GetOtherPlayerId();
