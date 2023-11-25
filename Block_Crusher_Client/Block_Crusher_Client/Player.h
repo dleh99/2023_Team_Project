@@ -6,9 +6,10 @@
 #define DIR_LEFT 0x04
 #define DIR_RIGHT 0x08
 #define DIR_UP 0x10
-#define DIR_DOWN 0x20
+#define KEY_SHOOT 0x20
 
 #include "GameObject.h"
+#include "Scene.h"
 #include "Camera.h"
 
 class CPlayer : public CGameObject
@@ -64,6 +65,7 @@ protected:
 
 public:
 	CGameObject** m_ppObjects = NULL;
+	CScene* m_pScene = NULL;
 
 	CPlayer();
 	virtual ~CPlayer();

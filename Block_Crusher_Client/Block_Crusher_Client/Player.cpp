@@ -77,15 +77,24 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		if (dwDirection & DIR_UP) { 
 			//이미 공중에서 중력을 받는 상태
 			if (m_bPlayerGravity) {
-				
+				//xmf3JumpShift.y += 10.0f;
+				if (xmf3JumpShift.y > 100.0f) {
+					100.0f;
+				}
+
 			}
 			else {
 				m_bPlayerGravity = true;
-				xmf3JumpShift.y = 2.0f;
+				xmf3JumpShift.y = 100.0f;
 			}
 		}
 
-		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance);
+		if (dwDirection & KEY_SHOOT) { 
+			
+			m_pScene->AddObjects(0);
+
+			//std::cout << "asd" << std::endl;
+		}
 		
 		//플레이어를 현재 위치 벡터에서 xmf3Shift 벡터만큼 이동한다.
 		Move(xmf3Shift, bUpdateVelocity);
@@ -116,23 +125,21 @@ void CPlayer::Jump(float fTimeElapsed)
 
 	if (m_bPlayerGravity) {
 		
-		m_fPlayerGravityTime += fTimeElapsed;
-		xmf3JumpShift.y -= 0.15f * m_fPlayerGravityTime;
+		XMFLOAT3 shiftY = { 0,0,0 };
 
-		if (xmf3JumpShift.y < -2.5f) {
-			xmf3JumpShift.y = -2.5f;
+		xmf3JumpShift.y -= 9.8f * m_fPlayerGravityTime;
+		shiftY.y = xmf3JumpShift.y * fTimeElapsed;
+
+		m_fPlayerGravityTime += fTimeElapsed;
+
+		if (shiftY.y < -2.5f) {
+			shiftY.y = -2.5f;
 		}
 
-		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3JumpShift);
+		m_xmf3Position = Vector3::Add(m_xmf3Position, shiftY);
 		//std::cout << m_xmf3Gravity.y << "\n";
 		
-		if (m_pCamera) m_pCamera->Move(xmf3JumpShift);
-
-		//if (m_xmf3Position.y < 0.f) {
-		//	m_xmf3Position.y = 0;
-		//	m_fPlayerGravityTime = 0;
-		//	m_bPlayerGravity = false;
-		//}
+		if (m_pCamera) m_pCamera->Move(shiftY);
 	}
 }
 
@@ -174,6 +181,8 @@ bool CPlayer::SBCollisionCheck(XMFLOAT3 Position)
 	float length = Vector3::Length(Dist);
 
 	if (m_fPlayerBoundingRadius > length) { 
+		if (by + size > m_xmf3Position.y - m_fPlayerBoundingRadius / 2.0f) return false;
+
 		m_xmf3Position.y = Position.y + size + m_fPlayerBoundingRadius + 0.01f;
 		//std::cout << m_xmf3Position.y << "\n";
 		return true; 
@@ -211,7 +220,7 @@ XMFLOAT3 CPlayer::SBCollisionMoveXZ(XMFLOAT3 Position, XMFLOAT3 Velocity) {
 	Dist.y += 3.6f;
 	float length = Vector3::Length(Dist);
 
-	if (m_fPlayerBoundingRadius + 3.5f > length) {
+	if (m_fPlayerBoundingRadius + 3.4f > length) {
 		BackVector = Velocity;
 		BackVector = Vector3::Normalize(BackVector);
 		BackVector.y = 0;
@@ -220,178 +229,17 @@ XMFLOAT3 CPlayer::SBCollisionMoveXZ(XMFLOAT3 Position, XMFLOAT3 Velocity) {
 		DistXZ = Dist;
 		DistXZ.y = 0;
 		float XZlength = Vector3::Length(DistXZ);
-		XZlength = m_fPlayerBoundingRadius + 3.5f - XZlength + 0.02f;
+		XZlength = m_fPlayerBoundingRadius + 3.4f - XZlength + 0.02f;
 
 		BackVector.x *= -XZlength;
 		BackVector.z *= -XZlength;
 
-		std::cout << XZlength << "\n";
+		//std::cout << XZlength << "\n";
 		return BackVector;
 	}
 
 	return { 0,0,0 };
 	
-	{
-		//if (bx + 6.0f > m_xmf3Position.x + 5.0f && m_xmf3Position.x - 5.0f > bx - 6.0f) {}
-		//else return false;
-		//if (bz + 6.0f > m_xmf3Position.z + 5.0f && m_xmf3Position.z - 5.0f > bz - 6.0f) {}
-		//else return false;
-
-
-		//3개의 면 위에 있는 점 3개
-		XMFLOAT3 Check[3][3] = {};
-
-		// 평면 방적식
-		float A[3] = {};
-		float B[3] = {};
-		float C[3] = {};
-		float D[3] = {};
-
-
-		if (bx > m_xmf3Position.x) {
-			Check[0][0].x = bx + size; Check[0][0].y = by + size; Check[0][0].z = bz + size;
-			Check[0][1].x = bx + size; Check[0][1].y = by - size; Check[0][1].z = bz - size;
-			Check[0][2].x = bx + size; Check[0][2].y = by - size; Check[0][2].z = bz + size;
-
-			A[0] = Check[0][0].y * (Check[0][1].z - Check[0][2].z) +
-				Check[0][1].y * (Check[0][2].z - Check[0][0].z) +
-				Check[0][2].y * (Check[0][0].z - Check[0][1].z);
-
-			B[0] = Check[0][0].z * (Check[0][1].x - Check[0][2].x) +
-				Check[0][1].z * (Check[0][2].x - Check[0][0].x) +
-				Check[0][2].z * (Check[0][0].x - Check[0][1].x);
-
-			C[0] = Check[0][0].x * (Check[0][1].y - Check[0][2].y) +
-				Check[0][1].x * (Check[0][2].y - Check[0][0].y) +
-				Check[0][2].x * (Check[0][0].y - Check[0][1].y);
-
-			D[0] = -Check[0][0].x * (Check[0][1].y * Check[0][2].z - Check[0][2].y * Check[0][1].z) -
-				Check[0][1].x * (Check[0][2].y * Check[0][0].z - Check[0][0].y * Check[0][2].z) -
-				Check[0][2].x * (Check[0][0].y * Check[0][1].z - Check[0][1].y * Check[0][0].z);
-		}
-		else {
-			Check[0][0].x = bx - size; Check[0][0].y = by + size; Check[0][0].z = bz + size;
-			Check[0][1].x = bx - size; Check[0][1].y = by - size; Check[0][1].z = bz - size;
-			Check[0][2].x = bx - size; Check[0][2].y = by - size; Check[0][2].z = bz + size;
-
-			A[0] = Check[0][0].y * (Check[0][1].z - Check[0][2].z) +
-				Check[0][1].y * (Check[0][2].z - Check[0][0].z) +
-				Check[0][2].y * (Check[0][0].z - Check[0][1].z);
-
-			B[0] = Check[0][0].z * (Check[0][1].x - Check[0][2].x) +
-				Check[0][1].z * (Check[0][2].x - Check[0][0].x) +
-				Check[0][2].z * (Check[0][0].x - Check[0][1].x);
-
-			C[0] = Check[0][0].x * (Check[0][1].y - Check[0][2].y) +
-				Check[0][1].x * (Check[0][2].y - Check[0][0].y) +
-				Check[0][2].x * (Check[0][0].y - Check[0][1].y);
-
-			D[0] = -Check[0][0].x * (Check[0][1].y * Check[0][2].z - Check[0][2].y * Check[0][1].z) -
-				Check[0][1].x * (Check[0][2].y * Check[0][0].z - Check[0][0].y * Check[0][2].z) -
-				Check[0][2].x * (Check[0][0].y * Check[0][1].z - Check[0][1].y * Check[0][0].z);
-		}
-
-		if (by > m_xmf3Position.y) {
-			Check[1][0].x = bx + size; Check[1][0].y = by + size; Check[1][0].z = bz + size;
-			Check[1][1].x = bx + size; Check[1][1].y = by + size; Check[1][1].z = bz - size;
-			Check[1][2].x = bx - size; Check[1][2].y = by + size; Check[1][2].z = bz + size;
-
-			A[1] = Check[1][0].y * (Check[1][1].z - Check[1][2].z) +
-				Check[1][1].y * (Check[1][2].z - Check[1][0].z) +
-				Check[1][2].y * (Check[1][0].z - Check[1][1].z);
-
-			B[1] = Check[1][0].z * (Check[1][1].x - Check[1][2].x) +
-				Check[1][1].z * (Check[1][2].x - Check[1][0].x) +
-				Check[1][2].z * (Check[1][0].x - Check[1][1].x);
-
-			C[1] = Check[1][0].x * (Check[1][1].y - Check[1][2].y) +
-				Check[1][1].x * (Check[1][2].y - Check[1][0].y) +
-				Check[1][2].x * (Check[1][0].y - Check[1][1].y);
-
-			D[1] = -Check[1][0].x * (Check[1][1].y * Check[1][2].z - Check[1][2].y * Check[1][1].z) -
-				Check[1][1].x * (Check[1][2].y * Check[1][0].z - Check[1][0].y * Check[1][2].z) -
-				Check[1][2].x * (Check[1][0].y * Check[1][1].z - Check[1][1].y * Check[1][0].z);
-		}
-		else {
-			Check[1][0].x = bx + size; Check[1][0].y = by - size; Check[1][0].z = bz + size;
-			Check[1][1].x = bx + size; Check[1][1].y = by - size; Check[1][1].z = bz - size;
-			Check[1][2].x = bx - size; Check[1][2].y = by - size; Check[1][2].z = bz + size;
-
-			A[1] = Check[1][0].y * (Check[1][1].z - Check[1][2].z) +
-				Check[1][1].y * (Check[1][2].z - Check[1][0].z) +
-				Check[1][2].y * (Check[1][0].z - Check[1][1].z);
-
-			B[1] = Check[1][0].z * (Check[1][1].x - Check[1][2].x) +
-				Check[1][1].z * (Check[1][2].x - Check[1][0].x) +
-				Check[1][2].z * (Check[1][0].x - Check[1][1].x);
-
-			C[1] = Check[1][0].x * (Check[1][1].y - Check[1][2].y) +
-				Check[1][1].x * (Check[1][2].y - Check[1][0].y) +
-				Check[1][2].x * (Check[1][0].y - Check[1][1].y);
-
-			D[1] = -Check[1][0].x * (Check[1][1].y * Check[1][2].z - Check[1][2].y * Check[1][1].z) -
-				Check[1][1].x * (Check[1][2].y * Check[1][0].z - Check[1][0].y * Check[1][2].z) -
-				Check[1][2].x * (Check[1][0].y * Check[1][1].z - Check[1][1].y * Check[1][0].z);
-		}
-
-		if (bz > m_xmf3Position.z) {
-			Check[2][0].x = bx + size; Check[2][0].y = by + size; Check[2][0].z = bz + size;
-			Check[2][1].x = bx + size; Check[2][1].y = by - size; Check[2][1].z = bz + size;
-			Check[2][2].x = bx - size; Check[2][2].y = by - size; Check[2][2].z = bz + size;
-
-			A[2] = Check[2][0].y * (Check[2][1].z - Check[2][2].z) +
-				Check[2][1].y * (Check[2][2].z - Check[2][0].z) +
-				Check[2][2].y * (Check[2][0].z - Check[2][1].z);
-
-			B[2] = Check[2][0].z * (Check[2][1].x - Check[2][2].x) +
-				Check[2][1].z * (Check[2][2].x - Check[2][0].x) +
-				Check[2][2].z * (Check[2][0].x - Check[2][1].x);
-
-			C[2] = Check[2][0].x * (Check[2][1].y - Check[2][2].y) +
-				Check[2][1].x * (Check[2][2].y - Check[2][0].y) +
-				Check[2][2].x * (Check[2][0].y - Check[2][1].y);
-
-			D[2] = -Check[2][0].x * (Check[2][1].y * Check[2][2].z - Check[2][2].y * Check[2][1].z) -
-				Check[2][1].x * (Check[2][2].y * Check[2][0].z - Check[2][0].y * Check[2][2].z) -
-				Check[2][2].x * (Check[2][0].y * Check[2][1].z - Check[2][1].y * Check[2][0].z);
-		}
-		else {
-			Check[2][0].x = bx + size; Check[2][0].y = by + size; Check[2][0].z = bz - size;
-			Check[2][1].x = bx - size; Check[2][1].y = by - size; Check[2][1].z = bz - size;
-			Check[2][2].x = bx + size; Check[2][2].y = by - size; Check[2][2].z = bz - size;
-
-			A[2] = Check[2][0].y * (Check[2][1].z - Check[2][2].z) +
-				Check[2][1].y * (Check[2][2].z - Check[2][0].z) +
-				Check[2][2].y * (Check[2][0].z - Check[2][1].z);
-
-			B[2] = Check[2][0].z * (Check[2][1].x - Check[2][2].x) +
-				Check[2][1].z * (Check[2][2].x - Check[2][0].x) +
-				Check[2][2].z * (Check[2][0].x - Check[2][1].x);
-
-			C[2] = Check[2][0].x * (Check[2][1].y - Check[2][2].y) +
-				Check[2][1].x * (Check[2][2].y - Check[2][0].y) +
-				Check[2][2].x * (Check[2][0].y - Check[2][1].y);
-
-			D[2] = -Check[2][0].x * (Check[2][1].y * Check[2][2].z - Check[2][2].y * Check[2][1].z) -
-				Check[2][1].x * (Check[2][2].y * Check[2][0].z - Check[2][0].y * Check[2][2].z) -
-				Check[2][2].x * (Check[2][0].y * Check[2][1].z - Check[2][1].y * Check[2][0].z);
-		}
-
-		float distance[3] = {};
-
-		for (int i = 0; i < 3; ++i) {
-
-			distance[i] = fabs(A[i] * m_xmf3Position.x + B[i] * m_xmf3Position.y + C[i] * m_xmf3Position.z + D[i]) /
-				sqrt(A[i] * A[i] + B[i] * B[i] + C[i] * C[i]);
-		}
-
-		for (int i = 0; i < 3; ++i) {
-
-			if (distance[i] < m_fPlayerBoundingRadius + 1.0f) {
-				std::cout << "충돌체크" << std::endl;
-			}
-		}
-	}
 }
 
 //플레이어를 로컬 x-축, y-축, z-축을 중심으로 회전한다.
@@ -480,13 +328,12 @@ void CPlayer::Update(float fTimeElapsed)
 
 	if (m_ppObjects != NULL) {
 		int cnt = 0;
+
 		for (int i = 0; i < 1008; ++i) {
 			if (BSCollisionCheck(m_ppObjects[i]->GetPosition(),
 				m_ppObjects[i]->GetBoundingRadius())) {
 
 				XMFLOAT3 Box = m_ppObjects[i]->GetPosition();
-				XMFLOAT3 MoveBack = SBCollisionMoveXZ(Box, xmf3Velocity);
-
 				if (SBCollisionCheck(Box)) {
 					m_fPlayerGravityTime = 0;
 					xmf3JumpShift.y = 0;
@@ -494,13 +341,22 @@ void CPlayer::Update(float fTimeElapsed)
 					//std::cout << m_xmf3Position.x << " " << m_xmf3Position.y << " " << m_xmf3Position.z << "\n";
 					break;
 				}
+			}
+			cnt++;
+		}
+
+		for (int i = 0; i < 1008; ++i) {
+			if (BSCollisionCheck(m_ppObjects[i]->GetPosition(),
+				m_ppObjects[i]->GetBoundingRadius())) {
+
+				XMFLOAT3 Box = m_ppObjects[i]->GetPosition();
+				XMFLOAT3 MoveBack = SBCollisionMoveXZ(Box, xmf3Velocity);
 
 				if (Vector3::Length(MoveBack) > 0) {
-					Move(MoveBack,false);
+					Move(MoveBack, false);
 					break;
 				}
 			}
-			cnt++;
 		}
 
 		if (cnt == 1008) m_bPlayerGravity = true;

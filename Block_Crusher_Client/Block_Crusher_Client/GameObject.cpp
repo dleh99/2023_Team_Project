@@ -205,7 +205,7 @@ void CTexture::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 }
 
-float CBlockObject::GetBlockType()
+int CBlockObject::GetBlockType()
 {
 	return m_iBlockType;
 };

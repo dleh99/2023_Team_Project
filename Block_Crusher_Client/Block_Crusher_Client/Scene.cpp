@@ -14,6 +14,9 @@ CScene::~CScene()
 
 void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	m_pd3dDevice = pd3dDevice;
+	m_pd3dCommandList = pd3dCommandList;
+
 	XMFLOAT3 Cubes[1008] = {};
 
 	int cnt = 0;
@@ -41,11 +44,12 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
 
 	m_nObjects = cnt;
-	m_ppObjects = new CGameObject * [m_nObjects];
+	m_ppObjects = new CGameObject * [m_nObjects + 1000];
 
 	CDiffusedShader* pShader = new CDiffusedShader();
 	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	m_pSceneShader = pShader;
 
 	for (int i = 0; i < m_nObjects; ++i ) {
 		CBlockObject* pBlockObject = new CBlockObject();
@@ -55,6 +59,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 		m_ppObjects[i] = pBlockObject;
 		m_ppObjects[i]->SetPosition(Cubes[i]);
 	}
+
 	CPlayerShader* pPlayerShader = new CPlayerShader();
 	pPlayerShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
 	pPlayerShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -169,4 +174,20 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 		if (m_ppObjects[j])
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 	}
+}
+
+void CScene::AddObjects(int type)
+{
+	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(m_pd3dDevice, m_pd3dCommandList, 4.0f, 4.0f, 4.0f);
+
+	CBlockObject* pBlockObject = new CBlockObject();
+	pBlockObject->SetMesh(pCubeMesh);
+	pBlockObject->SetShader(m_pSceneShader);
+
+	m_ppObjects[m_nObjects] = pBlockObject;
+	m_ppObjects[m_nObjects]->SetPosition(m_pPlayer->GetPosition());
+
+	m_nObjects++;
+
+	std::cout << m_nObjects << std::endl;
 }
