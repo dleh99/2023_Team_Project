@@ -60,6 +60,8 @@ protected:
 	//플레이어에 현재 설정된 카메라이다.
 	CCamera *m_pCamera = NULL;
 
+	int m_playerNetworkId = -1;
+
 public:
 	CGameObject** m_ppObjects = NULL;
 
@@ -106,6 +108,7 @@ public:
 
 	CCamera* GetCamera() { return(m_pCamera); }
 	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; }
+	int GetPlayerId() { return m_playerNetworkId; }
 
 	//플레이어를 이동하는 함수이다.
 	void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
@@ -154,7 +157,7 @@ class CCubePlayer : public CPlayer
 {
 public:
 	CCubePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-		ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z);
+		ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z, int id);
 	virtual ~CCubePlayer();
 
 	virtual CCamera* CreateCamera(float fTimeElapsed);

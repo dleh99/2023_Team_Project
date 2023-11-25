@@ -97,6 +97,7 @@ public:
 	CScene* m_pScene;
 	CCamera* m_pCamera = NULL;
 	CPlayer* m_pPlayer = NULL;
+	vector<CPlayer*> m_vEnemyPlayers;
 	POINT m_ptOldCursorPos; 
 };
 

@@ -25,3 +25,7 @@ void WINAPI do_recv();
 
 bool GetGameState();
 Pos GetStartPos();
+int GetPlayerId();
+
+Pos GetOtherPlayerPos();
+int GetOtherPlayerId();

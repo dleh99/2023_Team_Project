@@ -23,7 +23,9 @@ CGameFramework::CGameFramework()
 
 CGameFramework::~CGameFramework()
 {
-
+	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
+		delete m_vEnemyPlayers[i];
+	}
 }
 
 bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hWnd)
@@ -348,6 +350,11 @@ void CGameFramework::FrameAdvance()
 
 #ifdef USE_SERVER
 	do_recv();
+
+	int otherPlayerId = GetOtherPlayerId();
+	Pos otherPlayerPos = GetOtherPlayerPos();
+
+	m_vEnemyPlayers[otherPlayerId]->SetPosition(XMFLOAT3(otherPlayerPos.x, otherPlayerPos.y, otherPlayerPos.z));
 #endif
 
 	ProcessInput();
@@ -399,6 +406,14 @@ void CGameFramework::FrameAdvance()
 
 	if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList.Get(), m_pCamera);
 
+	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
+		if (m_pPlayer)
+			if (m_pPlayer->GetPlayerId() == i)
+				continue;
+
+		if (m_vEnemyPlayers[i])
+			m_vEnemyPlayers[i]->Render(m_pd3dCommandList.Get(), m_pCamera);
+	}
 
 
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -437,20 +452,41 @@ void CGameFramework::BuildObjects()
 
 #ifdef USE_SERVER
 	Pos p = GetStartPos();
+	int id = GetPlayerId();
+	
+	CCubePlayer* pCubePlayer0 = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get(), 0, 0, -40, id);
 
-	CCubePlayer* pCubePlayer = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), p.x, p.y, p.z);
+	CCubePlayer* pCubePlayer1 = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get(), 0, 0, 0, id);
+
+	CCubePlayer* pCubePlayer2 = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get(), 0, 0, 40, id);
+
+	m_vEnemyPlayers.push_back(pCubePlayer0);
+	m_vEnemyPlayers.push_back(pCubePlayer1);
+	m_vEnemyPlayers.push_back(pCubePlayer2);
+
+	m_pPlayer = m_vEnemyPlayers[id];
 #else
 	CCubePlayer* pCubePlayer = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
 		m_pScene->GetGraphicsRootSignature().Get(), 0.f, 0.f, -50.f);
-#endif
+
 	m_pPlayer = pCubePlayer;
+#endif
 	m_pCamera = m_pPlayer->GetCamera();
 	
-	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
+	//m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
+	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
+		m_vEnemyPlayers[i]->m_ppObjects = m_pScene->m_ppObjects;
+	}
 
-	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
+	//m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 	//auto pp = m_pScene->m_pPlayer->GetPosition();
+
+	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
+		m_vEnemyPlayers[i]->Update(m_GameTimer.GetTimeElapsed());
+	}
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList.Get() };

@@ -578,10 +578,12 @@ void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 	//카메라 모드가 3인칭이면 플레이어 객체를 렌더링한다.
 	if (m_pShader) m_pShader->Render(pd3dCommandList, pCamera);
 	CGameObject::Render(pd3dCommandList, pCamera);
+
+	//std::cout << "이 플레이어의 네트워크 ID : " << m_playerNetworkId << std::endl;
 }
 
 CCubePlayer::CCubePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-	ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z)
+	ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z, int id)
 {
 	//플레이어 메쉬를 생성한다.
 	CMesh* pCubePlayerMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 10.0f, 10.0f, 10.0f);
@@ -592,6 +594,9 @@ CCubePlayer::CCubePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 
 	//플레이어를 위한 셰이더 변수를 생성한다.
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	//플레이어의 네트워크 ID 설정
+	m_playerNetworkId = id;
 
 	//플레이어의 위치를 설정한다.
 	std::cout << x << ", " << y << ", " << z << std::endl;

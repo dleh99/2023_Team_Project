@@ -8,6 +8,10 @@ char recvBuf[BUF_SIZE];
 string SERVER_IP = "127.0.0.1";
 
 float start_x, start_y, start_z;
+int id;
+
+float otherPlayer_x, otherPlayer_y, otherPlayer_z;
+int otherPlayer_id;
 
 // 게임 시작 변수
 bool m_gameStart = false;
@@ -89,6 +93,7 @@ void WINAPI do_recv()
 			SC_LOGININFO_PACKET* packet = reinterpret_cast<SC_LOGININFO_PACKET*>(ptr);
 			cout << "서버에서 클라로 위치를 보냄" << endl;
 			// int id = packet->id
+			id = packet->id;
 			start_x = packet->x;
 			start_y = packet->y;
 			start_z = packet->z;
@@ -103,6 +108,10 @@ void WINAPI do_recv()
 		case SC_MOVE_PLAYER: {
 			SC_MOVE_PACKET* packet = reinterpret_cast<SC_MOVE_PACKET*>(ptr);
 			cout << packet->id << "의 위치를 받아왔습니다." << packet->x << ", " << packet->y << ", " << packet->z << endl;
+			otherPlayer_id = packet->id;
+			otherPlayer_x = packet->x;
+			otherPlayer_y = packet->y;
+			otherPlayer_z = packet->z;
 			break;
 		}
 		}
@@ -118,8 +127,41 @@ bool GetGameState()
 
 Pos GetStartPos()
 {
-	Pos p = { start_x, start_y, start_z };
+	Pos p = { start_x, start_y, start_z - 20 };
+
+	switch (id)
+	{
+	case 0:
+		p = { start_x, start_y, start_z };
+		break;
+	case 1:
+		p = { start_x, start_y, start_z + 50 };
+		break;
+	case 2:
+		p = { start_x, start_y, start_z + 70 };
+		break;
+	}
+
 	return p;
+}
+
+int GetPlayerId()
+{
+	int playerId = id;
+
+	return playerId;
+}
+
+Pos GetOtherPlayerPos()
+{
+	Pos p = { otherPlayer_x,otherPlayer_y,otherPlayer_z };
+
+	return p;
+}
+
+int GetOtherPlayerId()
+{
+	return otherPlayer_id;
 }
 
 void NetCleanup()
