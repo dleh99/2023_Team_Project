@@ -77,9 +77,12 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		if (dwDirection & DIR_UP) { 
 			//이미 공중에서 중력을 받는 상태
 			if (m_bPlayerGravity) {
-				//xmf3JumpShift.y += 10.0f;
+				
+				m_fPlayerGravityTime = 0;
+
+				xmf3JumpShift.y += 1000.0f * m_fEtime;
 				if (xmf3JumpShift.y > 100.0f) {
-					100.0f;
+					xmf3JumpShift.y  = 100.0f;
 				}
 
 			}
@@ -91,7 +94,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 
 		if (dwDirection & KEY_SHOOT) { 
 			m_fKeyDownTime += m_fEtime;
-			if (m_fKeyDownTime > 0.2f) {
+			if (m_fKeyDownTime > 0.1f) {
 				m_pScene->AddObjects(0);
 				m_fKeyDownTime = 0.f;
 			}
