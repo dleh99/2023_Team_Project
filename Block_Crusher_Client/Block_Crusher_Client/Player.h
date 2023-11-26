@@ -26,6 +26,9 @@ protected:
 	float m_fYaw;
 	float m_fRoll;
 
+	float m_fKeyDownTime = 9999;
+	//
+	float m_fEtime = 0;
 	//플레이어 중력적용(y좌표 감소) 여부
 	bool m_bPlayerGravity = false;
 	//플레이어 점프키

@@ -25,9 +25,6 @@ public:
 	
 	CGameObject** m_ppObjects = NULL;
 
-	ID3D12Device* m_pd3dDevice = NULL;
-	ID3D12GraphicsCommandList* m_pd3dCommandList = NULL;
-
 	CPlayer* m_pPlayer= NULL;
 
 protected:
@@ -36,6 +33,8 @@ protected:
 	
 	int m_nObjects = 0;
 	CDiffusedShader* m_pSceneShader;
+	CCubeMeshDiffused* pBulletMesh = NULL;
+
 	ComPtr<ID3D12RootSignature> m_pd3dGraphicsRootSignature = NULL;
 };
 

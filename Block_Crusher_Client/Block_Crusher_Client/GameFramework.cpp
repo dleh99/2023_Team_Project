@@ -455,30 +455,31 @@ void CGameFramework::BuildObjects()
 	int id = GetPlayerId();
 	
 	CCubePlayer* pCubePlayer0 = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0, 0, -40, id);
+		m_pScene->GetGraphicsRootSignature().Get(), 0, 15, -40, id);
 
 	CCubePlayer* pCubePlayer1 = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0, 0, 0, id);
+		m_pScene->GetGraphicsRootSignature().Get(), 0, 15, 0, id);
 
 	CCubePlayer* pCubePlayer2 = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0, 0, 40, id);
+		m_pScene->GetGraphicsRootSignature().Get(), 0, 15, 40, id);
 
 	m_vEnemyPlayers.push_back(pCubePlayer0);
 	m_vEnemyPlayers.push_back(pCubePlayer1);
 	m_vEnemyPlayers.push_back(pCubePlayer2);
 
 	m_pPlayer = m_vEnemyPlayers[id];
-	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
 
 #else
 	CCubePlayer* pCubePlayer = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
 		m_pScene->GetGraphicsRootSignature().Get(), 0, 10, 40, 1);
 
 	m_pPlayer = pCubePlayer;
+
+#endif
+
 	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
 	m_pScene->m_pPlayer = m_pPlayer;
 	m_pPlayer->m_pScene = m_pScene;
-#endif
 	m_pCamera = m_pPlayer->GetCamera();
 	
 	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {

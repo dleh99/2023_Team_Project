@@ -14,8 +14,6 @@ CScene::~CScene()
 
 void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	m_pd3dDevice = pd3dDevice;
-	m_pd3dCommandList = pd3dCommandList;
 
 	XMFLOAT3 Cubes[1008] = {};
 
@@ -42,6 +40,8 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	// 가로 x 세로 x 깊이가 12 x 12 x 12인 정육면체 메쉬 생성
 	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
+	CCubeMeshDiffused* BulletMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 2.0f, 2.0f, 2.0f);
+	pBulletMesh = BulletMesh;
 
 	m_nObjects = cnt;
 	m_ppObjects = new CGameObject * [m_nObjects + 1000];
@@ -178,16 +178,21 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 void CScene::AddObjects(int type)
 {
-	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(m_pd3dDevice, m_pd3dCommandList, 4.0f, 4.0f, 4.0f);
+	CBulletObject* pBulletObject = new CBulletObject();
+	pBulletObject->SetMesh(pBulletMesh);
+	pBulletObject->SetShader(m_pSceneShader);
+	pBulletObject->SetBulletVector(m_pPlayer->GetLook());
 
-	CBlockObject* pBlockObject = new CBlockObject();
-	pBlockObject->SetMesh(pCubeMesh);
-	pBlockObject->SetShader(m_pSceneShader);
-
-	m_ppObjects[m_nObjects] = pBlockObject;
+	m_ppObjects[m_nObjects] = pBulletObject;
 	m_ppObjects[m_nObjects]->SetPosition(m_pPlayer->GetPosition());
+	m_ppObjects[m_nObjects];
 
+	std::cout << "총알 생성" << std::endl;
+	
+	//std::cout << m_pPlayer->GetPosition().x <<  " " << m_pPlayer->GetPosition().y <<std::endl;	
+	//for (int i = 1008; i < m_nObjects; ++i) {
+	//	std::cout << i << " : " << m_ppObjects[i]->GetPosition().x << " " << m_ppObjects[i]->GetPosition().y << std::endl;
+	//}
+	
 	m_nObjects++;
-
-	std::cout << m_nObjects << std::endl;
 }

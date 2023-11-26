@@ -90,9 +90,11 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		}
 
 		if (dwDirection & KEY_SHOOT) { 
-			
-			m_pScene->AddObjects(0);
-
+			m_fKeyDownTime += m_fEtime;
+			if (m_fKeyDownTime > 0.2f) {
+				m_pScene->AddObjects(0);
+				m_fKeyDownTime = 0.f;
+			}
 			//std::cout << "asd" << std::endl;
 		}
 		
@@ -298,6 +300,7 @@ void CPlayer::Rotate(float x, float y, float z)
 //이 함수는 매 프레임마다 호출된다. 플레이어의 속도 벡터에 중력과 마찰력 등을 적용한다.
 void CPlayer::Update(float fTimeElapsed)
 {
+	m_fEtime = fTimeElapsed;
 	/*플레이어의 속도 벡터를 중력 벡터와 더한다. 중력 벡터에 fTimeElapsed를 곱하는 것은 중력을 시간에 비례하도록
 	적용한다는 의미이다.*/
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Gravity, fTimeElapsed, false));
