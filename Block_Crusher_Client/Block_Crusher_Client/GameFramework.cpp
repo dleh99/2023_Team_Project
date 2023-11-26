@@ -14,7 +14,7 @@ CGameFramework::CGameFramework()
 	m_hFenceEvent = NULL;
 	m_nFenceValue = 0;
 
-	_tcscpy_s(m_pszFrameRate, _T("LapProject ("));
+	_tcscpy_s(m_pszFrameRate, _T("Block Crusher (("));
 
 	for (int i = 0; i < m_nSwapChainBuffers; ++i)
 		m_nFenceValues[i] = 0;
@@ -460,28 +460,33 @@ void CGameFramework::BuildObjects()
 	int id = GetPlayerId();
 	
 	CCubePlayer* pCubePlayer0 = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0, 0, -40, id);
+		m_pScene->GetGraphicsRootSignature().Get(), 0, 15, -40, id);
 
 	CCubePlayer* pCubePlayer1 = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0, 0, 0, id);
+		m_pScene->GetGraphicsRootSignature().Get(), 0, 15, 0, id);
 
 	CCubePlayer* pCubePlayer2 = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0, 0, 40, id);
+		m_pScene->GetGraphicsRootSignature().Get(), 0, 15, 40, id);
 
 	m_vEnemyPlayers.push_back(pCubePlayer0);
 	m_vEnemyPlayers.push_back(pCubePlayer1);
 	m_vEnemyPlayers.push_back(pCubePlayer2);
 
 	m_pPlayer = m_vEnemyPlayers[id];
+
 #else
 	CCubePlayer* pCubePlayer = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0.f, 0.f, -50.f);
+		m_pScene->GetGraphicsRootSignature().Get(), 0, 10, 40, 1);
 
 	m_pPlayer = pCubePlayer;
+
 #endif
+
+	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
+	m_pScene->m_pPlayer = m_pPlayer;
+	m_pPlayer->m_pScene = m_pScene;
 	m_pCamera = m_pPlayer->GetCamera();
 	
-	//m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
 	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
 		m_vEnemyPlayers[i]->m_ppObjects = m_pScene->m_ppObjects;
 	}
@@ -524,6 +529,7 @@ void CGameFramework::ProcessInput()
 		if (pKeyBuffer[0x41] & 0xF0) dwDirection |= DIR_LEFT;				// A
 		if (pKeyBuffer[0x44] & 0xF0) dwDirection |= DIR_RIGHT;				// D
 		if (pKeyBuffer[VK_SPACE] & 0xF0) dwDirection |= DIR_UP;
+		if (pKeyBuffer[0x43] & 0xF0) dwDirection |= KEY_SHOOT;
 	}
 
 	float cxDelta = 0.0f, cyDelta = 0.0f;
@@ -572,6 +578,7 @@ void CGameFramework::ProcessInput()
 		}
 	}
 #endif
+
 	if (cxDelta || cyDelta)
 	{
 		/*cxDelta는 y-축의 회전을 나타내고 cyDelta는 x-축의 회전을 나타낸다. 오른쪽 마우스 버튼이 눌려진 경우

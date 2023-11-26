@@ -201,11 +201,28 @@ void CRotatingObject::Animate(float fTimeElapsed)
 	CGameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
 }
 
-void CTexture::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
-{
-}
-
-float CBlockObject::GetBlockType()
+int CBlockObject::GetBlockType()
 {
 	return m_iBlockType;
 };
+
+void CBulletObject::Animate(float fTimeElapsed)
+{
+	XMFLOAT3 position = GetPosition();
+	XMFLOAT3 velocity;
+
+	float speed = m_fSpeed * fTimeElapsed;
+	velocity = m_xmf3Vector;
+	velocity.x *= speed;
+	velocity.y *= speed;
+	velocity.z *= speed;
+
+	position = Vector3::Add(position, velocity);
+
+	CGameObject::SetPosition(position);
+}
+
+void CTexture::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+
+}

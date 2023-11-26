@@ -100,14 +100,44 @@ public:
 	CBlockObject() 
 	{
 		m_iBlockType = 0; 
+		m_iBlockHP = 1;
 	};
 	virtual ~CBlockObject() {};
 
 private:
 	int m_iBlockType;
+	int m_iBlockHP;
 
 public:
-	float GetBlockType();
+	int GetBlockType();
+	int GetBlockHP() { return m_iBlockHP; };
+	void Animate(float fTimeElapsed) {};
+};
+
+class CBulletObject : public CGameObject
+{
+public:
+	CBulletObject()
+	{
+		m_iBulletType = 0;
+		m_iBulletDamage = 1;
+		m_xmf3Vector = { 0,0,0 };
+		m_fSpeed = 200.0f;
+	};
+	virtual ~CBulletObject() {};
+
+private:
+	int m_iBulletType;
+	int m_iBulletDamage;
+	float m_fSpeed;
+	XMFLOAT3 m_xmf3Vector;
+
+public:
+	int GetBulletType() { return m_iBulletType; };
+	int GetBulletDamage() { return m_iBulletDamage; };
+
+	void SetBulletVector(XMFLOAT3 vector) { m_xmf3Vector = vector; };
+	virtual void Animate(float fTimeElapsed);
 };
 
 class CTexture
