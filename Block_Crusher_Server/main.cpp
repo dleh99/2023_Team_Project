@@ -43,6 +43,7 @@ void packet_process(int c_id, char* packet)
 			for (auto& cl : clients)
 				if (cl._state == US_INGAME)
 					cl.send_start_packet();
+		break;
 	}
 	case CS_MOVE: {
 			CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
@@ -50,6 +51,8 @@ void packet_process(int c_id, char* packet)
 			clients[c_id].x = p->x;
 			clients[c_id].y = p->y;
 			clients[c_id].z = p->z;
+			clients[c_id].cx = p->cxDelta;
+			clients[c_id].cy = p->cyDelta;
 
 			// 다른 클라이언트들에게 뿌리기
 			for (auto& cl : clients) {

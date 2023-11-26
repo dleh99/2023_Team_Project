@@ -11,8 +11,9 @@ float start_x, start_y, start_z;
 int id;
 
 float otherPlayer_x, otherPlayer_y, otherPlayer_z;
-Pos otherPlayerPos[3];
-int otherPlayer_id;
+Pos otherPlayerPos;
+Mouse otherPlayerMouse;
+int otherPlayer_id = -1;
 
 // 게임 시작 변수
 bool m_gameStart = false;
@@ -59,7 +60,7 @@ void send_login_packet()
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
-void send_move_packet(float x, float y, float z)
+void send_move_packet(float x, float y, float z, float cx, float cy)
 {
 	CS_MOVE_PACKET p{};
 	p.size = sizeof(CS_MOVE_PACKET);
@@ -67,6 +68,8 @@ void send_move_packet(float x, float y, float z)
 	p.x = x;
 	p.y = y;
 	p.z = z;
+	p.cxDelta = cx;
+	p.cyDelta = cy;
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
@@ -92,7 +95,7 @@ void WINAPI do_recv()
 		switch (type) {
 		case SC_LOGIN: {	// 처음 로그인 했을 때 받는 패킷. 아이디를 서버는 클라에게 아이디를 부여한다
 			SC_LOGININFO_PACKET* packet = reinterpret_cast<SC_LOGININFO_PACKET*>(ptr);
-			cout << "서버에서 클라로 위치를 보냄" << endl;
+			//cout << "서버에서 클라로 위치를 보냄" << endl;
 			// int id = packet->id
 			id = packet->id;
 			start_x = packet->x;
@@ -103,16 +106,18 @@ void WINAPI do_recv()
 		case SC_START: {	// 게임 시작 조건이 달성되면(6명) 게임을 시작함. 초기 지형 위치 보냄
 			SC_START_PACKET* packet = reinterpret_cast<SC_START_PACKET*>(ptr);
 			m_gameStart = true;
-			cout << "시작 패킷 받음" << endl;
+			//cout << "시작 패킷 받음" << endl;
 			break;
 		}
 		case SC_MOVE_PLAYER: {
 			SC_MOVE_PACKET* packet = reinterpret_cast<SC_MOVE_PACKET*>(ptr);
-			cout << packet->id << "의 위치를 받아왔습니다." << packet->x << ", " << packet->y << ", " << packet->z << endl;
+			//cout << packet->id << "의 위치를 받아왔습니다." << packet->x << ", " << packet->y << ", " << packet->z << endl;
 			otherPlayer_id = packet->id;
-			otherPlayerPos[otherPlayer_id].x = packet->x;
-			otherPlayerPos[otherPlayer_id].y = packet->y;
-			otherPlayerPos[otherPlayer_id].z = packet->z;
+			otherPlayerPos.x = packet->x;
+			otherPlayerPos.y = packet->y;
+			otherPlayerPos.z = packet->z;
+			otherPlayerMouse.cx = packet->cxDelta;
+			otherPlayerMouse.cy = packet->cyDelta;
 
 			break;
 		}
@@ -154,7 +159,7 @@ int GetPlayerId()
 	return playerId;
 }
 
-Pos* GetOtherPlayerPos()
+Pos GetOtherPlayerPos()
 {
 	return otherPlayerPos;
 }
@@ -162,6 +167,11 @@ Pos* GetOtherPlayerPos()
 int GetOtherPlayerId()
 {
 	return otherPlayer_id;
+}
+
+Mouse GetOtherPlayerMouse()
+{
+	return otherPlayerMouse;
 }
 
 void NetCleanup()

@@ -13,6 +13,8 @@ public:
 	short			x, y, z;
 	int				_prev_remain;				// 패킷 재조립 시 이전에 남은 데이터 양
 
+	float			cx, cy;						// 마우스 움직임 량
+
 public:
 	User_Interface();
 	~User_Interface();

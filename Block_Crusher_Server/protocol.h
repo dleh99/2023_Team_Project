@@ -41,7 +41,8 @@ struct CS_MOVE_PACKET {
 	float				x;
 	float				y;
 	float				z;
-	float				rotate_angle;
+	float				cxDelta;
+	float				cyDelta;
 };
 
 //===========================
@@ -68,7 +69,8 @@ struct SC_MOVE_PACKET {
 	float				x;
 	float				y;
 	float				z;
-	float				rotate_angle;
+	float				cxDelta;
+	float				cyDelta;
 };
 
 #pragma pack(pop)

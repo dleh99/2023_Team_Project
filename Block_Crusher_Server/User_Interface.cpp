@@ -6,6 +6,7 @@ User_Interface::User_Interface()
 	_id = -1;
 	x = y = z = 0;
 	_prev_remain = 0;
+	cx = cy = 0;
 }
 
 User_Interface::~User_Interface()
@@ -56,5 +57,7 @@ void User_Interface::send_move_packet(User_Interface* clients, int c_id)
 	p.x = clients[c_id].x;
 	p.y = clients[c_id].y;
 	p.z = clients[c_id].z;
+	p.cxDelta = clients[c_id].cx;
+	p.cyDelta = clients[c_id].cy;
 	do_send(&p);
 }

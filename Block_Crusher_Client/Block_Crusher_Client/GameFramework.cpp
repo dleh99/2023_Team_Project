@@ -352,15 +352,14 @@ void CGameFramework::FrameAdvance()
 	do_recv();
 
 	int otherPlayerId = GetOtherPlayerId();
-	Pos* otherPlayerPos = GetOtherPlayerPos();
-
-	for (int i = 0; i < 3; ++i) {
-		if (m_pPlayer->GetPlayerId() == i)
-			continue;
-		m_vEnemyPlayers[i]->SetPosition(XMFLOAT3(otherPlayerPos[i].x, otherPlayerPos[i].y, otherPlayerPos[i].z));
+	
+	if (otherPlayerId != -1) {
+		Pos otherPlayerPos = GetOtherPlayerPos();
+		Mouse otherPlayerMouse = GetOtherPlayerMouse();
+		m_vEnemyPlayers[otherPlayerId]->Rotate(otherPlayerMouse.cy, otherPlayerMouse.cx, 0.f);
+		m_vEnemyPlayers[otherPlayerId]->SetPosition(XMFLOAT3(otherPlayerPos.x, otherPlayerPos.y, otherPlayerPos.z));
 	}
 
-	
 #endif
 
 	ProcessInput();
@@ -550,12 +549,27 @@ void CGameFramework::ProcessInput()
 #ifdef USE_SERVER
 	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 	{
-
+		if ((cxDelta != 0.0f) || (cyDelta != 0.0f))
+		{
+			m_pPlayer->SetIsRotate(true);
+		}
 		float x = m_pPlayer->GetPosition().x;
 		float y = m_pPlayer->GetPosition().y;
 		float z = m_pPlayer->GetPosition().z;
-		send_move_packet(x, y, z);
 
+		send_move_packet(x, y, z, cxDelta, cyDelta);
+	}
+	
+	if(cxDelta == 0.f && cyDelta == 0.f)
+	{
+		if (m_pPlayer->GetIsRotate()) {
+			m_pPlayer->SetIsRotate(false);
+			float x = m_pPlayer->GetPosition().x;
+			float y = m_pPlayer->GetPosition().y;
+			float z = m_pPlayer->GetPosition().z;
+
+			send_move_packet(x, y, z, cxDelta, cyDelta);
+		}
 	}
 #endif
 	if (cxDelta || cyDelta)

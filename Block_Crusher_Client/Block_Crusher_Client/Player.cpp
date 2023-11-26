@@ -582,6 +582,16 @@ void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 	//std::cout << "이 플레이어의 네트워크 ID : " << m_playerNetworkId << std::endl;
 }
 
+void CPlayer::SetIsRotate(bool tf)
+{
+	isRotate = tf;
+}
+
+bool CPlayer::GetIsRotate()
+{
+	return isRotate;
+}
+
 CCubePlayer::CCubePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z, int id)
 {

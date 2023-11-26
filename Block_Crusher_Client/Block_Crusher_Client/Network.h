@@ -14,10 +14,15 @@ struct Pos {
 	float z;
 };
 
+struct Mouse {
+	float cx;
+	float cy;
+};
+
 int NetworkInit();
 void NetCleanup();
 void send_login_packet();
-void send_move_packet(float x, float y, float z);
+void send_move_packet(float x, float y, float z, float cx, float cy);
 void err_quit(const char* msg);
 void err_display(const char* msg);
 void err_display(int errcode);
@@ -27,5 +32,6 @@ bool GetGameState();
 Pos GetStartPos();
 int GetPlayerId();
 
-Pos* GetOtherPlayerPos();
+Pos GetOtherPlayerPos();
 int GetOtherPlayerId();
+Mouse GetOtherPlayerMouse();

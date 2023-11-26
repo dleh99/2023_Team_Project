@@ -62,6 +62,8 @@ protected:
 
 	int m_playerNetworkId = -1;
 
+	bool isRotate = false;
+
 public:
 	CGameObject** m_ppObjects = NULL;
 
@@ -76,7 +78,6 @@ public:
 	float GetPitch() { return(m_fPitch); }
 	float GetYaw() { return(m_fYaw); }
 	float GetRoll() { return(m_fRoll); }
-
 
 	void SetFriction(float fFriction) { m_fFriction = fFriction; }
 	void SetGravity(XMFLOAT3 xmf3Gravity) { m_xmf3Gravity = xmf3Gravity; }
@@ -150,7 +151,8 @@ public:
 	//플레이어의 카메라가 3인칭 카메라일 때 플레이어(메쉬)를 렌더링한다.
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 
-
+	void SetIsRotate(bool tf);
+	bool GetIsRotate();
 };
 
 class CCubePlayer : public CPlayer
