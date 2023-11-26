@@ -559,18 +559,12 @@ CCamera* CPlayer::OnCreateCamera()
 플레이어의 위치 벡터가 네 번째 행 벡터가 된다.*/
 void CPlayer::OnPrepareRender()
 {
-	m_xmf4x4World._11 = m_xmf3Right.x;
-	m_xmf4x4World._12 = m_xmf3Right.y;
-	m_xmf4x4World._13 = m_xmf3Right.z;
-	m_xmf4x4World._21 = m_xmf3Up.x;
-	m_xmf4x4World._22 = m_xmf3Up.y;
-	m_xmf4x4World._23 = m_xmf3Up.z;
-	m_xmf4x4World._31 = m_xmf3Look.x;
-	m_xmf4x4World._32 = m_xmf3Look.y;
-	m_xmf4x4World._33 = m_xmf3Look.z;
-	m_xmf4x4World._41 = m_xmf3Position.x;
-	m_xmf4x4World._42 = m_xmf3Position.y;
-	m_xmf4x4World._43 = m_xmf3Position.z;
+	m_xmf4x4Transform._11 = m_xmf3Right.x; m_xmf4x4Transform._12 = m_xmf3Right.y; m_xmf4x4Transform._13 = m_xmf3Right.z;
+	m_xmf4x4Transform._21 = m_xmf3Up.x; m_xmf4x4Transform._22 = m_xmf3Up.y; m_xmf4x4Transform._23 = m_xmf3Up.z;
+	m_xmf4x4Transform._31 = m_xmf3Look.x; m_xmf4x4Transform._32 = m_xmf3Look.y; m_xmf4x4Transform._33 = m_xmf3Look.z;
+	m_xmf4x4Transform._41 = m_xmf3Position.x; m_xmf4x4Transform._42 = m_xmf3Position.y; m_xmf4x4Transform._43 = m_xmf3Position.z;
+
+	UpdateTransform(NULL);
 }
 
 void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -647,13 +641,28 @@ CCamera* CCubePlayer::CreateCamera(float fTimeElapsed)
 CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	ID3D12RootSignature* pd3dGraphicsRootSignature) : CPlayer()
 {
-	CPlayerMesh* pPlayerMesh = new CPlayerMesh(pd3dDevice, pd3dCommandList);
-	SetMesh(pPlayerMesh);
+	CGameObject* pPlayerObject = CGameObject::LoadHierarchyModelFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+		"Models/player model data.bin");
 
+	//pPlayerObject->SetScale(50.0f, 50.0f, 50.0f);
 	SetScale(50.0f);
+	Rotate(45.0f, 0.0f, 0.0f);
+	//pPlayerObject->Rotate((XMFLOAT3(1.0f, 0.0f, 0.0f), 45.0f));
+	SetPosition(XMFLOAT3(0.0f, 0.0f, -50.0f));
+
+	SetChild(pPlayerObject);
+
+	m_pCamera = CreateCamera(0.0f);
+
+	CPlayerShader* pPlayerShader = new CPlayerShader();
+	pPlayerShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pPlayerShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	SetShader(pPlayerShader);
+
+	/*SetScale(50.0f, 50.0f, 50.0f);
 	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(-90.0f), 0.0f, 0.0f);
-	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
-	SetPos(0.0f, 0.0f, -50.0f);
+	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
+	SetPos(0.0f, 0.0f, -50.0f);*/
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
@@ -666,6 +675,33 @@ CMainPlayer::~CMainPlayer()
 {
 }
 
+CCamera* CMainPlayer::CreateCamera(float fTimeElapsed)
+{
+	//플레이어의 특성을 3인칭 카메라 모드에 맞게 변경한다. 지연 효과와 카메라 오프셋을 설정한다.
+	SetFriction(250.0f);
+	SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
+
+	SetMaxVelocityXZ(125.0f);
+	SetMaxVelocityY(400.0f);
+
+	m_pCamera = OnCreateCamera();
+
+	//3인칭 카메라의 지연 효과를 설정한다. 값을 0.25f 대신에 0.0f와 1.0f로 설정한 결과를 비교하기 바란다.
+	m_pCamera->SetTimeLag(0.25f);
+	m_pCamera->SetOffset(XMFLOAT3(0.0f, 20.0f, -50.0f));
+	m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+	m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+	m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+
+	m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
+
+	//플레이어를 시간의 경과에 따라 갱신(위치와 방향을 변경: 속도, 마찰력, 중력 등을 처리)한다.
+	Update(fTimeElapsed);
+
+	return(m_pCamera);
+}
+
 void CMainPlayer::OnPrepareRender()
 {
+	//CPlayer::OnPrepareRender();
 }

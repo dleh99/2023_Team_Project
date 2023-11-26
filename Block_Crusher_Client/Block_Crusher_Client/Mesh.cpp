@@ -133,21 +133,16 @@ CCubeMeshDiffused::~CCubeMeshDiffused()
 {
 }
 
-CPlayerMesh::CPlayerMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+CPlayerMesh::CPlayerMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CMeshLoadInfo* pMeshInfo)
 	:CMesh(pd3dDevice, pd3dCommandList)
 {
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-	LoadMeshFromFile(pd3dDevice, pd3dCommandList, "Models/player model data.bin");
+	LoadMeshFromFile(pd3dDevice, pd3dCommandList, pMeshInfo);
 }
 
 CPlayerMesh::~CPlayerMesh()
 {
-	if (m_pxmf3Vertex) delete[] m_pxmf3Vertex;
-	if (m_pxmf3Normal) delete[] m_pxmf3Normal;
-	if (m_pxmf4Tangent) delete[] m_pxmf4Tangent;
-	if (m_pxmf2Uv) delete[] m_pxmf2Uv;
-	if (m_puiIndex) delete[] m_puiIndex;
 	if (m_pd3dPlayerVertexBufferViews) delete[] m_pd3dPlayerVertexBufferViews;
 }
 
@@ -166,41 +161,19 @@ void CPlayerMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 }
 
 void CPlayerMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-	const char* pstrFileName)
+	CMeshLoadInfo* pMeshInfo)
 {
-	std::ifstream fPlayerModelFile{ pstrFileName, std::ios::binary };
-
-	if (!fPlayerModelFile) {
-		std::cout << "플레이어 모델 파일 읽기 실패" << std::endl;
-		exit(-1);
-	}
-
-	int nModel;
-	fPlayerModelFile.read((char*)&nModel, sizeof(int));
-
-	fPlayerModelFile.read((char*)&m_nVertices, sizeof(int));
-	m_pxmf3Vertex = new XMFLOAT3[m_nVertices];
-	fPlayerModelFile.read((char*)m_pxmf3Vertex, sizeof(XMFLOAT3) * m_nVertices);
-
-	fPlayerModelFile.read((char*)&m_nNormals, sizeof(int));
-	m_pxmf3Normal = new XMFLOAT3[m_nNormals];
-	fPlayerModelFile.read((char*)m_pxmf3Normal, sizeof(XMFLOAT3) * m_nNormals);
-
-	fPlayerModelFile.read((char*)&m_nTangents, sizeof(int));
-	m_pxmf4Tangent = new XMFLOAT4[m_nTangents];
-	fPlayerModelFile.read((char*)m_pxmf4Tangent, sizeof(XMFLOAT4) * m_nTangents);
-
-	fPlayerModelFile.read((char*)&m_nUvs, sizeof(int));
-	m_pxmf2Uv = new XMFLOAT2[m_nUvs];
-	fPlayerModelFile.read((char*)m_pxmf2Uv, sizeof(XMFLOAT2) * m_nUvs);
-
-	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Vertex, sizeof(XMFLOAT3) * m_nVertices,
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pMeshInfo->m_pxmf3Positions,
+		sizeof(XMFLOAT3) * pMeshInfo->m_nPositions,
 		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
-	m_pd3dNormalBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Normal, sizeof(XMFLOAT3) * m_nNormals,
+	m_pd3dNormalBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pMeshInfo->m_pxmf3Normals,
+		sizeof(XMFLOAT3) * pMeshInfo->m_nNormals,
 		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dNormalUploadBuffer);
-	m_pd3dTangentBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf4Tangent, sizeof(XMFLOAT4) * m_nTangents,
+	m_pd3dTangentBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pMeshInfo->m_pxmf4Tangents,
+		sizeof(XMFLOAT4) * pMeshInfo->m_nTangents,
 		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dTangentUploadBuffer);
-	m_pd3dUvBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf2Uv, sizeof(XMFLOAT2) * m_nUvs,
+	m_pd3dUvBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pMeshInfo->m_pxmf2Uvs,
+		sizeof(XMFLOAT2) * pMeshInfo->m_nUvs,
 		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dUvUploadBuffer);
 
 	m_nVertexBufferViews = 4;
@@ -208,28 +181,37 @@ void CPlayerMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	m_pd3dPlayerVertexBufferViews[0].BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
 	m_pd3dPlayerVertexBufferViews[0].StrideInBytes = sizeof(XMFLOAT3);
-	m_pd3dPlayerVertexBufferViews[0].SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+	m_pd3dPlayerVertexBufferViews[0].SizeInBytes = sizeof(XMFLOAT3) * pMeshInfo->m_nPositions;
 
 	m_pd3dPlayerVertexBufferViews[1].BufferLocation = m_pd3dNormalBuffer->GetGPUVirtualAddress();
 	m_pd3dPlayerVertexBufferViews[1].StrideInBytes = sizeof(XMFLOAT3);
-	m_pd3dPlayerVertexBufferViews[1].SizeInBytes = sizeof(XMFLOAT3) * m_nNormals;
+	m_pd3dPlayerVertexBufferViews[1].SizeInBytes = sizeof(XMFLOAT3) * pMeshInfo->m_nNormals;
 
 	m_pd3dPlayerVertexBufferViews[2].BufferLocation = m_pd3dTangentBuffer->GetGPUVirtualAddress();
 	m_pd3dPlayerVertexBufferViews[2].StrideInBytes = sizeof(XMFLOAT3);
-	m_pd3dPlayerVertexBufferViews[2].SizeInBytes = sizeof(XMFLOAT3) * m_nTangents;
+	m_pd3dPlayerVertexBufferViews[2].SizeInBytes = sizeof(XMFLOAT3) * pMeshInfo->m_nTangents;
 
 	m_pd3dPlayerVertexBufferViews[3].BufferLocation = m_pd3dUvBuffer->GetGPUVirtualAddress();
 	m_pd3dPlayerVertexBufferViews[3].StrideInBytes = sizeof(XMFLOAT2);
-	m_pd3dPlayerVertexBufferViews[3].SizeInBytes = sizeof(XMFLOAT2) * m_nUvs;
+	m_pd3dPlayerVertexBufferViews[3].SizeInBytes = sizeof(XMFLOAT2) * pMeshInfo->m_nUvs;
 
-	fPlayerModelFile.read((char*)&m_nIndices, sizeof(int));
-	m_puiIndex = new UINT[m_nIndices];
-	fPlayerModelFile.read((char*)m_puiIndex, sizeof(UINT) * m_nIndices);
-
-	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_puiIndex, sizeof(UINT) * m_nIndices,
+	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pMeshInfo->m_pIndices,
+		sizeof(UINT) * pMeshInfo->m_nIndices,
 		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
 
 	m_pd3dPlayerIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
 	m_pd3dPlayerIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
-	m_pd3dPlayerIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+	m_pd3dPlayerIndexBufferView.SizeInBytes = sizeof(UINT) * pMeshInfo->m_nIndices;
+
+	m_nVertices = pMeshInfo->m_nPositions;
+	m_nIndices = pMeshInfo->m_nIndices;
+}
+
+CMeshLoadInfo::~CMeshLoadInfo()
+{
+	if (m_pxmf3Positions) delete[] m_pxmf3Positions;
+	if (m_pxmf3Normals) delete[] m_pxmf3Normals;
+	if (m_pxmf4Tangents) delete[] m_pxmf4Tangents;
+	if (m_pxmf2Uvs) delete[] m_pxmf2Uvs;
+	if (m_pIndices) delete[] m_pIndices;
 }

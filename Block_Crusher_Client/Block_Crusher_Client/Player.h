@@ -88,11 +88,11 @@ public:
 
 	XMFLOAT3& GetVelocity() { return(m_xmf3Velocity); }
 
-	void SetScale(float scale) {
+	/*void SetScale(float scale) {
 		m_xmf4x4World._11 *= scale;
 		m_xmf4x4World._22 *= scale;
 		m_xmf4x4World._33 *= scale;
-	}
+	}*/
 	/*플레이어의 위치를 xmf3Position 위치로 설정한다.
 	xmf3Position 벡터에서 현재 플레이어의 위치 벡터를 빼면 현재 플레이어의 위치에서 xmf3Position 방향으로의 벡터가 된다.
 	현재 플레이어의 위치에서 이 벡터 만큼 이동한다.*/
@@ -171,5 +171,6 @@ public:
 		ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual ~CMainPlayer();
 
+	virtual CCamera* CreateCamera(float fTimeElapsed);
 	virtual void OnPrepareRender();
 };

@@ -359,8 +359,6 @@ void CGameFramework::FrameAdvance()
 			continue;
 		m_vEnemyPlayers[i]->SetPosition(XMFLOAT3(otherPlayerPos[i].x, otherPlayerPos[i].y, otherPlayerPos[i].z));
 	}
-
-	
 #endif
 
 	ProcessInput();
@@ -476,18 +474,17 @@ void CGameFramework::BuildObjects()
 	m_pPlayer = m_vEnemyPlayers[id];
 #else
 	CCubePlayer* pCubePlayer = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0.f, 0.f, -50.f);
+		m_pScene->GetGraphicsRootSignature().Get(), 0.f, 0.f, -50.f, 0);
+	/*CMainPlayer* pCubePlayer = new CMainPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get());*/
 
 	m_pPlayer = pCubePlayer;
 #endif
 	m_pCamera = m_pPlayer->GetCamera();
 	
-	//m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
-	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
-		m_vEnemyPlayers[i]->m_ppObjects = m_pScene->m_ppObjects;
-	}
+	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
 
-	//m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
+	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 	//auto pp = m_pScene->m_pPlayer->GetPosition();
 
 	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {

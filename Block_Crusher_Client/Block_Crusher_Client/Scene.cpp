@@ -61,8 +61,9 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	m_ppObjects[1] = new CMainPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
 	m_ppObjects[1]->SetShader(pPlayerShader);
-	/*m_ppObjects[0]->SetScale(100.0f);
-	m_ppObjects[0]->SetPosition(0.0f, 0.0f, 0.0f);*/
+	m_ppObjects[1]->Rotate(-90.0f, 0.0f, 0.0f);
+	m_ppObjects[1]->SetPosition(XMFLOAT3(0.0f, 10.0f, 0.0f));
+	//m_ppObjects[1]->SetScale(10.0f, 10.0f, 10.0f);
 }
 
 void CScene::ReleaseObjects()
