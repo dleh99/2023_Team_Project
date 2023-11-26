@@ -18,12 +18,15 @@ public:
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
 protected:
-	XMFLOAT4X4 m_xmf4x4World;
+	TCHAR m_pstrFrameName[64];
+
 	CMesh* m_pMesh = NULL;
 	CShader* m_pShader = NULL;
-	float m_fBlockBoundingRadius = sqrt(144.f * 3.f) / 2;
 
-	char m_pstrFrameName[64];
+	XMFLOAT4X4 m_xmf4x4Transform;
+	XMFLOAT4X4 m_xmf4x4World;	
+
+	float m_fBlockBoundingRadius = sqrt(144.f * 3.f) / 2;
 
 	CGameObject* m_pParent = NULL;
 	CGameObject* m_pChild = NULL;
@@ -45,6 +48,7 @@ public:
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	// 상수 버퍼의 내용을 갱신한다.
+	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 
@@ -60,6 +64,7 @@ public:
 	void SetPosition(XMFLOAT3 xmf3Position);
 
 	void SetScale(float scale);
+	void SetScale(float x, float y, float z);
 
 	// 게임 객체를 로컬 x-축, y-축, z-축 방향으로 이동한다.
 	void MoveStrafe(float fDistance = 1.0f);
@@ -74,7 +79,15 @@ public:
 
 	void SetChild(CGameObject* pChild);
 	CGameObject* GetParent() { return m_pParent; }
-	CGameObject* FindFrame(char* pstrFrameName);
+	CGameObject* FindFrame(_TCHAR* pstrFrameName);
+	void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
+
+	static CGameObject* LoadHierarchyModelFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrFileName);
+	static CGameObject* LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		ID3D12RootSignature* pd3dGraphicsRootSignature, std::ifstream& fileStream);
+
+	static CMeshLoadInfo* LoadMeshInfoFromFile(std::ifstream& fileStream);
 };
 
 class CRotatingObject : public CGameObject

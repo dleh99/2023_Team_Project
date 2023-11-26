@@ -476,7 +476,9 @@ void CGameFramework::BuildObjects()
 
 #else
 	CCubePlayer* pCubePlayer = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0, 10, 40, 1);
+		m_pScene->GetGraphicsRootSignature().Get(), 0.f, 0.f, -50.f, 0);
+	/*CMainPlayer* pCubePlayer = new CMainPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get());*/
 
 	m_pPlayer = pCubePlayer;
 
@@ -487,11 +489,9 @@ void CGameFramework::BuildObjects()
 	m_pPlayer->m_pScene = m_pScene;
 	m_pCamera = m_pPlayer->GetCamera();
 	
-	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
-		m_vEnemyPlayers[i]->m_ppObjects = m_pScene->m_ppObjects;
-	}
+	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
 
-	//m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
+	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 	//auto pp = m_pScene->m_pPlayer->GetPosition();
 
 	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
