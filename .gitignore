@@ -381,3 +381,9 @@ FodyWeavers.xsd
 *.ilk
 *.lastbuildstate
 *.tlog
+*.tlog
+*.exe
+*.ilk
+*.log
+*.pdb
+*.ilk
