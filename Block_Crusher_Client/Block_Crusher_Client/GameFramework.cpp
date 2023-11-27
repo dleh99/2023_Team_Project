@@ -533,6 +533,8 @@ void CGameFramework::ProcessInput()
 	}
 
 	float cxDelta = 0.0f, cyDelta = 0.0f;
+	float x, y, z;
+	x = y = z = 0.f;
 	POINT ptCursorPos;
 
 	if (::GetCapture() == m_hWnd)
@@ -559,24 +561,28 @@ void CGameFramework::ProcessInput()
 		{
 			m_pPlayer->SetIsRotate(true);
 		}
-		float x = m_pPlayer->GetPosition().x;
-		float y = m_pPlayer->GetPosition().y;
-		float z = m_pPlayer->GetPosition().z;
+		//x = m_pPlayer->GetPosition().x;
+		//y = m_pPlayer->GetPosition().y;
+		//z = m_pPlayer->GetPosition().z;
 
-		send_move_packet(x, y, z, cxDelta, cyDelta);
+		//send_move_packet(x, y, z, cxDelta, cyDelta);
 	}
 	
 	if(cxDelta == 0.f && cyDelta == 0.f)
 	{
 		if (m_pPlayer->GetIsRotate()) {
 			m_pPlayer->SetIsRotate(false);
-			float x = m_pPlayer->GetPosition().x;
-			float y = m_pPlayer->GetPosition().y;
-			float z = m_pPlayer->GetPosition().z;
+			//x = m_pPlayer->GetPosition().x;
+			//y = m_pPlayer->GetPosition().y;
+			//z = m_pPlayer->GetPosition().z;
 
-			send_move_packet(x, y, z, cxDelta, cyDelta);
+			//send_move_packet(x, y, z, cxDelta, cyDelta);
 		}
 	}
+	x = m_pPlayer->GetPosition().x;
+	y = m_pPlayer->GetPosition().y;
+	z = m_pPlayer->GetPosition().z;
+	send_move_packet(x, y, z, cxDelta, cyDelta);
 #endif
 
 	if (cxDelta || cyDelta)
