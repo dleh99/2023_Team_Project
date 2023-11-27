@@ -44,7 +44,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pBulletMesh = BulletMesh;
 
 	m_nObjects = cnt;
-	m_ppObjects = new CGameObject * [m_nObjects + 1000];
+	m_ppObjects = new CGameObject * [3000];
 
 	CDiffusedShader* pShader = new CDiffusedShader();
 	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
@@ -55,6 +55,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 		CBlockObject* pBlockObject = new CBlockObject();
 		pBlockObject->SetMesh(pCubeMesh);
 		pBlockObject->SetShader(pShader);
+		pBlockObject->SetIsActive(true);
 
 		m_ppObjects[i] = pBlockObject;
 		m_ppObjects[i]->SetPosition(Cubes[i]);
@@ -155,11 +156,26 @@ bool CScene::ProcessInput(UCHAR* pKeyBuffer)
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
-
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		m_ppObjects[j]->Animate(fTimeElapsed);
+		if (m_ppObjects[j]->GetIsActive()) 
+			m_ppObjects[j]->Animate(fTimeElapsed);
 	}
+
+	for (int i = 0; i < m_nObjects; i++)
+		for (int j = 0; j < m_nObjects; j++) {
+			if (m_ppObjects[i]->GetIsActive()&& m_ppObjects[j]->GetIsActive()) {
+				if (m_ppObjects[i]->GetObjectType() != m_ppObjects[j]->GetObjectType()){
+					if (BSCollisionCheck(m_ppObjects[i]->GetPosition(), m_ppObjects[j]->GetPosition(),
+						m_ppObjects[i]->GetBoundingRadius(), m_ppObjects[j]->GetBoundingRadius())) {
+
+						m_ppObjects[i]->SetIsActive(false);
+						m_ppObjects[j]->SetIsActive(false);
+						//std::cout << i << " " << j << std::endl;
+					}
+				}
+			}
+		}
 }
 
 void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -172,7 +188,7 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		if (m_ppObjects[j])
+		if (m_ppObjects[j]&& m_ppObjects[j]->GetIsActive())
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 	}
 }
@@ -183,17 +199,37 @@ void CScene::AddObjects(int type)
 	pBulletObject->SetMesh(pBulletMesh);
 	pBulletObject->SetShader(m_pSceneShader);
 	pBulletObject->SetBulletVector(m_pPlayer->GetLook());
+	pBulletObject->SetObjectType(TYPE_BULLET);
+	//pBulletObject->SetBoundingRadius(2.0f);
+
+	//int index = FindEmptySlot();
 
 	m_ppObjects[m_nObjects] = pBulletObject;
 	m_ppObjects[m_nObjects]->SetPosition(m_pPlayer->GetPosition());
-	m_ppObjects[m_nObjects];
+	m_ppObjects[m_nObjects]->SetIsActive(true);
 
-	std::cout << "醚舅 积己" << std::endl;
-	
-	//std::cout << m_pPlayer->GetPosition().x <<  " " << m_pPlayer->GetPosition().y <<std::endl;	
-	//for (int i = 1008; i < m_nObjects; ++i) {
-	//	std::cout << i << " : " << m_ppObjects[i]->GetPosition().x << " " << m_ppObjects[i]->GetPosition().y << std::endl;
-	//}
+	//std::cout << "醚舅 积己" << std::endl;
 	
 	m_nObjects++;
+}
+
+int CScene::FindEmptySlot()
+{
+	for (int i = 0; i < MAX_OBJ_COUNT; ++i) {
+		if (m_ppObjects[i]->GetIsActive() == false) {
+			return i;
+			//std::cout << i << std::endl;
+		}
+	}
+}
+
+bool CScene::BSCollisionCheck(XMFLOAT3 Position1, XMFLOAT3 Position2,float Radius1, float Radius2)
+{
+	float x = Position1.x - Position2.x;
+	float y = Position1.y - Position2.y;
+	float z = Position1.z - Position2.z;
+
+	if (Radius1 + Radius2 - 4.0f> sqrt(x * x + y * y + z * z)) return true;
+
+	return false;
 }

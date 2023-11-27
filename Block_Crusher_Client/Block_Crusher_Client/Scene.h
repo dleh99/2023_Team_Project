@@ -2,6 +2,8 @@
 #include "Timer.h"
 #include "Shader.h"
 
+#define MAX_OBJ_COUNT 3000
+
 class CScene
 {
 public:
@@ -19,6 +21,9 @@ public:
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	void AddObjects(int type);
 	void ReleaseUploadBuffers();
+
+	int FindEmptySlot();
+	bool BSCollisionCheck(XMFLOAT3 Position1, XMFLOAT3 Position2, float Radius1, float Radius2);
 
 	ComPtr<ID3D12RootSignature> CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 	ComPtr<ID3D12RootSignature> GetGraphicsRootSignature();

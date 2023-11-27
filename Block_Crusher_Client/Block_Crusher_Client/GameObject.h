@@ -2,6 +2,10 @@
 #include "Mesh.h"
 #include "Camera.h"
 
+#define TYPE_PLAYER 0
+#define TYPE_BLOCK 1
+#define TYPE_BULLET 2
+
 class CShader;
 
 class CGameObject
@@ -26,7 +30,10 @@ protected:
 	XMFLOAT4X4 m_xmf4x4Transform;
 	XMFLOAT4X4 m_xmf4x4World;	
 
-	float m_fBlockBoundingRadius = sqrt(144.f * 3.f) / 2;
+	float m_fBlockBoundingRadius;
+	//| 0 - 주인공 | 1 - 블럭 | 2 - 총알 |
+	int m_ObjType = TYPE_BLOCK;
+	bool m_bActive = false;
 
 	CGameObject* m_pParent = NULL;
 	CGameObject* m_pChild = NULL;
@@ -57,14 +64,18 @@ public:
 	XMFLOAT3 GetLook();
 	XMFLOAT3 GetUp();
 	XMFLOAT3 GetRight();
+	int GetObjectType();
+	bool GetIsActive();
+
 	float GetBoundingRadius() { return m_fBlockBoundingRadius; };
 
 	// 게임 객체의 워치를 설정한다.
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3 xmf3Position);
-
 	void SetScale(float scale);
 	void SetScale(float x, float y, float z);
+	void SetObjectType(int type);
+	void SetIsActive(bool Active);
 
 	// 게임 객체를 로컬 x-축, y-축, z-축 방향으로 이동한다.
 	void MoveStrafe(float fDistance = 1.0f);
@@ -136,6 +147,8 @@ public:
 		m_iBulletDamage = 1;
 		m_xmf3Vector = { 0,0,0 };
 		m_fSpeed = 200.0f;
+		m_fBoundingSph = 2.0f;
+		m_fBlockBoundingRadius = 2.0f;
 	};
 	virtual ~CBulletObject() {};
 
@@ -143,6 +156,7 @@ private:
 	int m_iBulletType;
 	int m_iBulletDamage;
 	float m_fSpeed;
+	float m_fBoundingSph;
 	XMFLOAT3 m_xmf3Vector;
 
 public:
