@@ -336,31 +336,35 @@ void CPlayer::Update(float fTimeElapsed)
 		int cnt = 0;
 
 		for (int i = 0; i < 1008; ++i) {
-			if (BSCollisionCheck(m_ppObjects[i]->GetPosition(),
-				m_ppObjects[i]->GetBoundingRadius())) {
+			if (m_ppObjects[i]->GetIsActive()) {
+				if (BSCollisionCheck(m_ppObjects[i]->GetPosition(),
+					m_ppObjects[i]->GetBoundingRadius())) {
 
-				XMFLOAT3 Box = m_ppObjects[i]->GetPosition();
-				if (SBCollisionCheck(Box)) {
-					m_fPlayerGravityTime = 0;
-					xmf3JumpShift.y = 0;
-					m_bPlayerGravity = false;
-					//std::cout << m_xmf3Position.x << " " << m_xmf3Position.y << " " << m_xmf3Position.z << "\n";
-					break;
+					XMFLOAT3 Box = m_ppObjects[i]->GetPosition();
+					if (SBCollisionCheck(Box)) {
+						m_fPlayerGravityTime = 0;
+						xmf3JumpShift.y = 0;
+						m_bPlayerGravity = false;
+						//std::cout << m_xmf3Position.x << " " << m_xmf3Position.y << " " << m_xmf3Position.z << "\n";
+						break;
+					}
 				}
 			}
 			cnt++;
 		}
 
 		for (int i = 0; i < 1008; ++i) {
-			if (BSCollisionCheck(m_ppObjects[i]->GetPosition(),
-				m_ppObjects[i]->GetBoundingRadius())) {
+			if(m_ppObjects[i]->GetIsActive()){
+				if (BSCollisionCheck(m_ppObjects[i]->GetPosition(),
+					m_ppObjects[i]->GetBoundingRadius())) {
 
-				XMFLOAT3 Box = m_ppObjects[i]->GetPosition();
-				XMFLOAT3 MoveBack = SBCollisionMoveXZ(Box, xmf3Velocity);
+					XMFLOAT3 Box = m_ppObjects[i]->GetPosition();
+					XMFLOAT3 MoveBack = SBCollisionMoveXZ(Box, xmf3Velocity);
 
-				if (Vector3::Length(MoveBack) > 0) {
-					Move(MoveBack, false);
-					break;
+					if (Vector3::Length(MoveBack) > 0) {
+						Move(MoveBack, false);
+						break;
+					}
 				}
 			}
 		}

@@ -6,6 +6,8 @@ CGameObject::CGameObject()
 {
 	XMStoreFloat4x4(&m_xmf4x4Transform, XMMatrixIdentity());
 	XMStoreFloat4x4(&m_xmf4x4World, XMMatrixIdentity());
+	
+	m_fBlockBoundingRadius = sqrt(144.f * 3.f) / 2;
 }
 
 CGameObject::~CGameObject()
@@ -122,6 +124,16 @@ XMFLOAT3 CGameObject::GetRight()
 	return Vector3::Normalize(XMFLOAT3(m_xmf4x4World._11, m_xmf4x4World._12, m_xmf4x4World._13));
 }
 
+int CGameObject::GetObjectType()
+{
+	return m_ObjType;
+}
+
+bool CGameObject::GetIsActive()
+{
+	return m_bActive;
+}
+
 void CGameObject::SetPosition(float x, float y, float z)
 {
 	m_xmf4x4Transform._41 = x;
@@ -134,6 +146,11 @@ void CGameObject::SetPosition(float x, float y, float z)
 void CGameObject::SetPosition(XMFLOAT3 xmf3Position)
 {
 	SetPosition(xmf3Position.x, xmf3Position.y, xmf3Position.z);
+}
+
+void CGameObject::SetObjectType(int type)
+{
+	m_ObjType = type;
 }
 
 void CGameObject::SetScale(float scale)
@@ -151,6 +168,11 @@ void CGameObject::SetScale(float x, float y, float z)
 	m_xmf4x4Transform = Matrix4x4::Multiply(mtxScale, m_xmf4x4Transform);
 
 	UpdateTransform(NULL);
+}
+
+void CGameObject::SetIsActive(bool Active)
+{
+	m_bActive = Active;
 }
 
 // 게임 객체를 로컬 x-축 방향으로 이동한다.
@@ -371,6 +393,21 @@ void CBulletObject::Animate(float fTimeElapsed)
 	velocity.z *= speed;
 
 	position = Vector3::Add(position, velocity);
+
+	if (position.x > 200.0f || position.x < -200.0f) {
+		m_bActive = false;
+		return;
+	}
+
+	if (position.z > 200.0f || position.z < -200.0f) {
+		m_bActive = false;
+		return;
+	}
+
+	if (position.y > 200.0f || position.y < -200.0f) {
+		m_bActive = false;
+		return;
+	}
 
 	CGameObject::SetPosition(position);
 }
