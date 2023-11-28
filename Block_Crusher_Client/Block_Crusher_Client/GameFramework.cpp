@@ -404,8 +404,6 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle,
 		D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
-
-
 	//렌더링 코드는 여기에 추가될 것이다.
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList.Get(), m_pCamera);
 
@@ -459,36 +457,32 @@ void CGameFramework::BuildObjects()
 	Pos p = GetStartPos();
 	int id = GetPlayerId();
 	
-	CCubePlayer* pCubePlayer0 = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0, 15, -40, id);
+	CMainPlayer* pCubePlayer0 = new CMainPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, -30.0f);
 
-	CCubePlayer* pCubePlayer1 = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0, 15, 0, id);
+	CMainPlayer* pCubePlayer1 = new CMainPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 0.0f);
 
-	CCubePlayer* pCubePlayer2 = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0, 15, 40, id);
+	CMainPlayer* pCubePlayer2 = new CMainPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 30.0f);
 
 	m_vEnemyPlayers.push_back(pCubePlayer0);
 	m_vEnemyPlayers.push_back(pCubePlayer1);
 	m_vEnemyPlayers.push_back(pCubePlayer2);
 
 	m_pPlayer = m_vEnemyPlayers[id];
-
 #else
-	CCubePlayer* pCubePlayer = new CCubePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0.f, 0.f, -50.f, 0);
-	/*CMainPlayer* pCubePlayer = new CMainPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get());*/
+	CMainPlayer* pCubePlayer = new CMainPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 0.0f);
 
 	m_pPlayer = pCubePlayer;
-
 #endif
 
 	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
 	m_pScene->m_pPlayer = m_pPlayer;
 	m_pPlayer->m_pScene = m_pScene;
 	m_pCamera = m_pPlayer->GetCamera();
-	
+
 	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
 
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());

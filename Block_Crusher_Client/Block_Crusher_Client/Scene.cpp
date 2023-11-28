@@ -60,17 +60,6 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 		m_ppObjects[i] = pBlockObject;
 		m_ppObjects[i]->SetPosition(Cubes[i]);
 	}
-
-	CPlayerShader* pPlayerShader = new CPlayerShader();
-	pPlayerShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
-	pPlayerShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	m_ppObjects[1] = new CMainPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
-	m_ppObjects[1]->SetShader(pPlayerShader);
-	m_ppObjects[1]->SetIsActive(true);
-	m_ppObjects[1]->Rotate(-90.0f, 0.0f, 0.0f);
-	m_ppObjects[1]->SetPosition(XMFLOAT3(-30.0f, 34.0f, -20.0f));
-	//m_ppObjects[1]->SetScale(10.0f, 10.0f, 10.0f);
 }
 
 void CScene::ReleaseObjects()

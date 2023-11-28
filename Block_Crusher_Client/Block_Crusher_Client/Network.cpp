@@ -5,8 +5,8 @@ SOCKET g_socket;
 SOCKADDR_IN serveraddr;
 char recvBuf[BUF_SIZE];
 
-//string SERVER_IP = "127.0.0.1";
-string SERVER_IP = "14.51.115.70";
+string SERVER_IP = "127.0.0.1";
+//string SERVER_IP = "14.51.115.70";
 
 float start_x, start_y, start_z;
 int id;

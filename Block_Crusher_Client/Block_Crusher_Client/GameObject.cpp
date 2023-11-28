@@ -301,7 +301,7 @@ CGameObject* CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, I
 		else if ('M' == token)
 		{
 			// Mesh Info
-			CMeshLoadInfo* pMeshInfo = pGameObject->LoadMeshInfoFromFile(fileStream);
+			CMeshLoadInfo* pMeshInfo = pGameObject->LoadMeshInfoFromFile(fileStream, 20.0f);
 
 			if (pMeshInfo)
 			{
@@ -334,13 +334,19 @@ CGameObject* CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, I
 	return pGameObject;
 }
 
-CMeshLoadInfo* CGameObject::LoadMeshInfoFromFile(std::ifstream& fileStream)
+CMeshLoadInfo* CGameObject::LoadMeshInfoFromFile(std::ifstream& fileStream, float modelScaleFactor)
 {
 	CMeshLoadInfo* pMeshInfo = new CMeshLoadInfo;
 
 	fileStream.read((char*)&pMeshInfo->m_nPositions, sizeof(int));
 	pMeshInfo->m_pxmf3Positions = new XMFLOAT3[pMeshInfo->m_nPositions];
 	fileStream.read((char*)pMeshInfo->m_pxmf3Positions, sizeof(XMFLOAT3) * pMeshInfo->m_nPositions);
+
+	for (int i = 0; i < pMeshInfo->m_nPositions; ++i) {
+		pMeshInfo->m_pxmf3Positions[i].x *= modelScaleFactor;
+		pMeshInfo->m_pxmf3Positions[i].y *= modelScaleFactor;
+		pMeshInfo->m_pxmf3Positions[i].z *= modelScaleFactor;
+	}
 
 	fileStream.read((char*)&pMeshInfo->m_nNormals, sizeof(int));
 	pMeshInfo->m_pxmf3Normals = new XMFLOAT3[pMeshInfo->m_nNormals];

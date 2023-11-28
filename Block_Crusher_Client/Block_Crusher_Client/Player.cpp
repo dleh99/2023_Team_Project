@@ -430,6 +430,11 @@ void CPlayer::OnPrepareRender()
 	m_xmf4x4Transform._31 = m_xmf3Look.x; m_xmf4x4Transform._32 = m_xmf3Look.y; m_xmf4x4Transform._33 = m_xmf3Look.z;
 	m_xmf4x4Transform._41 = m_xmf3Position.x; m_xmf4x4Transform._42 = m_xmf3Position.y; m_xmf4x4Transform._43 = m_xmf3Position.z;
 
+	// 모델 x축으로 90도 회전하여 똑바로 세우기
+	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(-90.0f),
+		XMConvertToRadians(0.0f), XMConvertToRadians(0.0f));
+	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
+
 	UpdateTransform(NULL);
 }
 
@@ -515,16 +520,12 @@ CCamera* CCubePlayer::CreateCamera(float fTimeElapsed)
 }
 
 CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-	ID3D12RootSignature* pd3dGraphicsRootSignature) : CPlayer()
+	ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z) : CPlayer()
 {
 	CGameObject* pPlayerObject = CGameObject::LoadHierarchyModelFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
 		"Models/player model data.bin");
 
-	//pPlayerObject->SetScale(50.0f, 50.0f, 50.0f);
-	SetScale(50.0f);
-	Rotate(45.0f, 0.0f, 0.0f);
-	//pPlayerObject->Rotate((XMFLOAT3(1.0f, 0.0f, 0.0f), 45.0f));
-	SetPosition(XMFLOAT3(0.0f, 0.0f, -50.0f));
+	SetPosition(XMFLOAT3(x, y, z));
 
 	SetChild(pPlayerObject);
 
@@ -535,16 +536,7 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	pPlayerShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	SetShader(pPlayerShader);
 
-	/*SetScale(50.0f, 50.0f, 50.0f);
-	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(-90.0f), 0.0f, 0.0f);
-	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
-	SetPos(0.0f, 0.0f, -50.0f);*/
-
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	/*CDiffusedShader* pShader = new CDiffusedShader();
-	pShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
-	SetShader(pShader);*/
 }
 
 CMainPlayer::~CMainPlayer()
@@ -579,5 +571,5 @@ CCamera* CMainPlayer::CreateCamera(float fTimeElapsed)
 
 void CMainPlayer::OnPrepareRender()
 {
-	//CPlayer::OnPrepareRender();
+	CPlayer::OnPrepareRender();
 }
