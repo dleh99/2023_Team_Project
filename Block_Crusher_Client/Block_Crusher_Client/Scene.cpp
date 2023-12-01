@@ -14,6 +14,11 @@ CScene::~CScene()
 
 void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Rock01.dds", RESOURCE_TEXTURE2D, 0);
+
+	CMaterial* pMaterial = new CMaterial();
+	pMaterial->SetTexture(pTexture);
 
 	XMFLOAT3 Cubes[1008] = {};
 
@@ -39,7 +44,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	// 가로 x 세로 x 깊이가 12 x 12 x 12인 정육면체 메쉬 생성
-	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
+	CCubeMeshTextured* pCubeMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
 	CCubeMeshDiffused* BulletMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 2.0f, 2.0f, 2.0f);
 	pBulletMesh = BulletMesh;
 
@@ -55,6 +60,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 		CBlockObject* pBlockObject = new CBlockObject();
 		pBlockObject->SetMesh(pCubeMesh);
 		pBlockObject->SetShader(pShader);
+		pBlockObject->SetMaterial(pMaterial);
 		pBlockObject->SetIsActive(true);
 
 		m_ppObjects[i] = pBlockObject;
