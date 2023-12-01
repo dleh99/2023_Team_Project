@@ -1,6 +1,9 @@
 #pragma once
 #include "header.h"
 #include "Overlapped.h"
+#include "GameObject.h"
+
+constexpr int MAX_BULLET_NUM = 1000;
 
 enum USER_STATE { US_EMPTY, US_CONNECTING, US_INGAME };
 class User_Interface{
@@ -15,6 +18,8 @@ public:
 
 	float			cx, cy;						// 마우스 움직임 량
 
+	BulletObject	bullet[MAX_BULLET_NUM];
+
 public:
 	User_Interface();
 	~User_Interface();
@@ -25,4 +30,5 @@ public:
 	void send_login_info_packet();
 	void send_start_packet();
 	void send_move_packet(User_Interface* clients, int c_id);
+	void send_bullet_add_packet(User_Interface* clients, int c_id, int bullet_num);
 };

@@ -61,3 +61,17 @@ void User_Interface::send_move_packet(User_Interface* clients, int c_id)
 	p.cyDelta = clients[c_id].cy;
 	do_send(&p);
 }
+
+void User_Interface::send_bullet_add_packet(User_Interface* clients, int c_id, int bullet_num)
+{
+	SC_BULLET_ADD_PACKET p;
+	p.size = sizeof(SC_BULLET_ADD_PACKET);
+	p.type = SC_BULLET_ADD;
+	p.s_x = clients[c_id].bullet[bullet_num].GetPosition().x;
+	p.s_y = clients[c_id].bullet[bullet_num].GetPosition().y;
+	p.s_z = clients[c_id].bullet[bullet_num].GetPosition().z;
+	p.b_x = clients[c_id].bullet[bullet_num].GetBulletVec().x;
+	p.b_y = clients[c_id].bullet[bullet_num].GetBulletVec().y;
+	p.b_z = clients[c_id].bullet[bullet_num].GetBulletVec().z;
+	do_send(&p);
+}

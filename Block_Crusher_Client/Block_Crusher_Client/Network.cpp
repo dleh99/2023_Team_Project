@@ -74,6 +74,20 @@ void send_move_packet(float x, float y, float z, float cx, float cy)
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
+void send_bullet_add_packet(XMFLOAT3 pos, XMFLOAT3 bullet_v)
+{
+	CS_BULLET_ADD_PACKET p{};
+	p.size = sizeof(CS_BULLET_ADD_PACKET);
+	p.type = CS_BULLET_ADD;
+	p.s_x = pos.x;
+	p.s_y = pos.y;
+	p.s_z = pos.z;
+	p.b_x = bullet_v.x;
+	p.b_y = bullet_v.y;
+	p.b_z = bullet_v.z;
+	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
+}
+
 void WINAPI do_recv()
 {
 	int ret;
@@ -120,6 +134,11 @@ void WINAPI do_recv()
 			otherPlayerMouse.cx = packet->cxDelta;
 			otherPlayerMouse.cy = packet->cyDelta;
 
+			break;
+		}
+		case SC_BULLET_ADD: {
+			SC_BULLET_ADD_PACKET* packet = reinterpret_cast<SC_BULLET_ADD_PACKET*>(ptr);
+			cout << "총알을 받아 왔습니다. 위치 :" << packet->s_x << ", " << packet->s_y << ", " << packet->s_z << ", 발사 벡터 : " << packet->b_x << ", " << packet->b_y << ", " << packet->b_z << endl;
 			break;
 		}
 		}

@@ -139,12 +139,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="GameObject.h" />
     <ClInclude Include="header.h" />
     <ClInclude Include="Overlapped.h" />
     <ClInclude Include="protocol.h" />
     <ClInclude Include="User_Interface.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Overlapped.cpp" />
     <ClCompile Include="User_Interface.cpp" />

@@ -27,6 +27,9 @@
     <ClInclude Include="User_Interface.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -36,6 +39,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="User_Interface.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

@@ -164,6 +164,7 @@ public:
 	int GetBulletDamage() { return m_iBulletDamage; };
 
 	void SetBulletVector(XMFLOAT3 vector) { m_xmf3Vector = vector; };
+	XMFLOAT3 GetBulletVector() { return m_xmf3Vector; };
 	virtual void Animate(float fTimeElapsed);
 };
 

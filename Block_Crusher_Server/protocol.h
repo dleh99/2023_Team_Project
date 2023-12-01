@@ -23,10 +23,12 @@ constexpr int WORLD_HEIGHT = 3600;		// 블럭 = 60cm(px), 높이 = 아래 30개, 위 30�
 // packet id
 constexpr char CS_LOGIN = 0;
 constexpr char CS_MOVE = 1;
+constexpr char CS_BULLET_ADD = 5;
 
 constexpr char SC_LOGIN = 2;
 constexpr char SC_START = 3;
 constexpr char SC_MOVE_PLAYER = 4;
+constexpr char SC_BULLET_ADD = 6;
 
 #pragma pack(push, 1)
 
@@ -43,6 +45,17 @@ struct CS_MOVE_PACKET {
 	float				z;
 	float				cxDelta;
 	float				cyDelta;
+};
+
+struct CS_BULLET_ADD_PACKET {
+	unsigned char		size;
+	char				type;
+	float				s_x;
+	float				s_y;
+	float				s_z;
+	float				b_x;
+	float				b_y;
+	float				b_z;
 };
 
 //===========================
@@ -71,6 +84,17 @@ struct SC_MOVE_PACKET {
 	float				z;
 	float				cxDelta;
 	float				cyDelta;
+};
+
+struct SC_BULLET_ADD_PACKET {
+	unsigned char		size;
+	char				type;
+	float				s_x;
+	float				s_y;
+	float				s_z;
+	float				b_x;
+	float				b_y;
+	float				b_z;
 };
 
 #pragma pack(pop)

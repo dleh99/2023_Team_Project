@@ -46,21 +46,40 @@ void packet_process(int c_id, char* packet)
 		break;
 	}
 	case CS_MOVE: {
-			CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
-			// 패킷에서 보내온 방향에 따라 위치 이동 코드
-			clients[c_id].x = p->x;
-			clients[c_id].y = p->y;
-			clients[c_id].z = p->z;
-			clients[c_id].cx = p->cxDelta;
-			clients[c_id].cy = p->cyDelta;
+		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
+		// 패킷에서 보내온 방향에 따라 위치 이동 코드
+		clients[c_id].x = p->x;
+		clients[c_id].y = p->y;
+		clients[c_id].z = p->z;
+		clients[c_id].cx = p->cxDelta;
+		clients[c_id].cy = p->cyDelta;
 
-			// 다른 클라이언트들에게 뿌리기
-			for (auto& cl : clients) {
-				if (cl._state != US_INGAME) continue;
-				if (cl._id == c_id) continue;
-				cl.send_move_packet(clients.data(), c_id);
+		// 다른 클라이언트들에게 뿌리기
+		for (auto& cl : clients) {
+			if (cl._state != US_INGAME) continue;
+			if (cl._id == c_id) continue;
+			cl.send_move_packet(clients.data(), c_id);
+		}
+		break;
+	}
+	case CS_BULLET_ADD: {
+		CS_BULLET_ADD_PACKET* p = reinterpret_cast<CS_BULLET_ADD_PACKET*>(packet);
+		//cout << "[" << c_id << "] 총알 발사" << endl;
+		for (int i{}; i < MAX_BULLET_NUM; ++i) {
+			if (false == clients[c_id].bullet[i].GetisActive()) {
+				clients[c_id].bullet[i].SetisActive(true);
+				clients[c_id].bullet[i].SetPosition(p->s_x, p->s_y, p->s_z);
+				clients[c_id].bullet[i].SetBulletVec(p->b_x, p->b_y, p->b_z);
+
+				for (auto& cl : clients) {
+					if (cl._state != US_INGAME) continue;
+					if (cl._id == c_id) continue;
+					cl.send_bullet_add_packet(clients.data(), c_id, i);
+				}
+				break;
 			}
-			break;
+		}
+		break;
 	}
 	}
 }
@@ -155,6 +174,34 @@ void worker_thread(HANDLE iocp_h)
 	}
 }
 
+void Physics_Calculation_thread()
+{
+	/* 이 스레드가 하는 일
+	* 1. 활성화 되어 있는 총알들의 움직임 제어
+	*		-> 총알을 일정 시간 마다 움직임
+	* 2. 총알들과 오브젝트들의 충돌 계산
+	*		-> 충돌 시 패킷 보내기
+	*/
+	while (true) {
+		for (auto& cl : clients) {
+			if (cl._state != US_INGAME) continue;
+			for (int i{}; i < MAX_BULLET_NUM; ++i) {
+				if (cl.bullet[i].GetisActive()) {
+					cl.bullet[i].Move(0.0167f);
+					//cout << "[" << cl._id << "] " << cl.bullet[i].GetPosition().x << ", " << cl.bullet[i].GetPosition().y << ", " << cl.bullet[i].GetPosition().z << endl;
+				}
+			}
+		}
+	}
+}
+
+void do_timer()
+{
+	while (true) {
+		
+	}
+}
+
 int main()
 {
 	WSADATA WSAData;
@@ -181,10 +228,15 @@ int main()
 	for (int i{}; i < thread_num; ++i)
 		worker_threads.emplace_back(worker_thread, iocp_h);
 	
+	// 계산 스레드
+	thread physics_thread{ Physics_Calculation_thread };
+	physics_thread.join();
+
 	// 타이머로 처리할 것들 처리
-	//thread timer_thread{};
-	
-	for (auto& thread : worker_threads)
+	/*thread timer_thread{ do_timer };
+
+	timer_thread.join();*/
+	for (auto& thread : worker_threads) 
 		thread.join();
 
 	closesocket(g_s_socket);
