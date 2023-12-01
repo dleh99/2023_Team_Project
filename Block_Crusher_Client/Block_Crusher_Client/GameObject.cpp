@@ -68,15 +68,17 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 {
 	OnPrepareRender();
 
-	//UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
-
 	if (m_pShader)
 	{
 		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 		m_pShader->Render(pd3dCommandList, pCamera);
 	}
 
-	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
+	if (m_pMesh)
+	{
+		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+		m_pMesh->Render(pd3dCommandList);
+	}
 
 	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
@@ -88,9 +90,9 @@ void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Graphics
 
 void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World)
 {
-	/*XMFLOAT4X4 xmf4x4World;
+	XMFLOAT4X4 xmf4x4World;
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);*/
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &xmf4x4World, 0);
 }
 
 void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -283,8 +285,7 @@ CGameObject* CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, I
 
 		if ('F' == token)
 		{
-			int nFrame;
-			fileStream.read((char*)&nFrame, sizeof(int));
+			fileStream.read((char*)&pGameObject->m_nFrames, sizeof(int));
 			//fileStream.read((char*)&m_pstrFrameName, sizeof(int));
 
 			// Transform
@@ -342,11 +343,11 @@ CMeshLoadInfo* CGameObject::LoadMeshInfoFromFile(std::ifstream& fileStream, floa
 	pMeshInfo->m_pxmf3Positions = new XMFLOAT3[pMeshInfo->m_nPositions];
 	fileStream.read((char*)pMeshInfo->m_pxmf3Positions, sizeof(XMFLOAT3) * pMeshInfo->m_nPositions);
 
-	for (int i = 0; i < pMeshInfo->m_nPositions; ++i) {
+	/*for (int i = 0; i < pMeshInfo->m_nPositions; ++i) {
 		pMeshInfo->m_pxmf3Positions[i].x *= modelScaleFactor;
 		pMeshInfo->m_pxmf3Positions[i].y *= modelScaleFactor;
 		pMeshInfo->m_pxmf3Positions[i].z *= modelScaleFactor;
-	}
+	}*/
 
 	fileStream.read((char*)&pMeshInfo->m_nNormals, sizeof(int));
 	pMeshInfo->m_pxmf3Normals = new XMFLOAT3[pMeshInfo->m_nNormals];

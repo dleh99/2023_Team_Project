@@ -23,6 +23,7 @@ public:
 
 protected:
 	TCHAR m_pstrFrameName[64];
+	int m_nFrames = 0;
 
 	CMesh* m_pMesh = NULL;
 	CShader* m_pShader = NULL;

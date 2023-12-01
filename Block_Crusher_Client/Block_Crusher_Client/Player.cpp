@@ -430,8 +430,20 @@ void CPlayer::OnPrepareRender()
 	m_xmf4x4Transform._31 = m_xmf3Look.x; m_xmf4x4Transform._32 = m_xmf3Look.y; m_xmf4x4Transform._33 = m_xmf3Look.z;
 	m_xmf4x4Transform._41 = m_xmf3Position.x; m_xmf4x4Transform._42 = m_xmf3Position.y; m_xmf4x4Transform._43 = m_xmf3Position.z;
 
+	/*XMFLOAT4X4 playerTransform = XMFLOAT4X4(m_xmf3Right.x, m_xmf3Right.y, m_xmf3Right.z, 0.0f,
+		m_xmf3Up.x, m_xmf3Up.y, m_xmf3Up.z, 0.0f,
+		m_xmf3Look.x, m_xmf3Look.y, m_xmf3Look.z, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f);
+
+	m_xmf4x4Transform = Matrix4x4::Multiply(playerTransform, m_xmf4x4Transform);*/
+
 	// 모델 x축으로 90도 회전하여 똑바로 세우기
-	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(-90.0f),
+	
+
+	XMMATRIX scaleMatrix = XMMatrixScaling(20.0f, 20.0f, 20.0f);
+	m_xmf4x4Transform = Matrix4x4::Multiply(scaleMatrix, m_xmf4x4Transform);
+
+	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(180.0f),
 		XMConvertToRadians(0.0f), XMConvertToRadians(0.0f));
 	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
 
