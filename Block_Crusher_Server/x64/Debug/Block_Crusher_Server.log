@@ -1,7 +1,2 @@
-﻿  main.cpp
-D:\back_up\Backup\졸작\2023_Team_Project\Block_Crusher_Server\main.cpp(51,22): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\back_up\Backup\졸작\2023_Team_Project\Block_Crusher_Server\main.cpp(52,22): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\back_up\Backup\졸작\2023_Team_Project\Block_Crusher_Server\main.cpp(53,22): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\back_up\Backup\졸작\2023_Team_Project\Block_Crusher_Server\main.cpp(102,16): warning C4244: '인수': 'ULONG_PTR'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\back_up\Backup\졸작\2023_Team_Project\Block_Crusher_Server\main.cpp(110,15): warning C4244: '인수': 'ULONG_PTR'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+﻿  Timer.cpp
   Block_Crusher_Server.vcxproj -> D:\back_up\Backup\졸작\2023_Team_Project\Block_Crusher_Server\x64\Debug\Block_Crusher_Server.exe

@@ -6,6 +6,7 @@
 #include <vector>
 #include <thread>
 #include <array>
+#include <chrono>
 
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "MSWSock.lib")

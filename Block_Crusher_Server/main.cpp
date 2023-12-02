@@ -2,12 +2,14 @@
 #include "protocol.h"
 #include "Overlapped.h"
 #include "User_Interface.h"
+#include "Timer.h"
 
 using namespace std;
 
 HANDLE iocp_h;
 SOCKET g_s_socket, g_c_socket;
 Overlapped g_over;
+Timer server_timer;
 
 array<User_Interface, MAX_USER> clients;
 
@@ -183,11 +185,12 @@ void Physics_Calculation_thread()
 	*		-> 충돌 시 패킷 보내기
 	*/
 	while (true) {
+		server_timer.Tick(0.f);
 		for (auto& cl : clients) {
 			if (cl._state != US_INGAME) continue;
 			for (int i{}; i < MAX_BULLET_NUM; ++i) {
 				if (cl.bullet[i].GetisActive()) {
-					cl.bullet[i].Move(0.0167f);
+					cl.bullet[i].Move(server_timer.GetTimeElapsed());
 					//cout << "[" << cl._id << "] " << cl.bullet[i].GetPosition().x << ", " << cl.bullet[i].GetPosition().y << ", " << cl.bullet[i].GetPosition().z << endl;
 				}
 			}
