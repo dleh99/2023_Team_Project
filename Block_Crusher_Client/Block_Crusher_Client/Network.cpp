@@ -1,4 +1,5 @@
 #include "Network.h"
+#include "Scene.h"
 
 WSADATA wsa;
 SOCKET g_socket;
@@ -14,6 +15,7 @@ int id;
 float otherPlayer_x, otherPlayer_y, otherPlayer_z;
 Pos otherPlayerPos;
 Mouse otherPlayerMouse;
+CScene* NetScene = NULL;
 int otherPlayer_id = -1;
 
 // 게임 시작 변수
@@ -138,7 +140,11 @@ void WINAPI do_recv()
 		}
 		case SC_BULLET_ADD: {
 			SC_BULLET_ADD_PACKET* packet = reinterpret_cast<SC_BULLET_ADD_PACKET*>(ptr);
-			cout << "총알을 받아 왔습니다. 위치 :" << packet->s_x << ", " << packet->s_y << ", " << packet->s_z << ", 발사 벡터 : " << packet->b_x << ", " << packet->b_y << ", " << packet->b_z << endl;
+			XMFLOAT3 BPos = { packet->s_x ,packet->s_y ,packet->s_z };
+			XMFLOAT3 BVec = { packet->b_x ,packet->b_y ,packet->b_z };
+
+			NetScene->AddObjects(0, BPos, BVec);
+			//cout << "총알을 받아 왔습니다. 위치 :" << packet->s_x << ", " << packet->s_y << ", " << packet->s_z << ", 발사 벡터 : " << packet->b_x << ", " << packet->b_y << ", " << packet->b_z << endl;
 			break;
 		}
 		}
@@ -238,4 +244,8 @@ void err_display(int errcode)
 		(char*)&lpMsgBuf, 0, NULL);
 	printf("[오류] %s\n", (char*)lpMsgBuf);
 	LocalFree(lpMsgBuf);
+}
+
+void SetScene(CScene* Scene) {
+	NetScene = Scene;
 }

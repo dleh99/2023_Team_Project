@@ -454,6 +454,7 @@ void CGameFramework::BuildObjects()
 	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
 #ifdef USE_SERVER
+	SetScene(m_pScene);
 	Pos p = GetStartPos();
 	int id = GetPlayerId();
 	

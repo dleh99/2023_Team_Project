@@ -1,5 +1,6 @@
 #include "Player.h"
 #include "Shader.h"
+#include "Network.h"
 
 CPlayer::CPlayer() : CGameObject()
 {
@@ -95,7 +96,10 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		if (dwDirection & KEY_SHOOT) { 
 			m_fKeyDownTime += m_fEtime;
 			if (m_fKeyDownTime > 0.1f) {
-				m_pScene->AddObjects(0);
+				m_pScene->AddObjects(0,m_xmf3Position,GetLookVector());
+				XMFLOAT3 send_p = m_xmf3Position;
+				XMFLOAT3 send_v = GetLookVector();
+				send_bullet_add_packet(send_p, send_v);
 				m_fKeyDownTime = 0.f;
 			}
 			//std::cout << "asd" << std::endl;

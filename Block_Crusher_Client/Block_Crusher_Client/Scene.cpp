@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include "Player.h"
-#include "Network.h"
+//#include "Network.h"
 
 CScene::CScene()
 {
@@ -184,26 +184,22 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	}
 }
 
-void CScene::AddObjects(int type)
+void CScene::AddObjects(int type,XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector)
 {
 	CBulletObject* pBulletObject = new CBulletObject();
 	pBulletObject->SetMesh(pBulletMesh);
 	pBulletObject->SetShader(m_pSceneShader);
-	XMFLOAT3 bullet_vector = m_pPlayer->GetUp();
-	pBulletObject->SetBulletVector(Vector3::ScalarProduct(bullet_vector, -1.f, false));
+
+	XMFLOAT3 bullet_vector = BulletVector;
+	//bullet_vector = Vector3::ScalarProduct(bullet_vector, -1.f, false);
+	pBulletObject->SetBulletVector(bullet_vector);
 	pBulletObject->SetObjectType(TYPE_BULLET);
 	//pBulletObject->SetBoundingRadius(2.0f);
 
 	//int index = FindEmptySlot();
-	XMFLOAT3 send_v = pBulletObject->GetBulletVector();
-
 	m_ppObjects[m_nObjects] = pBulletObject;
-	m_ppObjects[m_nObjects]->SetPosition(m_pPlayer->GetPosition());
+	m_ppObjects[m_nObjects]->SetPosition(BulletPosition);
 	m_ppObjects[m_nObjects]->SetIsActive(true);
-
-	XMFLOAT3 send_p = m_ppObjects[m_nObjects]->GetPosition();
-	
-	send_bullet_add_packet(send_p, send_v);
 
 	//std::cout << "ÃÑ¾Ë »ý¼º" << std::endl;
 	

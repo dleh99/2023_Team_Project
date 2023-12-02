@@ -19,7 +19,7 @@ public:
 	bool ProcessInput(UCHAR* pKeyBuffer);
 	void AnimateObjects(float fTimeElapsed);
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-	void AddObjects(int type);
+	void AddObjects(int type, XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector);
 	void ReleaseUploadBuffers();
 
 	int FindEmptySlot();

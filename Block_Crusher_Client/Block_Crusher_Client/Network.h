@@ -6,7 +6,7 @@
 #include <winsock2.h> 
 #include "stdafx.h"
 #pragma comment(lib, "ws2_32")
-
+#include "Scene.h"
 using namespace std;
 
 struct Pos {
@@ -37,3 +37,4 @@ int GetPlayerId();
 Pos GetOtherPlayerPos();
 int GetOtherPlayerId();
 Mouse GetOtherPlayerMouse();
+void SetScene(CScene* Scene);
