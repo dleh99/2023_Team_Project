@@ -1,10 +1,2 @@
-﻿  main.cpp
-D:\2023_Term_Project\Block_Crusher_Server\main.cpp(51,23): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\2023_Term_Project\Block_Crusher_Server\main.cpp(52,23): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\2023_Term_Project\Block_Crusher_Server\main.cpp(53,23): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\2023_Term_Project\Block_Crusher_Server\main.cpp(83,16): warning C4244: '인수': 'ULONG_PTR'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\2023_Term_Project\Block_Crusher_Server\main.cpp(91,15): warning C4244: '인수': 'ULONG_PTR'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  Overlapped.cpp
-  코드를 생성하고 있습니다...
-  LINK : D:\2023_Term_Project\Block_Crusher_Server\x64\Debug\Block_Crusher_Server.exe을(를) 찾을 수 없거나 마지막 증분 링크에 의해 빌드되지 않았습니다. 전체 링크를 수행하고 있습니다.
+﻿  LINK : D:\2023_Term_Project\Block_Crusher_Server\x64\Debug\Block_Crusher_Server.exe을(를) 찾을 수 없거나 마지막 증분 링크에 의해 빌드되지 않았습니다. 전체 링크를 수행하고 있습니다.
   Block_Crusher_Server.vcxproj -> D:\2023_Term_Project\Block_Crusher_Server\x64\Debug\Block_Crusher_Server.exe
