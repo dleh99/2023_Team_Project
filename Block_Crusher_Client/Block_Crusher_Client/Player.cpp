@@ -420,9 +420,6 @@ CCamera* CPlayer::OnCreateCamera()
 	return(pNewCamera);
 }
 
-/*플레이어의 위치와 회전축으로부터 월드 변환 행렬을 생성하는 함수이다.
-플레이어의 Right 벡터가 월드 변환 행렬의 첫 번째 행 벡터, Up 벡터가 두 번째 행 벡터, Look 벡터가 세 번째 행 벡터,
-플레이어의 위치 벡터가 네 번째 행 벡터가 된다.*/
 void CPlayer::OnPrepareRender()
 {
 	m_xmf4x4Transform._11 = m_xmf3Right.x; m_xmf4x4Transform._12 = m_xmf3Right.y; m_xmf4x4Transform._13 = m_xmf3Right.z;
@@ -430,22 +427,8 @@ void CPlayer::OnPrepareRender()
 	m_xmf4x4Transform._31 = m_xmf3Look.x; m_xmf4x4Transform._32 = m_xmf3Look.y; m_xmf4x4Transform._33 = m_xmf3Look.z;
 	m_xmf4x4Transform._41 = m_xmf3Position.x; m_xmf4x4Transform._42 = m_xmf3Position.y; m_xmf4x4Transform._43 = m_xmf3Position.z;
 
-	/*XMFLOAT4X4 playerTransform = XMFLOAT4X4(m_xmf3Right.x, m_xmf3Right.y, m_xmf3Right.z, 0.0f,
-		m_xmf3Up.x, m_xmf3Up.y, m_xmf3Up.z, 0.0f,
-		m_xmf3Look.x, m_xmf3Look.y, m_xmf3Look.z, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f);
-
-	m_xmf4x4Transform = Matrix4x4::Multiply(playerTransform, m_xmf4x4Transform);*/
-
-	// 모델 x축으로 90도 회전하여 똑바로 세우기
-	
-
 	XMMATRIX scaleMatrix = XMMatrixScaling(20.0f, 20.0f, 20.0f);
 	m_xmf4x4Transform = Matrix4x4::Multiply(scaleMatrix, m_xmf4x4Transform);
-
-	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(180.0f),
-		XMConvertToRadians(0.0f), XMConvertToRadians(0.0f));
-	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
 
 	UpdateTransform(NULL);
 }

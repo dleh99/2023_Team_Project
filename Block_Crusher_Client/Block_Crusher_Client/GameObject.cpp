@@ -343,12 +343,6 @@ CMeshLoadInfo* CGameObject::LoadMeshInfoFromFile(std::ifstream& fileStream, floa
 	pMeshInfo->m_pxmf3Positions = new XMFLOAT3[pMeshInfo->m_nPositions];
 	fileStream.read((char*)pMeshInfo->m_pxmf3Positions, sizeof(XMFLOAT3) * pMeshInfo->m_nPositions);
 
-	/*for (int i = 0; i < pMeshInfo->m_nPositions; ++i) {
-		pMeshInfo->m_pxmf3Positions[i].x *= modelScaleFactor;
-		pMeshInfo->m_pxmf3Positions[i].y *= modelScaleFactor;
-		pMeshInfo->m_pxmf3Positions[i].z *= modelScaleFactor;
-	}*/
-
 	fileStream.read((char*)&pMeshInfo->m_nNormals, sizeof(int));
 	pMeshInfo->m_pxmf3Normals = new XMFLOAT3[pMeshInfo->m_nNormals];
 	fileStream.read((char*)pMeshInfo->m_pxmf3Normals, sizeof(XMFLOAT3) * pMeshInfo->m_nNormals);
