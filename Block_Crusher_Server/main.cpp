@@ -3,6 +3,7 @@
 #include "Overlapped.h"
 #include "User_Interface.h"
 #include "Timer.h"
+#include "Map.h"
 
 using namespace std;
 
@@ -12,6 +13,8 @@ Overlapped g_over;
 Timer server_timer;
 
 array<User_Interface, MAX_USER> clients;
+
+Map Map_infromation;
 
 atomic_int user_number = 0;
 
@@ -30,6 +33,16 @@ void disconnect(int c_id)
 	clients[c_id]._state = US_EMPTY;
 	cout << "탈퇴함" << endl;
 	user_number--;
+}
+
+bool CollisionCheck(XMFLOAT3 p1, XMFLOAT3 p2, float r1, float r2)
+{
+	float x = p1.x - p2.x;
+	float y = p1.y - p2.y;
+	float z = p1.z - p2.z;
+
+	if (r1 + r2 - 4.f > sqrt(x * x + y * y + z * z)) return true;
+	return false;
 }
 
 void packet_process(int c_id, char* packet)
@@ -72,10 +85,12 @@ void packet_process(int c_id, char* packet)
 				clients[c_id].bullet[i].SetisActive(true);
 				clients[c_id].bullet[i].SetPosition(p->s_x, p->s_y, p->s_z);
 				clients[c_id].bullet[i].SetBulletVec(p->b_x, p->b_y, p->b_z);
+				clients[c_id].bullet[i].SetBulletId(p->bullet_id);
 
 				for (auto& cl : clients) {
 					if (cl._state != US_INGAME) continue;
 					if (cl._id == c_id) continue;
+					//cout << "서버에서 " << cl._id << "에게 " << c_id << "가 총을 쐈다는걸 보내줬습니다" << endl;
 					cl.send_bullet_add_packet(clients.data(), c_id, i);
 				}
 				break;
@@ -195,6 +210,34 @@ void Physics_Calculation_thread()
 				}
 			}
 		}
+
+		// 총알과 충돌 처리
+		/*
+		* 클라이언트 전체를 돌아서 인게임 중인 클라이언트의 총알들과 맵의 충돌을 검사하고
+		* 충돌했다면 Active를 false 시키고 모든 클라이언트들에게 충돌했다는 패킷을 보낸다
+		*/
+		for (auto& cl : clients) {
+			if (cl._state != US_INGAME) continue;
+			for (int i{}; i < MAX_BULLET_NUM; ++i) {
+				if (false == cl.bullet[i].GetisActive()) continue;
+				for (int j{}; j < 1008; ++j) {
+					if (false == Map_infromation.Map_Block[j].GetisActive()) continue;
+					if (CollisionCheck(cl.bullet[i].GetPosition(), Map_infromation.Map_Block[j].GetPosition(),
+						cl.bullet[i].GetRadius(), Map_infromation.Map_Block[j].GetRadius())){
+						cl.bullet[i].SetisActive(false);
+						Map_infromation.Map_Block[j].SetisActive(false);
+						//cout << "충돌함" << endl;
+						for (auto& send_cl : clients) {
+							if (send_cl._state != US_INGAME) continue;
+							send_cl.send_bullet_collision_packet(cl.bullet[i].GetbulletId(), Map_infromation.Map_Block[j].GetId(), cl._id);
+						}
+					}
+				}
+			}
+		}
+
+		// 플레이어와 총알의 충돌 처리
+
 	}
 }
 

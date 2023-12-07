@@ -32,6 +32,8 @@ CPlayer::CPlayer() : CGameObject()
 	m_pCameraUpdatedContext = NULL;
 
 	m_fPlayerBoundingRadius = 5.0f;
+
+	m_playerNetworkId = GetNetworkPlayerId();
 }
 
 CPlayer::~CPlayer()
@@ -96,10 +98,14 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		if (dwDirection & KEY_SHOOT) { 
 			m_fKeyDownTime += m_fEtime;
 			if (m_fKeyDownTime > 0.1f) {
-				m_pScene->AddObjects(0,m_xmf3Position,GetLookVector());
+				int b_id = GetBulletId();
+				m_pScene->AddObjects(0,m_xmf3Position,GetLookVector(), GetPlayerId(), b_id);
+				cout << GetPlayerId() << "°¡ ÃÑÀ» ½÷¼­ ¼­¹ö¿¡ º¸³Â½À´Ï´Ù" << endl;
 				XMFLOAT3 send_p = m_xmf3Position;
 				XMFLOAT3 send_v = GetLookVector();
-				send_bullet_add_packet(send_p, send_v);
+
+				send_bullet_add_packet(send_p, send_v, b_id);
+				SetBulletId(b_id + 1);
 				m_fKeyDownTime = 0.f;
 			}
 			//std::cout << "asd" << std::endl;

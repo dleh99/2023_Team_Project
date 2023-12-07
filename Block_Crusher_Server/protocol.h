@@ -29,6 +29,8 @@ constexpr char SC_LOGIN = 2;
 constexpr char SC_START = 3;
 constexpr char SC_MOVE_PLAYER = 4;
 constexpr char SC_BULLET_ADD = 6;
+constexpr char SC_COLLISION = 7;
+constexpr char SC_BULLET_COLLISION = 8;
 
 #pragma pack(push, 1)
 
@@ -56,6 +58,7 @@ struct CS_BULLET_ADD_PACKET {
 	float				b_x;
 	float				b_y;
 	float				b_z;
+	int					bullet_id;
 };
 
 //===========================
@@ -95,6 +98,23 @@ struct SC_BULLET_ADD_PACKET {
 	float				b_x;
 	float				b_y;
 	float				b_z;
+	int					player_id;
+	int					bullet_id;
+};
+
+struct SC_COLLISION_PACKET {
+	unsigned char		size;
+	char				type;
+	int					coll_obj_id1;
+	int					coll_obj_id2;
+};
+
+struct SC_BULLET_COLLISION_PACKET {
+	unsigned char		size;
+	char				type;
+	int					coll_obj_id1;
+	int					coll_obj_id2;
+	int					player_id;
 };
 
 #pragma pack(pop)

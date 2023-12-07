@@ -68,6 +68,8 @@ protected:
 
 	bool isRotate = false;
 
+	int bullet_id = 0;
+
 public:
 	CGameObject** m_ppObjects = NULL;
 	CScene* m_pScene = NULL;
@@ -157,6 +159,9 @@ public:
 
 	void SetIsRotate(bool tf);
 	bool GetIsRotate();
+
+	void SetBulletId(int x) { bullet_id = x; };
+	int GetBulletId() { return bullet_id; };
 };
 
 class CCubePlayer : public CPlayer

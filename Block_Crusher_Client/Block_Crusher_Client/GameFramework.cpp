@@ -456,7 +456,7 @@ void CGameFramework::BuildObjects()
 #ifdef USE_SERVER
 	SetScene(m_pScene);
 	Pos p = GetStartPos();
-	int id = GetPlayerId();
+	int id = GetNetworkPlayerId();
 	
 	CMainPlayer* pCubePlayer0 = new CMainPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
 		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, -30.0f);

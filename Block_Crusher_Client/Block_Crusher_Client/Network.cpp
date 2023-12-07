@@ -76,7 +76,7 @@ void send_move_packet(float x, float y, float z, float cx, float cy)
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
-void send_bullet_add_packet(XMFLOAT3 pos, XMFLOAT3 bullet_v)
+void send_bullet_add_packet(XMFLOAT3 pos, XMFLOAT3 bullet_v, int bullet_id)
 {
 	CS_BULLET_ADD_PACKET p{};
 	p.size = sizeof(CS_BULLET_ADD_PACKET);
@@ -87,6 +87,7 @@ void send_bullet_add_packet(XMFLOAT3 pos, XMFLOAT3 bullet_v)
 	p.b_x = bullet_v.x;
 	p.b_y = bullet_v.y;
 	p.b_z = bullet_v.z;
+	p.bullet_id = bullet_id;
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
@@ -143,8 +144,20 @@ void WINAPI do_recv()
 			XMFLOAT3 BPos = { packet->s_x ,packet->s_y ,packet->s_z };
 			XMFLOAT3 BVec = { packet->b_x ,packet->b_y ,packet->b_z };
 
-			NetScene->AddObjects(0, BPos, BVec);
+			NetScene->AddObjects(0, BPos, BVec, packet->player_id, packet->bullet_id);
 			//cout << "총알을 받아 왔습니다. 위치 :" << packet->s_x << ", " << packet->s_y << ", " << packet->s_z << ", 발사 벡터 : " << packet->b_x << ", " << packet->b_y << ", " << packet->b_z << endl;
+			//cout << packet->player_id << "의 총알을 받아왔습니다" << endl;
+			break;
+		}
+		case SC_COLLISION: {
+			SC_COLLISION_PACKET* packet = reinterpret_cast<SC_COLLISION_PACKET*>(ptr);
+
+			break;
+		}
+		case SC_BULLET_COLLISION: {
+			SC_BULLET_COLLISION_PACKET* packet = reinterpret_cast<SC_BULLET_COLLISION_PACKET*>(ptr);
+
+			NetScene->DisableObject(packet->coll_obj_id1, packet->coll_obj_id2, packet->player_id);
 			break;
 		}
 		}
@@ -178,7 +191,7 @@ Pos GetStartPos()
 	return p;
 }
 
-int GetPlayerId()
+int GetNetworkPlayerId()
 {
 	int playerId = id;
 

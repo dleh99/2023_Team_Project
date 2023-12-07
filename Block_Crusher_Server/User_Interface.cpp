@@ -73,5 +73,28 @@ void User_Interface::send_bullet_add_packet(User_Interface* clients, int c_id, i
 	p.b_x = clients[c_id].bullet[bullet_num].GetBulletVec().x;
 	p.b_y = clients[c_id].bullet[bullet_num].GetBulletVec().y;
 	p.b_z = clients[c_id].bullet[bullet_num].GetBulletVec().z;
+	p.player_id = c_id;
+	p.bullet_id = clients[c_id].bullet[bullet_num].GetbulletId();
+	do_send(&p);
+}
+
+void User_Interface::send_collision_packet(int id_1, int id_2)
+{
+	SC_COLLISION_PACKET p;
+	p.size = sizeof(SC_COLLISION_PACKET);
+	p.type = SC_COLLISION;
+	p.coll_obj_id1 = id_1;
+	p.coll_obj_id2 = id_2;
+	do_send(&p);
+}
+
+void User_Interface::send_bullet_collision_packet(int id_1, int id_2, int c_id)
+{
+	SC_BULLET_COLLISION_PACKET p;
+	p.size = sizeof(SC_BULLET_COLLISION_PACKET);
+	p.type = SC_BULLET_COLLISION;
+	p.coll_obj_id1 = id_1;
+	p.coll_obj_id2 = id_2;
+	p.player_id = c_id;
 	do_send(&p);
 }

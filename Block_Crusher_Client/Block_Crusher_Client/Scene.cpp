@@ -83,6 +83,19 @@ void CScene::ReleaseUploadBuffers()
 	}
 }
 
+void CScene::DisableObject(int id_1, int id_2, int p_id)
+{
+	m_ppObjects[id_2]->SetIsActive(false);
+	for (int i{}; i < m_nObjects; ++i) {
+		if (m_ppObjects[i]->GetObjectType() != TYPE_BULLET) continue;
+		if (((CBulletObject*)m_ppObjects[i])->GetPlayerId() == p_id && ((CBulletObject*)m_ppObjects[i])->GetBulletId() == id_1) {
+			//std::cout << "충돌 처리 및 삭제 완료" << std::endl;
+			m_ppObjects[i]->SetIsActive(false);
+			break;
+		}
+	}
+}
+
 ComPtr<ID3D12RootSignature> CScene::GetGraphicsRootSignature()
 {
 	return m_pd3dGraphicsRootSignature;
@@ -153,20 +166,20 @@ void CScene::AnimateObjects(float fTimeElapsed)
 			m_ppObjects[j]->Animate(fTimeElapsed);
 	}
 
-	for (int i = 0; i < m_nObjects; i++)
-		for (int j = 0; j < m_nObjects; j++) {
-			if (m_ppObjects[i]->GetIsActive()&& m_ppObjects[j]->GetIsActive()) {
-				if (m_ppObjects[i]->GetObjectType() != m_ppObjects[j]->GetObjectType()){
-					if (BSCollisionCheck(m_ppObjects[i]->GetPosition(), m_ppObjects[j]->GetPosition(),
-						m_ppObjects[i]->GetBoundingRadius(), m_ppObjects[j]->GetBoundingRadius())) {
+	//for (int i = 0; i < m_nObjects; i++)
+	//	for (int j = 0; j < m_nObjects; j++) {
+	//		if (m_ppObjects[i]->GetIsActive()&& m_ppObjects[j]->GetIsActive()) {
+	//			if (m_ppObjects[i]->GetObjectType() != m_ppObjects[j]->GetObjectType()){
+	//				if (BSCollisionCheck(m_ppObjects[i]->GetPosition(), m_ppObjects[j]->GetPosition(),
+	//					m_ppObjects[i]->GetBoundingRadius(), m_ppObjects[j]->GetBoundingRadius())) {
 
-						m_ppObjects[i]->SetIsActive(false);
-						m_ppObjects[j]->SetIsActive(false);
-						//std::cout << i << " " << j << std::endl;
-					}
-				}
-			}
-		}
+	//					m_ppObjects[i]->SetIsActive(false);
+	//					m_ppObjects[j]->SetIsActive(false);
+	//					//std::cout << i << " " << j << std::endl;
+	//				}
+	//			}
+	//		}
+	//	}
 }
 
 void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -184,7 +197,7 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	}
 }
 
-void CScene::AddObjects(int type,XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector)
+void CScene::AddObjects(int type,XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector, int p_id, int b_id)
 {
 	CBulletObject* pBulletObject = new CBulletObject();
 	pBulletObject->SetMesh(pBulletMesh);
@@ -195,6 +208,9 @@ void CScene::AddObjects(int type,XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector)
 	pBulletObject->SetBulletVector(bullet_vector);
 	pBulletObject->SetObjectType(TYPE_BULLET);
 	//pBulletObject->SetBoundingRadius(2.0f);
+
+	pBulletObject->SetPlayerId(p_id);
+	pBulletObject->SetBulletId(b_id);
 
 	//int index = FindEmptySlot();
 	m_ppObjects[m_nObjects] = pBulletObject;

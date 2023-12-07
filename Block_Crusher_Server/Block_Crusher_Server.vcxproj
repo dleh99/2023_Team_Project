@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="header.h" />
+    <ClInclude Include="Map.h" />
     <ClInclude Include="Overlapped.h" />
     <ClInclude Include="protocol.h" />
     <ClInclude Include="Timer.h" />
@@ -149,6 +150,7 @@
   <ItemGroup>
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Map.cpp" />
     <ClCompile Include="Overlapped.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="User_Interface.cpp" />

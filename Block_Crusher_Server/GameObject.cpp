@@ -7,6 +7,8 @@ GameObject::GameObject()
 	pos.z = 0.f;
 
 	isActive = false;
+
+	ObjectBoundingRadius = 0.f;
 }
 
 GameObject::~GameObject()
@@ -30,6 +32,9 @@ BulletObject::BulletObject()
 	bullet_vec.x = 0.f;
 	bullet_vec.y = 0.f;
 	bullet_vec.z = 0.f;
+
+	float rad = 2.f;
+	SetRadius(rad);
 }
 
 BulletObject::~BulletObject()
@@ -75,4 +80,17 @@ void BulletObject::Move(float fTimeElapsed)
 	}
 
 	SetPosition(position.x, position.y, position.z);
+}
+
+Block::Block()
+{
+	float rad = sqrt(144.f * 3.f) / 2.f;
+	SetRadius(rad);
+
+	SetisActive(true);
+}
+
+Block::~Block()
+{
+	
 }

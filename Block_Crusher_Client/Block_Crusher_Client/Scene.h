@@ -19,8 +19,10 @@ public:
 	bool ProcessInput(UCHAR* pKeyBuffer);
 	void AnimateObjects(float fTimeElapsed);
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-	void AddObjects(int type, XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector);
+	void AddObjects(int type, XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector, int p_id, int b_id);
 	void ReleaseUploadBuffers();
+
+	void DisableObject(int id_1, int id_2, int p_id);
 
 	int FindEmptySlot();
 	bool BSCollisionCheck(XMFLOAT3 Position1, XMFLOAT3 Position2, float Radius1, float Radius2);
