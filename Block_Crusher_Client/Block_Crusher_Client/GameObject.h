@@ -137,6 +137,8 @@ protected:
 	CGameObject* m_pChild = NULL;
 	CGameObject* m_pSibling = NULL;
 
+	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dCbvGPUDescriptorHandle;
+
 public:
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 	void ReleaseUploadBuffers();
@@ -175,6 +177,7 @@ public:
 	void SetScale(float x, float y, float z);
 	void SetObjectType(int type);
 	void SetIsActive(bool Active);
+	void SetCbvGPUDescriptorHandlePtr(UINT64 nCbvGPUDescriptorHandlePtr) { m_d3dCbvGPUDescriptorHandle.ptr = nCbvGPUDescriptorHandlePtr; }
 
 	// 게임 객체를 로컬 x-축, y-축, z-축 방향으로 이동한다.
 	void MoveStrafe(float fDistance = 1.0f);

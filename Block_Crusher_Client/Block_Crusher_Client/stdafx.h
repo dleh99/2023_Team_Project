@@ -14,6 +14,7 @@
 #include <memory.h>
 #include <tchar.h>
 #include <timeapi.h>					// ::timeGetTime()
+#include <intsafe.h>
 
 // C++ 헤더 파일
 #include <iostream>
@@ -57,6 +58,7 @@ using namespace DirectX::PackedVector;
 
 // 정의하면 처음 실행할 때 전체화면 모드로 실행
 // #define _WITH_SWAPCHAIN_FULLSCREEN_STATE
+extern UINT	gnCbvSrvDescriptorIncrementSize;
 
 extern ID3D12Resource* CreateBufferResource(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList, void* pData, UINT nBytes,
@@ -65,6 +67,7 @@ extern ID3D12Resource* CreateBufferResource(ID3D12Device* pd3dDevice,
 	ID3D12Resource** ppd3dUploadBuffer = NULL);
 
 extern ID3D12Resource* CreateTextureResourceFromDDSFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,const wchar_t* pszFileName, ID3D12Resource** ppd3dUploadBuffer, D3D12_RESOURCE_STATES d3dResourceStates = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
 
 namespace Vector3
 {
