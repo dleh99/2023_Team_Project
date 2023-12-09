@@ -89,9 +89,19 @@ public:
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
 	XMFLOAT4						m_xmf4Albedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	XMFLOAT4						m_xmf4Emissive = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	XMFLOAT4						m_xmf4Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	XMFLOAT4						m_xmf4Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 
-	CTexture* m_pTexture = NULL;
-	CShader* m_pShader = NULL;
+	float							m_fGlossiness = 0.0f;
+	float							m_fSmoothness = 0.0f;
+	float							m_fSpecularHighlight = 0.0f;
+	float							m_fMetallic = 0.0f;
+	float							m_fGlossyReflection = 0.0f;
+
+	std::string						m_strTextureName;
+	CTexture*						m_pTexture = NULL;
+	CShader*						m_pShader = NULL;
 
 	void SetAlbedo(XMFLOAT4 xmf4Albedo) { m_xmf4Albedo = xmf4Albedo; }
 	void SetTexture(CTexture* pTexture);
@@ -118,12 +128,15 @@ public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
-protected:
+public:
 	TCHAR m_pstrFrameName[64];
+	int m_nFrames = 0;
 
-	CMesh* m_pMesh = NULL;
-	CMaterial* m_pMaterial = NULL;
-	CShader* m_pShader = NULL;
+	CMesh*		m_pMesh = NULL;
+
+	CMaterial*	m_pMaterial = NULL;
+
+	CShader*	m_pShader = NULL;
 
 	XMFLOAT4X4 m_xmf4x4Transform;
 	XMFLOAT4X4 m_xmf4x4World;	
@@ -201,6 +214,7 @@ public:
 		ID3D12RootSignature* pd3dGraphicsRootSignature, std::ifstream& fileStream);
 
 	static CMeshLoadInfo* LoadMeshInfoFromFile(std::ifstream& fileStream, float modelScaleFactor);
+	static void LoadMaterialsFromFile(std::ifstream& fileStream, CGameObject* pObj);
 };
 
 class CRotatingObject : public CGameObject

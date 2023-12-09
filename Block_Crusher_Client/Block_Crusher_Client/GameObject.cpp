@@ -499,8 +499,7 @@ CGameObject* CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, I
 
 		if ('F' == token)
 		{
-			int nFrame;
-			fileStream.read((char*)&nFrame, sizeof(int));
+			fileStream.read((char*)&pGameObject->m_nFrames, sizeof(int));
 			//fileStream.read((char*)&m_pstrFrameName, sizeof(int));
 
 			// Transform
@@ -543,6 +542,10 @@ CGameObject* CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, I
 				}
 			}
 		}
+		else if ('m' == token)
+		{
+			pGameObject->LoadMaterialsFromFile(fileStream, pGameObject);
+		}
 		else if ('H' == token)
 			break;
 	}
@@ -581,6 +584,72 @@ CMeshLoadInfo* CGameObject::LoadMeshInfoFromFile(std::ifstream& fileStream, floa
 	fileStream.read((char*)pMeshInfo->m_pIndices, sizeof(UINT) * pMeshInfo->m_nIndices);
 
 	return pMeshInfo;
+}
+
+void CGameObject::LoadMaterialsFromFile(std::ifstream& fileStream, CGameObject* pObj)
+{
+	int nMaterial = 0;
+	char c;
+
+	fileStream.read((char*)&nMaterial, sizeof(int));
+	fileStream.read((char*)&nMaterial, sizeof(int));
+	fileStream.read((char*)&c, sizeof(char));
+
+	CMaterial* pMaterial = new CMaterial;
+
+	while (true)
+	{
+		std::string token;
+		fileStream >> token;
+
+		char whiteSpace;
+		fileStream.read((char*)&whiteSpace, sizeof(char));
+
+		if (!token.compare("albedo"))				 // Color
+		{
+			fileStream.read((char*)&pMaterial->m_xmf4Albedo, sizeof(XMFLOAT4));
+		}
+		else if (!token.compare("emissive"))
+		{
+			fileStream.read((char*)&pMaterial->m_xmf4Emissive, sizeof(XMFLOAT4));
+		}
+		else if (!token.compare("specular"))
+		{
+			fileStream.read((char*)&pMaterial->m_xmf4Specular, sizeof(XMFLOAT4));
+		}
+		else if (!token.compare("glossiness"))		// Float
+		{
+			fileStream.read((char*)&pMaterial->m_fGlossiness, sizeof(float));
+		}
+		else if (!token.compare("smoothness"))
+		{
+			fileStream.read((char*)&pMaterial->m_fSmoothness, sizeof(float));
+		}
+		else if (!token.compare("metalic"))
+		{
+			fileStream.read((char*)&pMaterial->m_fMetallic, sizeof(float));
+		}
+		else if (!token.compare("specularHighlights"))
+		{
+			fileStream.read((char*)&pMaterial->m_fSpecularHighlight, sizeof(float));
+		}
+		else if (!token.compare("glossyReflections"))
+		{
+			fileStream.read((char*)&pMaterial->m_fGlossyReflection, sizeof(float));
+		}
+		else if (!token.compare("<AlbedoMap>"))			// Texture
+		{
+			char c;
+			fileStream.read((char*)&c, sizeof(char));
+
+			fileStream >> pMaterial->m_strTextureName;
+		}
+		else if (!token.compare("</material>"))
+		{
+			pObj->SetMaterial(pMaterial);
+			break;
+		}
+	}
 }
 
 CRotatingObject::CRotatingObject()
