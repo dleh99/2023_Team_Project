@@ -269,14 +269,12 @@ public:
 	virtual void Animate(float fTimeElapsed);
 };
 
-//class CTexture
-//{
-//private:
-//	int m_nTextures = 0;
-//	ComPtr<ID3D12Resource> m_pd3dTexture = NULL;
-//	UINT m_nRootParameterIndex = -1;
-//	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvGpuHandle;
-//
-//public:
-//	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
-//};
+class CSkyBox : public CGameObject
+{
+public:
+	CSkyBox() = default;
+	CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual ~CSkyBox();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+};

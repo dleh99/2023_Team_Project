@@ -81,6 +81,12 @@ protected:
 	UINT m_nStartIndex = 0;
 	int m_nBaseVertex = 0;
 
+	XMFLOAT3* m_pxmf3Positions = NULL;
+
+	ID3D12Resource* m_pd3dPositionBuffer = NULL;
+	ID3D12Resource* m_pd3dPositionUploadBuffer = NULL;
+	D3D12_VERTEX_BUFFER_VIEW		m_d3dPositionBufferView;
+
 public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 };
@@ -160,4 +166,11 @@ class CCubeMeshTextured : public CMesh
 public:
 	CCubeMeshTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
 	virtual ~CCubeMeshTextured() { };
+};
+
+class CSkyBoxMesh : public CMesh
+{
+public:
+	CSkyBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 20.0f, float fHeight = 20.0f, float fDepth = 20.0f);
+	virtual ~CSkyBoxMesh();
 };

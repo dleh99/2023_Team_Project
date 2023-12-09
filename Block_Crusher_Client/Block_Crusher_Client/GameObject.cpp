@@ -278,18 +278,18 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 
 	//UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 
+	if (m_pShader)
+	{
+		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+		m_pShader->Render(pd3dCommandList, pCamera);
+	}
+
 	if (m_pMaterial)
 	{
 		if (m_pMaterial->m_pTexture)
 		{
 			m_pMaterial->m_pTexture->UpdateShaderVariables(pd3dCommandList);
 		}
-	}
-
-	if (m_pShader)
-	{
-		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
-		m_pShader->Render(pd3dCommandList, pCamera);
 	}
 
 	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
@@ -634,7 +634,37 @@ void CBulletObject::Animate(float fTimeElapsed)
 	CGameObject::SetPosition(position);
 }
 
-//void CTexture::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
-//{
-//
-//}
+CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject()
+{
+	
+	CCubeMeshDiffused* pSkyBoxMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 20.0f);
+	SetMesh(pSkyBoxMesh);
+
+	CTexture* pSkyBoxTexture = new CTexture(1, RESOURCE_TEXTURE_CUBE, 0, 1);
+	pSkyBoxTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/SkyBox_0.dds", RESOURCE_TEXTURE_CUBE, 0);
+
+	CSkyBoxShader* pSkyBoxShader = new CSkyBoxShader();
+	pSkyBoxShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pSkyBoxShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	pSkyBoxShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+	pSkyBoxShader->CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture, 0, 3);
+	SetShader(pSkyBoxShader);
+
+	CMaterial* pSkyBoxMaterial = new CMaterial();
+	pSkyBoxMaterial->SetTexture(pSkyBoxTexture);
+	SetMaterial(pSkyBoxMaterial);
+}
+
+CSkyBox::~CSkyBox()
+{
+}
+
+void CSkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	XMFLOAT3 xmf3CameraPos = pCamera->GetPosition();
+	SetPosition(xmf3CameraPos.x, xmf3CameraPos.y, xmf3CameraPos.z);
+
+	//SetPosition(0, 50, 0);
+
+	CGameObject::Render(pd3dCommandList, pCamera);
+}
