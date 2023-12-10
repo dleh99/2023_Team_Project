@@ -139,14 +139,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="GameObject.h" />
     <ClInclude Include="header.h" />
+    <ClInclude Include="Map.h" />
     <ClInclude Include="Overlapped.h" />
     <ClInclude Include="protocol.h" />
+    <ClInclude Include="Timer.h" />
     <ClInclude Include="User_Interface.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Map.cpp" />
     <ClCompile Include="Overlapped.cpp" />
+    <ClCompile Include="Timer.cpp" />
     <ClCompile Include="User_Interface.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

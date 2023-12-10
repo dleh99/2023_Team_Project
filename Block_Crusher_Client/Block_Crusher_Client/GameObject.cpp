@@ -276,17 +276,13 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 {
 	OnPrepareRender();
 
+
 	if (m_pShader)
 	{
 		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 		m_pShader->Render(pd3dCommandList, pCamera);
 	}
 
-	if (m_pMesh)
-	{
-		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
-		m_pMesh->Render(pd3dCommandList);
-	}
 	if (m_pMaterial)
 	{
 		if (m_pMaterial->m_pTexture)
@@ -295,6 +291,11 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 		}
 	}
 
+	if (m_pMesh)
+	{
+		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+		m_pMesh->Render(pd3dCommandList);
+	}
 
 	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);

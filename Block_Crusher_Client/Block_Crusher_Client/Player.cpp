@@ -437,7 +437,7 @@ void CPlayer::OnPrepareRender()
 	m_xmf4x4Transform._31 = m_xmf3Look.x; m_xmf4x4Transform._32 = m_xmf3Look.y; m_xmf4x4Transform._33 = m_xmf3Look.z;
 	m_xmf4x4Transform._41 = m_xmf3Position.x; m_xmf4x4Transform._42 = m_xmf3Position.y; m_xmf4x4Transform._43 = m_xmf3Position.z;
 
-	XMMATRIX scaleMatrix = XMMatrixScaling(30.0f, 30.0f, 30.0f);
+	XMMATRIX scaleMatrix = XMMatrixScaling(15.0f, 15.0f, 15.0f);
 	m_xmf4x4Transform = Matrix4x4::Multiply(scaleMatrix, m_xmf4x4Transform);
 
 	UpdateTransform(NULL);
