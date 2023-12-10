@@ -2,14 +2,19 @@
 #include "protocol.h"
 #include "Overlapped.h"
 #include "User_Interface.h"
+#include "Timer.h"
+#include "Map.h"
 
 using namespace std;
 
 HANDLE iocp_h;
 SOCKET g_s_socket, g_c_socket;
 Overlapped g_over;
+Timer server_timer;
 
 array<User_Interface, MAX_USER> clients;
+
+Map Map_infromation;
 
 atomic_int user_number = 0;
 
@@ -30,6 +35,16 @@ void disconnect(int c_id)
 	user_number--;
 }
 
+bool CollisionCheck(XMFLOAT3 p1, XMFLOAT3 p2, float r1, float r2)
+{
+	float x = p1.x - p2.x;
+	float y = p1.y - p2.y;
+	float z = p1.z - p2.z;
+
+	if (r1 + r2 - 4.f > sqrt(x * x + y * y + z * z)) return true;
+	return false;
+}
+
 void packet_process(int c_id, char* packet)
 {
 	switch (packet[1]) {
@@ -46,21 +61,42 @@ void packet_process(int c_id, char* packet)
 		break;
 	}
 	case CS_MOVE: {
-			CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
-			// 패킷에서 보내온 방향에 따라 위치 이동 코드
-			clients[c_id].x = p->x;
-			clients[c_id].y = p->y;
-			clients[c_id].z = p->z;
-			clients[c_id].cx = p->cxDelta;
-			clients[c_id].cy = p->cyDelta;
+		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
+		// 패킷에서 보내온 방향에 따라 위치 이동 코드
+		clients[c_id].pos.x = p->x;
+		clients[c_id].pos.y = p->y;
+		clients[c_id].pos.z = p->z;
+		clients[c_id].cx = p->cxDelta;
+		clients[c_id].cy = p->cyDelta;
 
-			// 다른 클라이언트들에게 뿌리기
-			for (auto& cl : clients) {
-				if (cl._state != US_INGAME) continue;
-				if (cl._id == c_id) continue;
-				cl.send_move_packet(clients.data(), c_id);
+		// 다른 클라이언트들에게 뿌리기
+		for (auto& cl : clients) {
+			if (cl._state != US_INGAME) continue;
+			if (cl._id == c_id) continue;
+			cl.send_move_packet(clients.data(), c_id);
+		}
+		break;
+	}
+	case CS_BULLET_ADD: {
+		CS_BULLET_ADD_PACKET* p = reinterpret_cast<CS_BULLET_ADD_PACKET*>(packet);
+		//cout << "[" << c_id << "] 총알 발사" << endl;
+		for (int i{}; i < MAX_BULLET_NUM; ++i) {
+			if (false == clients[c_id].bullet[i].GetisActive()) {
+				clients[c_id].bullet[i].SetisActive(true);
+				clients[c_id].bullet[i].SetPosition(p->s_x, p->s_y, p->s_z);
+				clients[c_id].bullet[i].SetBulletVec(p->b_x, p->b_y, p->b_z);
+				clients[c_id].bullet[i].SetBulletId(p->bullet_id);
+
+				for (auto& cl : clients) {
+					if (cl._state != US_INGAME) continue;
+					if (cl._id == c_id) continue;
+					//cout << "서버에서 " << cl._id << "에게 " << c_id << "가 총을 쐈다는걸 보내줬습니다" << endl;
+					cl.send_bullet_add_packet(clients.data(), c_id, i);
+				}
+				break;
 			}
-			break;
+		}
+		break;
 	}
 	}
 }
@@ -105,8 +141,8 @@ void worker_thread(HANDLE iocp_h)
 					clients[client_id]._state = US_CONNECTING;
 
 					// 초기값 지정
-					clients[client_id].x = 0;
-					clients[client_id].y = 0;
+					clients[client_id].pos.x = 0;
+					clients[client_id].pos.y = 0;
 					clients[client_id]._id = client_id;
 					clients[client_id]._prev_remain = 0;
 					clients[client_id]._socket = g_c_socket;
@@ -155,6 +191,106 @@ void worker_thread(HANDLE iocp_h)
 	}
 }
 
+void Physics_Calculation_thread()
+{
+	/* 이 스레드가 하는 일
+	* 1. 활성화 되어 있는 총알들의 움직임 제어
+	*		-> 총알을 일정 시간 마다 움직임
+	* 2. 총알들과 오브젝트들의 충돌 계산
+	*		-> 충돌 시 패킷 보내기
+	*/
+	while (true) {
+		server_timer.Tick(0.f);
+		for (auto& cl : clients) {
+			if (cl._state != US_INGAME) continue;
+			for (int i{}; i < MAX_BULLET_NUM; ++i) {
+				if (cl.bullet[i].GetisActive()) {
+					cl.bullet[i].Move(server_timer.GetTimeElapsed());
+					//cout << "[" << cl._id << "] " << cl.bullet[i].GetPosition().x << ", " << cl.bullet[i].GetPosition().y << ", " << cl.bullet[i].GetPosition().z << endl;
+				}
+			}
+		}
+
+		// 총알과 충돌 처리
+		/*
+		* 클라이언트 전체를 돌아서 인게임 중인 클라이언트의 총알들과 맵의 충돌을 검사하고
+		* 충돌했다면 Active를 false 시키고 모든 클라이언트들에게 충돌했다는 패킷을 보낸다
+		*/
+		for (auto& cl : clients) {
+			if (cl._state != US_INGAME) continue;
+			for (int i{}; i < MAX_BULLET_NUM; ++i) {
+				if (false == cl.bullet[i].GetisActive()) continue;
+				// 총알과 블록 충돌 처리
+				for (int j{}; j < 1008; ++j) {
+					if (false == Map_infromation.Map_Block[j].GetisActive()) continue;
+					if (CollisionCheck(cl.bullet[i].GetPosition(), Map_infromation.Map_Block[j].GetPosition(),
+						cl.bullet[i].GetRadius(), Map_infromation.Map_Block[j].GetRadius())){
+						cl.bullet[i].SetisActive(false);
+						Map_infromation.Map_Block[j].SetisActive(false);
+						//cout << "충돌함" << endl;
+						for (auto& send_cl : clients) {
+							if (send_cl._state != US_INGAME) continue;
+							send_cl.send_bullet_collision_packet(cl.bullet[i].GetbulletId(), Map_infromation.Map_Block[j].GetId(), cl._id);
+						}
+					}
+				}
+				// 플레이어와 총알의 충돌 처리
+				if (false == cl.bullet[i].GetisActive()) continue;
+				for (auto& other_player : clients) {
+					if (other_player._state != US_INGAME) continue;
+					if (other_player._id == cl._id) continue;
+					if (CollisionCheck(cl.bullet[i].GetPosition(), other_player.pos,
+						cl.bullet[i].GetRadius(), other_player._player_radius)) {
+						cl.bullet[i].SetisActive(false);
+						
+						// 맞았을 때 체력을 깎는다. 또한 일정시간 무적을 만든다
+						// 체력 처리 어떻게 할건가? -> 이거 mutex 걸어야 함? 근데 이것도 mutex 걸거면 위치도 걸어야 하는거 아님? 근데 그럼 성능 안 나오는거 아님?
+						if (false == other_player.isinvincible) {
+							cout << "플레이어 [" << other_player._id << "] 맞았다" << endl;
+							other_player.isinvincible = true;
+							other_player.hp -= 1;
+
+							// 살아있다면 맞았다는 패킷을, 죽었다면 죽었다는 패킷을 보낸다
+							if (other_player.hp > 0) {
+								for (auto& send_cl : clients) {
+									if (send_cl._state != US_INGAME) continue;
+									send_cl.send_hit_packet(cl.bullet[i].GetbulletId(), cl._id);
+								}
+							}
+							else
+							{
+								// 죽었을 때 처리 어떻게?
+								//other_player._state = US_EMPTY;
+								for (auto& send_cl : clients) {
+									if (send_cl._state != US_INGAME) continue;
+									send_cl.send_dead_packet(cl.bullet[i].GetbulletId(), cl._id);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		// 무적이 적용되어 있는 클라이언트들 시간 더하기, 일단 무적시간 3초
+		for (auto& cl : clients) {
+			if (cl._state != US_INGAME) continue;
+			if (false == cl.isinvincible) continue;
+			cl.invincible_time += server_timer.GetTimeElapsed();
+			if (cl.invincible_time >= 3.f) {
+				cl.isinvincible = false;
+				cl.invincible_time = 0.f;
+			}
+		}
+	}
+}
+
+void do_timer()
+{
+	while (true) {
+		
+	}
+}
+
 int main()
 {
 	WSADATA WSAData;
@@ -181,10 +317,15 @@ int main()
 	for (int i{}; i < thread_num; ++i)
 		worker_threads.emplace_back(worker_thread, iocp_h);
 	
+	// 계산 스레드
+	thread physics_thread{ Physics_Calculation_thread };
+	physics_thread.join();
+
 	// 타이머로 처리할 것들 처리
-	//thread timer_thread{};
-	
-	for (auto& thread : worker_threads)
+	/*thread timer_thread{ do_timer };
+
+	timer_thread.join();*/
+	for (auto& thread : worker_threads) 
 		thread.join();
 
 	closesocket(g_s_socket);

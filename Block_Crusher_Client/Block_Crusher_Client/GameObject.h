@@ -153,6 +153,12 @@ public:
 	};
 	virtual ~CBulletObject() {};
 
+	void SetPlayerId(int x) { player_id = x; };
+	void SetBulletId(int x) { bullet_id = x; };
+
+	int GetPlayerId() { return player_id; };
+	int GetBulletId() { return bullet_id; };
+
 private:
 	int m_iBulletType;
 	int m_iBulletDamage;
@@ -160,11 +166,16 @@ private:
 	float m_fBoundingSph;
 	XMFLOAT3 m_xmf3Vector;
 
+	int player_id;
+	int bullet_id;
+
+
 public:
 	int GetBulletType() { return m_iBulletType; };
 	int GetBulletDamage() { return m_iBulletDamage; };
 
 	void SetBulletVector(XMFLOAT3 vector) { m_xmf3Vector = vector; };
+	XMFLOAT3 GetBulletVector() { return m_xmf3Vector; };
 	virtual void Animate(float fTimeElapsed);
 };
 

@@ -1,4 +1,5 @@
 #include "Network.h"
+#include "Scene.h"
 
 WSADATA wsa;
 SOCKET g_socket;
@@ -14,6 +15,7 @@ int id;
 float otherPlayer_x, otherPlayer_y, otherPlayer_z;
 Pos otherPlayerPos;
 Mouse otherPlayerMouse;
+CScene* NetScene = NULL;
 int otherPlayer_id = -1;
 
 // 게임 시작 변수
@@ -74,6 +76,21 @@ void send_move_packet(float x, float y, float z, float cx, float cy)
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
+void send_bullet_add_packet(XMFLOAT3 pos, XMFLOAT3 bullet_v, int bullet_id)
+{
+	CS_BULLET_ADD_PACKET p{};
+	p.size = sizeof(CS_BULLET_ADD_PACKET);
+	p.type = CS_BULLET_ADD;
+	p.s_x = pos.x;
+	p.s_y = pos.y;
+	p.s_z = pos.z;
+	p.b_x = bullet_v.x;
+	p.b_y = bullet_v.y;
+	p.b_z = bullet_v.z;
+	p.bullet_id = bullet_id;
+	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
+}
+
 void WINAPI do_recv()
 {
 	int ret;
@@ -122,6 +139,39 @@ void WINAPI do_recv()
 
 			break;
 		}
+		case SC_BULLET_ADD: {
+			SC_BULLET_ADD_PACKET* packet = reinterpret_cast<SC_BULLET_ADD_PACKET*>(ptr);
+			XMFLOAT3 BPos = { packet->s_x ,packet->s_y ,packet->s_z };
+			XMFLOAT3 BVec = { packet->b_x ,packet->b_y ,packet->b_z };
+
+			NetScene->AddObjects(0, BPos, BVec, packet->player_id, packet->bullet_id);
+			//cout << "총알을 받아 왔습니다. 위치 :" << packet->s_x << ", " << packet->s_y << ", " << packet->s_z << ", 발사 벡터 : " << packet->b_x << ", " << packet->b_y << ", " << packet->b_z << endl;
+			//cout << packet->player_id << "의 총알을 받아왔습니다" << endl;
+			break;
+		}
+		case SC_COLLISION: {
+			SC_COLLISION_PACKET* packet = reinterpret_cast<SC_COLLISION_PACKET*>(ptr);
+
+			break;
+		}
+		case SC_BULLET_COLLISION: {
+			SC_BULLET_COLLISION_PACKET* packet = reinterpret_cast<SC_BULLET_COLLISION_PACKET*>(ptr);
+
+			NetScene->DisableObject(packet->bullet_id, packet->block_id, packet->player_id);
+			break;
+		}
+		case SC_HIT: {
+			SC_HIT_PACKET* packet = reinterpret_cast<SC_HIT_PACKET*>(ptr);
+			// 맞았을 때 처리
+			//cout << packet->bullet_id << ", " << packet->player_id << endl;
+			NetScene->DisableBullet(packet->bullet_id, packet->player_id);
+			break;
+		}
+		case SC_DEATH: {
+			SC_DEATH_PACKET* packet = reinterpret_cast<SC_DEATH_PACKET*>(ptr);
+			cout << "플레이어 [" << packet->player_id << "]가 사망하였습니다." << endl;
+			break;
+		}
 		}
 		ptr += size;
 	}
@@ -153,7 +203,7 @@ Pos GetStartPos()
 	return p;
 }
 
-int GetPlayerId()
+int GetNetworkPlayerId()
 {
 	int playerId = id;
 
@@ -219,4 +269,8 @@ void err_display(int errcode)
 		(char*)&lpMsgBuf, 0, NULL);
 	printf("[오류] %s\n", (char*)lpMsgBuf);
 	LocalFree(lpMsgBuf);
+}
+
+void SetScene(CScene* Scene) {
+	NetScene = Scene;
 }

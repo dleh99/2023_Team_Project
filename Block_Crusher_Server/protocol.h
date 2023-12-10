@@ -23,10 +23,16 @@ constexpr int WORLD_HEIGHT = 3600;		// 블럭 = 60cm(px), 높이 = 아래 30개, 위 30�
 // packet id
 constexpr char CS_LOGIN = 0;
 constexpr char CS_MOVE = 1;
+constexpr char CS_BULLET_ADD = 5;
 
 constexpr char SC_LOGIN = 2;
 constexpr char SC_START = 3;
 constexpr char SC_MOVE_PLAYER = 4;
+constexpr char SC_BULLET_ADD = 6;
+constexpr char SC_COLLISION = 7;
+constexpr char SC_BULLET_COLLISION = 8;
+constexpr char SC_HIT = 9;
+constexpr char SC_DEATH = 10;
 
 #pragma pack(push, 1)
 
@@ -43,6 +49,18 @@ struct CS_MOVE_PACKET {
 	float				z;
 	float				cxDelta;
 	float				cyDelta;
+};
+
+struct CS_BULLET_ADD_PACKET {
+	unsigned char		size;
+	char				type;
+	float				s_x;
+	float				s_y;
+	float				s_z;
+	float				b_x;
+	float				b_y;
+	float				b_z;
+	int					bullet_id;
 };
 
 //===========================
@@ -71,6 +89,48 @@ struct SC_MOVE_PACKET {
 	float				z;
 	float				cxDelta;
 	float				cyDelta;
+};
+
+struct SC_BULLET_ADD_PACKET {
+	unsigned char		size;
+	char				type;
+	float				s_x;
+	float				s_y;
+	float				s_z;
+	float				b_x;
+	float				b_y;
+	float				b_z;
+	int					player_id;
+	int					bullet_id;
+};
+
+struct SC_COLLISION_PACKET {
+	unsigned char		size;
+	char				type;
+	int					coll_obj_id1;
+	int					coll_obj_id2;
+};
+
+struct SC_BULLET_COLLISION_PACKET {
+	unsigned char		size;
+	char				type;
+	int					bullet_id;
+	int					block_id;
+	int					player_id;
+};
+
+struct SC_HIT_PACKET {
+	unsigned char		size;
+	char				type;
+	int					bullet_id;
+	int					player_id;
+};
+
+struct SC_DEATH_PACKET {
+	unsigned char		size;
+	char				type;
+	int					bullet_id;
+	int					player_id;
 };
 
 #pragma pack(pop)

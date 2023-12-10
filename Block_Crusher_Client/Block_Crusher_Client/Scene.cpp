@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include "Player.h"
+//#include "Network.h"
 
 CScene::CScene()
 {
@@ -82,6 +83,31 @@ void CScene::ReleaseUploadBuffers()
 	}
 }
 
+void CScene::DisableObject(int bullet_id, int block_id, int p_id)
+{
+	m_ppObjects[block_id]->SetIsActive(false);
+	for (int i{}; i < m_nObjects; ++i) {
+		if (m_ppObjects[i]->GetObjectType() != TYPE_BULLET) continue;
+		if (((CBulletObject*)m_ppObjects[i])->GetPlayerId() == p_id && ((CBulletObject*)m_ppObjects[i])->GetBulletId() == bullet_id) {
+			//std::cout << "충돌 처리 및 삭제 완료" << std::endl;
+			m_ppObjects[i]->SetIsActive(false);
+			break;
+		}
+	}
+}
+
+void CScene::DisableBullet(int bullet_id, int p_id)
+{
+	for (int i{}; i < m_nObjects; ++i) {
+		if (m_ppObjects[i]->GetObjectType() != TYPE_BULLET) continue;
+		if (((CBulletObject*)m_ppObjects[i])->GetPlayerId() == p_id && ((CBulletObject*)m_ppObjects[i])->GetBulletId() == bullet_id) {
+			std::cout << "찾았다" << std::endl;
+			m_ppObjects[i]->SetIsActive(false);
+			break;
+		}
+	}
+}
+
 ComPtr<ID3D12RootSignature> CScene::GetGraphicsRootSignature()
 {
 	return m_pd3dGraphicsRootSignature;
@@ -152,20 +178,20 @@ void CScene::AnimateObjects(float fTimeElapsed)
 			m_ppObjects[j]->Animate(fTimeElapsed);
 	}
 
-	for (int i = 0; i < m_nObjects; i++)
-		for (int j = 0; j < m_nObjects; j++) {
-			if (m_ppObjects[i]->GetIsActive()&& m_ppObjects[j]->GetIsActive()) {
-				if (m_ppObjects[i]->GetObjectType() != m_ppObjects[j]->GetObjectType()){
-					if (BSCollisionCheck(m_ppObjects[i]->GetPosition(), m_ppObjects[j]->GetPosition(),
-						m_ppObjects[i]->GetBoundingRadius(), m_ppObjects[j]->GetBoundingRadius())) {
+	//for (int i = 0; i < m_nObjects; i++)
+	//	for (int j = 0; j < m_nObjects; j++) {
+	//		if (m_ppObjects[i]->GetIsActive()&& m_ppObjects[j]->GetIsActive()) {
+	//			if (m_ppObjects[i]->GetObjectType() != m_ppObjects[j]->GetObjectType()){
+	//				if (BSCollisionCheck(m_ppObjects[i]->GetPosition(), m_ppObjects[j]->GetPosition(),
+	//					m_ppObjects[i]->GetBoundingRadius(), m_ppObjects[j]->GetBoundingRadius())) {
 
-						m_ppObjects[i]->SetIsActive(false);
-						m_ppObjects[j]->SetIsActive(false);
-						//std::cout << i << " " << j << std::endl;
-					}
-				}
-			}
-		}
+	//					m_ppObjects[i]->SetIsActive(false);
+	//					m_ppObjects[j]->SetIsActive(false);
+	//					//std::cout << i << " " << j << std::endl;
+	//				}
+	//			}
+	//		}
+	//	}
 }
 
 void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -183,19 +209,24 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	}
 }
 
-void CScene::AddObjects(int type)
+void CScene::AddObjects(int type,XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector, int p_id, int b_id)
 {
 	CBulletObject* pBulletObject = new CBulletObject();
 	pBulletObject->SetMesh(pBulletMesh);
 	pBulletObject->SetShader(m_pSceneShader);
-	pBulletObject->SetBulletVector(m_pPlayer->GetLook());
+
+	XMFLOAT3 bullet_vector = BulletVector;
+	//bullet_vector = Vector3::ScalarProduct(bullet_vector, -1.f, false);
+	pBulletObject->SetBulletVector(bullet_vector);
 	pBulletObject->SetObjectType(TYPE_BULLET);
 	//pBulletObject->SetBoundingRadius(2.0f);
 
-	//int index = FindEmptySlot();
+	pBulletObject->SetPlayerId(p_id);
+	pBulletObject->SetBulletId(b_id);
 
+	//int index = FindEmptySlot();
 	m_ppObjects[m_nObjects] = pBulletObject;
-	m_ppObjects[m_nObjects]->SetPosition(m_pPlayer->GetPosition());
+	m_ppObjects[m_nObjects]->SetPosition(BulletPosition);
 	m_ppObjects[m_nObjects]->SetIsActive(true);
 
 	//std::cout << "총알 생성" << std::endl;
