@@ -31,6 +31,11 @@ public:
 	ComPtr<ID3D12RootSignature> CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 	ComPtr<ID3D12RootSignature> GetGraphicsRootSignature();
 	
+	void CreateCbvSrvDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews);
+	void CreateConstantBufferViews(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride);
+	void CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex);
+	void CreateShaderResourceView(ID3D12Device* pd3dDevice, CTexture* pTexture, int nIndex);
+
 	CGameObject** m_ppObjects = NULL;
 
 	CPlayer* m_pPlayer= NULL;
@@ -40,9 +45,12 @@ protected:
 	int m_nShaders = 0;*/
 	
 	int m_nObjects = 0;
-	CDiffusedShader* m_pSceneShader;
+	CShader* m_pSceneShader;
 	CCubeMeshDiffused* pBulletMesh = NULL;
 
+	CSkyBox* m_pSkyBox = NULL;
+
 	ComPtr<ID3D12RootSignature> m_pd3dGraphicsRootSignature = NULL;
+
 };
 

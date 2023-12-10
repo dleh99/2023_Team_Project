@@ -3,9 +3,11 @@
 //
 
 #pragma once
+#pragma warning(disable: 4996)
 
 #include "targetver.h"
 #define WIN32_LEAN_AND_MEAN             // 거의 사용되지 않는 내용을 Windows 헤더에서 제외합니다.
+
 // Windows 헤더 파일
 #include <windows.h>
 // C 런타임 헤더 파일입니다.
@@ -14,6 +16,7 @@
 #include <memory.h>
 #include <tchar.h>
 #include <timeapi.h>					// ::timeGetTime()
+#include <intsafe.h>
 
 // C++ 헤더 파일
 #include <iostream>
@@ -57,12 +60,16 @@ using namespace DirectX::PackedVector;
 
 // 정의하면 처음 실행할 때 전체화면 모드로 실행
 // #define _WITH_SWAPCHAIN_FULLSCREEN_STATE
+extern UINT	gnCbvSrvDescriptorIncrementSize;
 
 extern ID3D12Resource* CreateBufferResource(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList, void* pData, UINT nBytes,
 	D3D12_HEAP_TYPE d3dHeapType = D3D12_HEAP_TYPE_UPLOAD,
 	D3D12_RESOURCE_STATES d3dResourceStates = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
 	ID3D12Resource** ppd3dUploadBuffer = NULL);
+
+extern ID3D12Resource* CreateTextureResourceFromDDSFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,const wchar_t* pszFileName, ID3D12Resource** ppd3dUploadBuffer, D3D12_RESOURCE_STATES d3dResourceStates = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
 
 namespace Vector3
 {

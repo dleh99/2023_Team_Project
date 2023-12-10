@@ -527,8 +527,21 @@ CCamera* CCubePlayer::CreateCamera(float fTimeElapsed)
 CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z) : CPlayer()
 {
+	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/SpaceMan_Rank_01_Black.dds", RESOURCE_TEXTURE2D, 0);
+
+	CPlayerShader* pPlayerShader = new CPlayerShader();
+	pPlayerShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pPlayerShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	pPlayerShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+	pPlayerShader->CreateShaderResourceViews(pd3dDevice, pTexture, 0, 4);
+
 	CGameObject* pPlayerObject = CGameObject::LoadHierarchyModelFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
-		"Models/player model data.bin");
+		"Models/player model data.bin", pPlayerShader);
+
+	CMaterial* pMat = new CMaterial();
+	pMat->SetTexture(pTexture);
+	SetMaterial(pMat);
 
 	SetPosition(XMFLOAT3(x, y, z));
 
@@ -536,9 +549,6 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 
 	m_pCamera = CreateCamera(0.0f);
 
-	CPlayerShader* pPlayerShader = new CPlayerShader();
-	pPlayerShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
-	pPlayerShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	SetShader(pPlayerShader);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
