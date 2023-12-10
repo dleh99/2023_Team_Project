@@ -27,6 +27,14 @@ struct VS_OUTPUT
 	float4 color : COLOR;
 };
 
+Texture2D gtxtTexture : register(t0);
+SamplerState gSamplerState : register(s0);
+
+TextureCube gtxtSkyCubeTexture : register(t1);
+SamplerState gssClamp : register(s1);
+
+Texture2D gtxtAlbedoTexture : register(t2);
+
 // 정점 셰이더를 정의한다.
 VS_OUTPUT VSDiffused(VS_INPUT input)
 {
@@ -43,6 +51,8 @@ float4 PSDiffused(VS_OUTPUT input) : SV_TARGET
 {
 	return input.color;
 }
+
+/// ////////////////////////////////////////////////////////////////////////////////////////////
 
 struct VS_PLAYER_INPUT
 {
@@ -74,11 +84,13 @@ VS_PLAYER_OUTPUT VSPlayerDiffused(VS_PLAYER_INPUT input)
 
 float4 PSPlayerDiffused(VS_PLAYER_OUTPUT input) : SV_TARGET
 {
-	return float4(0.0f, 128.0f, 0.0f, 1.0f);
+	float4 cColor = gtxtAlbedoTexture.Sample(gSamplerState, input.uv);
+	return cColor;
+
+	//return float4(1,0,0,1);
 }
 
-Texture2D gtxtTexture : register(t0);
-SamplerState gSamplerState : register(s0);
+/// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct VS_TEXTURED_INPUT
 {
@@ -132,9 +144,6 @@ VS_SKYBOX_CUBEMAP_OUTPUT VSSkyBox(VS_SKYBOX_CUBEMAP_INPUT input)
 
 	return(output);
 }
-
-TextureCube gtxtSkyCubeTexture : register(t1);
-SamplerState gssClamp : register(s1);
 
 float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
 {

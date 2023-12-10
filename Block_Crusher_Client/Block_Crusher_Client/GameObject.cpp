@@ -468,7 +468,7 @@ void CGameObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 }
 
 CGameObject* CGameObject::LoadHierarchyModelFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
-	const char* pstrFileName)
+	const char* pstrFileName, CShader* pShader)
 {
 	std::ifstream fPlayerModelFile{ pstrFileName, std::ios::binary };
 
@@ -480,13 +480,13 @@ CGameObject* CGameObject::LoadHierarchyModelFromFile(ID3D12Device* pd3dDevice, I
 	CGameObject* pGameObject = NULL;
 
 	pGameObject = CGameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
-		fPlayerModelFile);
+		fPlayerModelFile, pShader);
 
 	return pGameObject;
 }
 
 CGameObject* CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-	ID3D12RootSignature* pd3dGraphicsRootSignature, std::ifstream& fileStream)
+	ID3D12RootSignature* pd3dGraphicsRootSignature, std::ifstream& fileStream, CShader* pShader)
 {
 	CGameObject* pGameObject = NULL;
 	pGameObject = new CGameObject();
@@ -536,7 +536,7 @@ CGameObject* CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, I
 			{
 				for (int i = 0; i < nChildren; ++i) {
 					CGameObject* pChild = CGameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList,
-						pd3dGraphicsRootSignature, fileStream);
+						pd3dGraphicsRootSignature, fileStream, pShader);
 
 					if (pChild) pGameObject->SetChild(pChild);
 				}
@@ -544,7 +544,7 @@ CGameObject* CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, I
 		}
 		else if ('m' == token)
 		{
-			pGameObject->LoadMaterialsFromFile(fileStream, pGameObject);
+			pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, fileStream, pGameObject, pShader);
 		}
 		else if ('H' == token)
 			break;
@@ -586,7 +586,7 @@ CMeshLoadInfo* CGameObject::LoadMeshInfoFromFile(std::ifstream& fileStream, floa
 	return pMeshInfo;
 }
 
-void CGameObject::LoadMaterialsFromFile(std::ifstream& fileStream, CGameObject* pObj)
+void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, std::ifstream& fileStream, CGameObject* pObj,CShader* pShader)
 {
 	int nMaterial = 0;
 	char c;
@@ -596,6 +596,8 @@ void CGameObject::LoadMaterialsFromFile(std::ifstream& fileStream, CGameObject* 
 	fileStream.read((char*)&c, sizeof(char));
 
 	CMaterial* pMaterial = new CMaterial;
+	CTexture* pTexture= new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	//pMaterial->SetTexture(pTexture);
 
 	while (true)
 	{
@@ -643,10 +645,24 @@ void CGameObject::LoadMaterialsFromFile(std::ifstream& fileStream, CGameObject* 
 			fileStream.read((char*)&c, sizeof(char));
 
 			fileStream >> pMaterial->m_strTextureName;
+			
+			//std::string tmp = pMaterial->m_strTextureName;
+			//tmp = "Textures/" + tmp + ".dds";
+
+			//const char* cname = tmp.c_str();
+
+			//const size_t cSize = strlen(cname) + 1;
+			//wchar_t* wc = new wchar_t[cSize];
+			//mbstowcs(wc, cname, cSize);
+
+			//pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, wc, RESOURCE_TEXTURE2D, 0);
+			//pShader->CreateShaderResourceViews(pd3dDevice, pTexture, 0, 4);
+
+			//delete[] wc;
 		}
 		else if (!token.compare("</material>"))
 		{
-			pObj->SetMaterial(pMaterial);
+			//pObj->SetMaterial(pMaterial);
 			break;
 		}
 	}
