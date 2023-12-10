@@ -1,12 +1,6 @@
 #pragma once
 #include "header.h"
 
-struct XMFLOAT3 {
-	float x;
-	float y;
-	float z;
-};
-
 class GameObject
 {
 private:

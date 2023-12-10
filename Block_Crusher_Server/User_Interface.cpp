@@ -4,9 +4,13 @@ User_Interface::User_Interface()
 {
 	_state = US_EMPTY;
 	_id = -1;
-	x = y = z = 0;
+	pos.x = pos.y = pos.z = 0.f;
 	_prev_remain = 0;
 	cx = cy = 0;
+	_player_radius = 5.f;
+	hp = 3;
+	isinvincible = false;
+	invincible_time = 0.f;
 }
 
 User_Interface::~User_Interface()
@@ -54,9 +58,9 @@ void User_Interface::send_move_packet(User_Interface* clients, int c_id)
 	p.size = sizeof(SC_MOVE_PACKET);
 	p.type = SC_MOVE_PLAYER;
 	p.id = c_id;
-	p.x = clients[c_id].x;
-	p.y = clients[c_id].y;
-	p.z = clients[c_id].z;
+	p.x = clients[c_id].pos.x;
+	p.y = clients[c_id].pos.y;
+	p.z = clients[c_id].pos.z;
 	p.cxDelta = clients[c_id].cx;
 	p.cyDelta = clients[c_id].cy;
 	do_send(&p);
@@ -88,13 +92,33 @@ void User_Interface::send_collision_packet(int id_1, int id_2)
 	do_send(&p);
 }
 
-void User_Interface::send_bullet_collision_packet(int id_1, int id_2, int c_id)
+void User_Interface::send_bullet_collision_packet(int bullet_id, int block_id, int c_id)
 {
 	SC_BULLET_COLLISION_PACKET p;
 	p.size = sizeof(SC_BULLET_COLLISION_PACKET);
 	p.type = SC_BULLET_COLLISION;
-	p.coll_obj_id1 = id_1;
-	p.coll_obj_id2 = id_2;
+	p.bullet_id = bullet_id;
+	p.block_id = block_id;
 	p.player_id = c_id;
+	do_send(&p);
+}
+
+void User_Interface::send_hit_packet(int bullet_id, int player_id)
+{
+	SC_HIT_PACKET p;
+	p.size = sizeof(SC_HIT_PACKET);
+	p.type = SC_HIT;
+	p.bullet_id = bullet_id;
+	p.player_id = player_id;
+	do_send(&p);
+}
+
+void User_Interface::send_dead_packet(int bullet_id, int player_id)
+{
+	SC_DEATH_PACKET p;
+	p.size = sizeof(SC_DEATH_PACKET);
+	p.type = SC_DEATH;
+	p.bullet_id = bullet_id;
+	p.player_id = player_id;
 	do_send(&p);
 }

@@ -10,3 +10,9 @@
 
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "MSWSock.lib")
+
+struct XMFLOAT3 {
+	float x;
+	float y;
+	float z;
+};

@@ -31,6 +31,8 @@ constexpr char SC_MOVE_PLAYER = 4;
 constexpr char SC_BULLET_ADD = 6;
 constexpr char SC_COLLISION = 7;
 constexpr char SC_BULLET_COLLISION = 8;
+constexpr char SC_HIT = 9;
+constexpr char SC_DEATH = 10;
 
 #pragma pack(push, 1)
 
@@ -112,8 +114,22 @@ struct SC_COLLISION_PACKET {
 struct SC_BULLET_COLLISION_PACKET {
 	unsigned char		size;
 	char				type;
-	int					coll_obj_id1;
-	int					coll_obj_id2;
+	int					bullet_id;
+	int					block_id;
+	int					player_id;
+};
+
+struct SC_HIT_PACKET {
+	unsigned char		size;
+	char				type;
+	int					bullet_id;
+	int					player_id;
+};
+
+struct SC_DEATH_PACKET {
+	unsigned char		size;
+	char				type;
+	int					bullet_id;
 	int					player_id;
 };
 

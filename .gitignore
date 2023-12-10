@@ -387,3 +387,5 @@ FodyWeavers.xsd
 *.log
 *.pdb
 *.ilk
+
+x64/

@@ -157,7 +157,19 @@ void WINAPI do_recv()
 		case SC_BULLET_COLLISION: {
 			SC_BULLET_COLLISION_PACKET* packet = reinterpret_cast<SC_BULLET_COLLISION_PACKET*>(ptr);
 
-			NetScene->DisableObject(packet->coll_obj_id1, packet->coll_obj_id2, packet->player_id);
+			NetScene->DisableObject(packet->bullet_id, packet->block_id, packet->player_id);
+			break;
+		}
+		case SC_HIT: {
+			SC_HIT_PACKET* packet = reinterpret_cast<SC_HIT_PACKET*>(ptr);
+			// 맞았을 때 처리
+			//cout << packet->bullet_id << ", " << packet->player_id << endl;
+			NetScene->DisableBullet(packet->bullet_id, packet->player_id);
+			break;
+		}
+		case SC_DEATH: {
+			SC_DEATH_PACKET* packet = reinterpret_cast<SC_DEATH_PACKET*>(ptr);
+			cout << "플레이어 [" << packet->player_id << "]가 사망하였습니다." << endl;
 			break;
 		}
 		}

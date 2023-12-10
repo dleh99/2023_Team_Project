@@ -100,7 +100,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 			if (m_fKeyDownTime > 0.1f) {
 				int b_id = GetBulletId();
 				m_pScene->AddObjects(0,m_xmf3Position,GetLookVector(), GetPlayerId(), b_id);
-				cout << GetPlayerId() << "°¡ ÃÑÀ» ½÷¼­ ¼­¹ö¿¡ º¸³Â½À´Ï´Ù" << endl;
+				//cout << GetPlayerId() << "°¡ ÃÑÀ» ½÷¼­ ¼­¹ö¿¡ º¸³Â½À´Ï´Ù" << endl;
 				XMFLOAT3 send_p = m_xmf3Position;
 				XMFLOAT3 send_v = GetLookVector();
 

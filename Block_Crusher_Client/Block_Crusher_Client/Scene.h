@@ -23,6 +23,7 @@ public:
 	void ReleaseUploadBuffers();
 
 	void DisableObject(int id_1, int id_2, int p_id);
+	void DisableBullet(int bullet_id, int p_id);
 
 	int FindEmptySlot();
 	bool BSCollisionCheck(XMFLOAT3 Position1, XMFLOAT3 Position2, float Radius1, float Radius2);

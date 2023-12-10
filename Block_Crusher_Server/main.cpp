@@ -63,9 +63,9 @@ void packet_process(int c_id, char* packet)
 	case CS_MOVE: {
 		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
 		// 패킷에서 보내온 방향에 따라 위치 이동 코드
-		clients[c_id].x = p->x;
-		clients[c_id].y = p->y;
-		clients[c_id].z = p->z;
+		clients[c_id].pos.x = p->x;
+		clients[c_id].pos.y = p->y;
+		clients[c_id].pos.z = p->z;
 		clients[c_id].cx = p->cxDelta;
 		clients[c_id].cy = p->cyDelta;
 
@@ -141,8 +141,8 @@ void worker_thread(HANDLE iocp_h)
 					clients[client_id]._state = US_CONNECTING;
 
 					// 초기값 지정
-					clients[client_id].x = 0;
-					clients[client_id].y = 0;
+					clients[client_id].pos.x = 0;
+					clients[client_id].pos.y = 0;
 					clients[client_id]._id = client_id;
 					clients[client_id]._prev_remain = 0;
 					clients[client_id]._socket = g_c_socket;
@@ -220,6 +220,7 @@ void Physics_Calculation_thread()
 			if (cl._state != US_INGAME) continue;
 			for (int i{}; i < MAX_BULLET_NUM; ++i) {
 				if (false == cl.bullet[i].GetisActive()) continue;
+				// 총알과 블록 충돌 처리
 				for (int j{}; j < 1008; ++j) {
 					if (false == Map_infromation.Map_Block[j].GetisActive()) continue;
 					if (CollisionCheck(cl.bullet[i].GetPosition(), Map_infromation.Map_Block[j].GetPosition(),
@@ -233,11 +234,53 @@ void Physics_Calculation_thread()
 						}
 					}
 				}
+				// 플레이어와 총알의 충돌 처리
+				if (false == cl.bullet[i].GetisActive()) continue;
+				for (auto& other_player : clients) {
+					if (other_player._state != US_INGAME) continue;
+					if (other_player._id == cl._id) continue;
+					if (CollisionCheck(cl.bullet[i].GetPosition(), other_player.pos,
+						cl.bullet[i].GetRadius(), other_player._player_radius)) {
+						cl.bullet[i].SetisActive(false);
+						
+						// 맞았을 때 체력을 깎는다. 또한 일정시간 무적을 만든다
+						// 체력 처리 어떻게 할건가? -> 이거 mutex 걸어야 함? 근데 이것도 mutex 걸거면 위치도 걸어야 하는거 아님? 근데 그럼 성능 안 나오는거 아님?
+						if (false == other_player.isinvincible) {
+							cout << "플레이어 [" << other_player._id << "] 맞았다" << endl;
+							other_player.isinvincible = true;
+							other_player.hp -= 1;
+
+							// 살아있다면 맞았다는 패킷을, 죽었다면 죽었다는 패킷을 보낸다
+							if (other_player.hp > 0) {
+								for (auto& send_cl : clients) {
+									if (send_cl._state != US_INGAME) continue;
+									send_cl.send_hit_packet(cl.bullet[i].GetbulletId(), cl._id);
+								}
+							}
+							else
+							{
+								// 죽었을 때 처리 어떻게?
+								//other_player._state = US_EMPTY;
+								for (auto& send_cl : clients) {
+									if (send_cl._state != US_INGAME) continue;
+									send_cl.send_dead_packet(cl.bullet[i].GetbulletId(), cl._id);
+								}
+							}
+						}
+					}
+				}
 			}
 		}
-
-		// 플레이어와 총알의 충돌 처리
-
+		// 무적이 적용되어 있는 클라이언트들 시간 더하기, 일단 무적시간 3초
+		for (auto& cl : clients) {
+			if (cl._state != US_INGAME) continue;
+			if (false == cl.isinvincible) continue;
+			cl.invincible_time += server_timer.GetTimeElapsed();
+			if (cl.invincible_time >= 3.f) {
+				cl.isinvincible = false;
+				cl.invincible_time = 0.f;
+			}
+		}
 	}
 }
 
