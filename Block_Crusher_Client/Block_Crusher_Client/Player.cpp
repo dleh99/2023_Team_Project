@@ -142,7 +142,7 @@ void CPlayer::Jump(float fTimeElapsed)
 		
 		XMFLOAT3 shiftY = { 0,0,0 };
 
-		xmf3JumpShift.y -= 9.8f * m_fPlayerGravityTime;
+		xmf3JumpShift.y -= 98.f * m_fPlayerGravityTime * fTimeElapsed;
 		shiftY.y = xmf3JumpShift.y * fTimeElapsed;
 
 		m_fPlayerGravityTime += fTimeElapsed;
@@ -345,7 +345,7 @@ void CPlayer::Update(float fTimeElapsed)
 	if (m_ppObjects != NULL) {
 		int cnt = 0;
 
-		for (int i = 0; i < 1008; ++i) {
+		for (int i = 0; i < 50 * 50 * 10; ++i) {
 			if (m_ppObjects[i]->GetIsActive()) {
 				if (BSCollisionCheck(m_ppObjects[i]->GetPosition(),
 					m_ppObjects[i]->GetBoundingRadius())) {
@@ -363,7 +363,7 @@ void CPlayer::Update(float fTimeElapsed)
 			cnt++;
 		}
 
-		for (int i = 0; i < 1008; ++i) {
+		for (int i = 0; i < 50 * 50 * 10; ++i) {
 			if(m_ppObjects[i]->GetIsActive()){
 				if (BSCollisionCheck(m_ppObjects[i]->GetPosition(),
 					m_ppObjects[i]->GetBoundingRadius())) {
@@ -379,7 +379,7 @@ void CPlayer::Update(float fTimeElapsed)
 			}
 		}
 
-		if (cnt == 1008) m_bPlayerGravity = true;
+		if (cnt == 50 * 50 * 10) m_bPlayerGravity = true;
 		//std::cout << m_ppObjects[0]->GetPosition().x << " " << m_ppObjects[0]->GetPosition().y << " " << m_ppObjects[0]->GetPosition().z << "\n";
 	}
 	

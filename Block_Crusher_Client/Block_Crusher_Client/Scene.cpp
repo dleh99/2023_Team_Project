@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include "Player.h"
+
 //#include "Network.h"
 
 CScene::CScene()
@@ -19,32 +20,9 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
 
-	XMFLOAT3 Cubes[1008] = {};
-	int cnt = 0;
-	for (int i = 0; i < 10; ++i)
-		for (int j = 0; j < 10; ++j)
-			for (int k = 0; k < 10; ++k) {
-				Cubes[cnt].x = -(float)i * 12.0f + 20.0f;
-				Cubes[cnt].y = -(float)j * 12.0f;
-				Cubes[cnt].z = -(float)k * 12.0f + 40.0f;
-				cnt++;
-			}
-	for (int i = 0; i < 2; ++i)
-		for (int j = 0; j < 2; ++j)
-			for (int k = 0; k < 2; ++k) {
-				Cubes[cnt].x = 20.0f -12.0f * (i + 4);
-				Cubes[cnt].y = 12.0f + 12.0f * j;
-				Cubes[cnt].z = 40.0f -12.0f * (k + 4);
-				cnt++;
-			}
-
 	// 가로 x 세로 x 깊이가 12 x 12 x 12인 정육면체 메쉬 생성
-	
 	CCubeMeshTextured* pCubeMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
 	CCubeMeshDiffused* BulletMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 2.0f, 2.0f, 2.0f);
-	pBulletMesh = BulletMesh;
-	m_nObjects = cnt;
-	m_ppObjects = new CGameObject * [3000];
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	//pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/Dia_Cube.dds", RESOURCE_TEXTURE2D, 0);
@@ -63,17 +41,33 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	m_pSceneShader = pShader;
-	
-	for (int i = 0; i < m_nObjects; ++i ) {
-		CBlockObject* pBlockObject = new CBlockObject();
-		pBlockObject->SetMesh(pCubeMesh);
-		pBlockObject->SetShader(pTShader);
-		pBlockObject->SetMaterial(pMaterial);
-		pBlockObject->SetIsActive(true);
 
-		m_ppObjects[i] = pBlockObject;
-		m_ppObjects[i]->SetPosition(Cubes[i]);
-	}
+	pBulletMesh = BulletMesh;
+
+	m_nObjects = 50 * 50 * 10 + m_nblock;
+	m_ppObjects = new CGameObject * [m_nObjects + 2000];
+
+	int cnt = 0;
+
+	for (int i = 0; i < 50; ++i)
+		for (int j = 0; j < 10; ++j)
+			for (int k = 0; k < 50; ++k) {
+				XMFLOAT3 position = { -(float)i * 12.0f + 20.0f,
+				 -(float)j * 12.0f , -(float)k * 12.0f + 40.0f };
+				CBlockObject* pBlockObject = new CBlockObject();
+				pBlockObject->SetMesh(pCubeMesh);
+				pBlockObject->SetShader(pTShader);
+				pBlockObject->SetMaterial(pMaterial);
+				pBlockObject->SetIsActive(true);
+
+				m_ppObjects[cnt] = pBlockObject;
+				m_ppObjects[cnt]->SetPosition(position);
+
+				cnt++;
+			}
+
+	AddBlocksByMapData(pCubeMesh, pTShader, pMaterial, cnt);
+	std::cout << "추가된 블럭 : " << m_nblock << std::endl;
 }
 
 void CScene::ReleaseObjects()
@@ -323,12 +317,13 @@ void CScene::AddObjects(int type,XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector,
 
 int CScene::FindEmptySlot()
 {
-	for (int i = 0; i < MAX_OBJ_COUNT; ++i) {
-		if (m_ppObjects[i]->GetIsActive() == false) {
-			return i;
-			//std::cout << i << std::endl;
-		}
-	}
+	//for (int i = 0; i < MAX_OBJ_COUNT; ++i) {
+	//	if (m_ppObjects[i]->GetIsActive() == false) {
+	//		return i;
+	//		//std::cout << i << std::endl;
+	//	}
+	//}
+	return 0;
 }
 
 bool CScene::BSCollisionCheck(XMFLOAT3 Position1, XMFLOAT3 Position2,float Radius1, float Radius2)
@@ -340,4 +335,77 @@ bool CScene::BSCollisionCheck(XMFLOAT3 Position1, XMFLOAT3 Position2,float Radiu
 	if (Radius1 + Radius2 - 4.0f> sqrt(x * x + y * y + z * z)) return true;
 
 	return false;
+}
+
+int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMaterial, int nindex)
+{
+	std::ifstream in{ "Map/MapData3.bin", std::ios::binary };
+
+	//if (!in) std::cout << "뭐임 ㅅㅂ" << std::endl;
+
+	int mapdata[50][50];
+	int sum = 0;
+	int x = 0;
+	int y = 0;
+	bool flag = false;
+
+	while (in) {
+		int num;
+		in >> num;
+		std::cout << num << " ";
+
+		if (char(num) == 'd') {
+			flag = true;
+			continue;
+		}
+
+		if (flag) {
+			mapdata[x][y] = num;
+			std::cout << mapdata[x][y] << " x : " << x << " y : " << y << std::endl;
+
+			y++;
+			if (y >= 50) {
+				y = 0;
+				x++;
+			}
+			if (x >= 50) {
+				break;
+			}
+
+			sum += num;
+		}
+	}
+	
+	int cnt = nindex;
+
+	for (int i = 0; i < 50; ++i)
+		for (int k = 0; k < 50; ++k) {
+			for (int y = 0; y < mapdata[i][k]; ++y) {
+				XMFLOAT3 position = { -(float)i * 12.0f + 20.0f,
+				(float)y * 12.0f + 12.0f, -(float)k * 12.0f + 40.0f };
+
+				//std::cout << position.x << " " << position.y << " " << position.z << std::endl;
+
+				CBlockObject* pBlockObject = new CBlockObject();
+				pBlockObject->SetMesh(pMesh);
+				pBlockObject->SetShader(pShader);
+				pBlockObject->SetMaterial(pMaterial);
+				pBlockObject->SetIsActive(true);
+
+				m_ppObjects[cnt] = pBlockObject;
+				m_ppObjects[cnt]->SetPosition(position);
+				//std::cout << cnt << "번째 추가?" << std::endl;
+				
+				m_nObjects++;
+				cnt++;
+			}
+		}
+	//for (int i = 0; i < 50; ++i) {
+	//	for (int j = 0; j < 50; j++) {
+	//		std::cout << mapdata[i][j] << " ";
+	//	}
+	//	std::cout << std::endl;
+	//}
+
+	return sum;
 }

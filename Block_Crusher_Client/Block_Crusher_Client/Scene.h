@@ -27,15 +27,11 @@ public:
 
 	int FindEmptySlot();
 	bool BSCollisionCheck(XMFLOAT3 Position1, XMFLOAT3 Position2, float Radius1, float Radius2);
+	int AddBlocksByMapData(CMesh* pMesh, CShader* pShader, CMaterial* pMaterial,int nindex);
 
 	ComPtr<ID3D12RootSignature> CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 	ComPtr<ID3D12RootSignature> GetGraphicsRootSignature();
 	
-	void CreateCbvSrvDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews);
-	void CreateConstantBufferViews(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride);
-	void CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex);
-	void CreateShaderResourceView(ID3D12Device* pd3dDevice, CTexture* pTexture, int nIndex);
-
 	CGameObject** m_ppObjects = NULL;
 
 	CPlayer* m_pPlayer= NULL;
@@ -44,7 +40,10 @@ protected:
 	/*CShader** m_ppShaders = NULL;
 	int m_nShaders = 0;*/
 	
+	int m_nblock = 0;
 	int m_nObjects = 0;
+	int m_nRandObject = 0;
+
 	CShader* m_pSceneShader;
 	CCubeMeshDiffused* pBulletMesh = NULL;
 

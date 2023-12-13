@@ -28,13 +28,11 @@ struct VS_OUTPUT
 };
 
 Texture2D gtxtTexture : register(t0);
-SamplerState gSamplerState : register(s0);
-
 TextureCube gtxtSkyCubeTexture : register(t1);
-SamplerState gssClamp : register(s1);
-
 Texture2D gtxtAlbedoTexture : register(t2);
 
+SamplerState gSamplerState : register(s0);
+SamplerState gssClamp : register(s1);
 // 정점 셰이더를 정의한다.
 VS_OUTPUT VSDiffused(VS_INPUT input)
 {

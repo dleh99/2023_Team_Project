@@ -23,6 +23,7 @@
 #include <vector>
 #include <fstream>
 #include <string>
+#include <random>
 
 // Direct3D 12
 #include <string>
