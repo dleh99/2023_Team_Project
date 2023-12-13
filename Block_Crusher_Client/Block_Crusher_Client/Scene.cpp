@@ -44,29 +44,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	pBulletMesh = BulletMesh;
 
-	m_nObjects = 50 * 50 * 10 + m_nblock;
-	m_ppObjects = new CGameObject * [m_nObjects + 2000];
-
-	int cnt = 0;
-
-	for (int i = 0; i < 50; ++i)
-		for (int j = 0; j < 10; ++j)
-			for (int k = 0; k < 50; ++k) {
-				XMFLOAT3 position = { -(float)i * 12.0f + 20.0f,
-				 -(float)j * 12.0f , -(float)k * 12.0f + 40.0f };
-				CBlockObject* pBlockObject = new CBlockObject();
-				pBlockObject->SetMesh(pCubeMesh);
-				pBlockObject->SetShader(pTShader);
-				pBlockObject->SetMaterial(pMaterial);
-				pBlockObject->SetIsActive(true);
-
-				m_ppObjects[cnt] = pBlockObject;
-				m_ppObjects[cnt]->SetPosition(position);
-
-				cnt++;
-			}
-
-	AddBlocksByMapData(pCubeMesh, pTShader, pMaterial, cnt);
+	AddBlocksByMapData(pCubeMesh, pTShader, pMaterial, 0);
 	std::cout << "추가된 블럭 : " << m_nblock << std::endl;
 }
 
@@ -344,24 +322,26 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 	//if (!in) std::cout << "뭐임 ㅅㅂ" << std::endl;
 
 	int mapdata[50][50];
-	int sum = 0;
+
 	int x = 0;
 	int y = 0;
 	bool flag = false;
 
 	while (in) {
-		int num;
-		in >> num;
-		std::cout << num << " ";
+		char c;
+		in >> c;
+		//std::cout << c << " ";
 
-		if (char(num) == 'd') {
+		if (c == 'd') {
 			flag = true;
 			continue;
 		}
 
 		if (flag) {
+			int num = c - 48;
+
 			mapdata[x][y] = num;
-			std::cout << mapdata[x][y] << " x : " << x << " y : " << y << std::endl;
+			//std::cout << mapdata[x][y] << " x : " << x << " y : " << y << std::endl;
 
 			y++;
 			if (y >= 50) {
@@ -372,11 +352,31 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 				break;
 			}
 
-			sum += num;
+			m_nblock += num;
 		}
 	}
 	
+	m_nObjects = 50 * 50 * 10 + m_nblock;
+	m_ppObjects = new CGameObject * [m_nObjects + 2000];
+
 	int cnt = nindex;
+
+	for (int i = 0; i < 50; ++i)
+		for (int j = 0; j < 10; ++j)
+			for (int k = 0; k < 50; ++k) {
+				XMFLOAT3 position = { -(float)i * 12.0f + 20.0f,
+				 -(float)j * 12.0f , -(float)k * 12.0f + 40.0f };
+				CBlockObject* pBlockObject = new CBlockObject();
+				pBlockObject->SetMesh(pMesh);
+				pBlockObject->SetShader(pShader);
+				pBlockObject->SetMaterial(pMaterial);
+				pBlockObject->SetIsActive(true);
+
+				m_ppObjects[cnt] = pBlockObject;
+				m_ppObjects[cnt]->SetPosition(position);
+
+				cnt++;
+			}
 
 	for (int i = 0; i < 50; ++i)
 		for (int k = 0; k < 50; ++k) {
@@ -396,10 +396,10 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 				m_ppObjects[cnt]->SetPosition(position);
 				//std::cout << cnt << "번째 추가?" << std::endl;
 				
-				m_nObjects++;
 				cnt++;
 			}
 		}
+
 	//for (int i = 0; i < 50; ++i) {
 	//	for (int j = 0; j < 50; j++) {
 	//		std::cout << mapdata[i][j] << " ";
@@ -407,5 +407,5 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 	//	std::cout << std::endl;
 	//}
 
-	return sum;
+	return m_nblock;
 }
