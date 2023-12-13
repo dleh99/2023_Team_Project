@@ -249,7 +249,7 @@ void Physics_Calculation_thread()
 						// 맞았을 때 체력을 깎는다.
 						// 체력 처리 어떻게 할건가? -> 이거 mutex 걸어야 함? 근데 이것도 mutex 걸거면 위치도 걸어야 하는거 아님? 근데 그럼 성능 안 나오는거 아님?
 						if (false == other_player.isinvincible) {
-							cout << "플레이어 [" << other_player._id << "] 맞았다" << endl;
+							//cout << "플레이어 [" << other_player._id << "] 맞았다" << endl;
 							//other_player.isinvincible = true;
 							other_player.hp -= 1;
 
@@ -295,7 +295,7 @@ void Physics_Calculation_thread()
 
 					XMFLOAT3 random_pos = physics_engine.PickPos();
 
-					cout << "플레이어 [" << cl._id << "] 부활" << endl;
+					//cout << "플레이어 [" << cl._id << "] 부활" << endl;
 					for (auto& send_cl : clients) {
 						if (send_cl._state != US_INGAME)continue;
 						send_cl.send_respawn_packet(random_pos.x, random_pos.y, random_pos.z, cl._id);
