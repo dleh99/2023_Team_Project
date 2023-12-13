@@ -407,7 +407,9 @@ void CGameFramework::FrameAdvance()
 	//렌더링 코드는 여기에 추가될 것이다.
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList.Get(), m_pCamera);
 
-	if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList.Get(), m_pCamera);
+	if (m_pPlayer)
+		if(true == m_pPlayer->GetIsActive())
+			m_pPlayer->Render(m_pd3dCommandList.Get(), m_pCamera);
 
 	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
 		if (m_pPlayer)
@@ -415,7 +417,8 @@ void CGameFramework::FrameAdvance()
 				continue;
 
 		if (m_vEnemyPlayers[i])
-			m_vEnemyPlayers[i]->Render(m_pd3dCommandList.Get(), m_pCamera);
+			if(true == m_vEnemyPlayers[i]->GetIsActive())
+				m_vEnemyPlayers[i]->Render(m_pd3dCommandList.Get(), m_pCamera);
 	}
 
 
@@ -470,6 +473,8 @@ void CGameFramework::BuildObjects()
 	m_vEnemyPlayers.push_back(pCubePlayer0);
 	m_vEnemyPlayers.push_back(pCubePlayer1);
 	m_vEnemyPlayers.push_back(pCubePlayer2);
+
+	SetPlayers(m_vEnemyPlayers);
 
 	m_pPlayer = m_vEnemyPlayers[id];
 #else

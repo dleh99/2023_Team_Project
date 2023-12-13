@@ -34,6 +34,8 @@ CPlayer::CPlayer() : CGameObject()
 	m_fPlayerBoundingRadius = 5.0f;
 
 	m_playerNetworkId = GetNetworkPlayerId();
+
+	m_bActive = true;
 }
 
 CPlayer::~CPlayer()

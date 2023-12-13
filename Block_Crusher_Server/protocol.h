@@ -33,6 +33,7 @@ constexpr char SC_COLLISION = 7;
 constexpr char SC_BULLET_COLLISION = 8;
 constexpr char SC_HIT = 9;
 constexpr char SC_DEATH = 10;
+constexpr char SC_RESPAWN = 11;
 
 #pragma pack(push, 1)
 
@@ -131,6 +132,16 @@ struct SC_DEATH_PACKET {
 	char				type;
 	int					bullet_id;
 	int					player_id;
+	int					death_id;
+};
+
+struct SC_RESPAWN_PACKET {
+	unsigned char		size;
+	char				type;
+	int					player_id;
+	float				respawn_x;
+	float				respawn_y;
+	float				respawn_z;
 };
 
 #pragma pack(pop)
