@@ -8,9 +8,11 @@ User_Interface::User_Interface()
 	_prev_remain = 0;
 	cx = cy = 0;
 	_player_radius = 5.f;
-	hp = 3;
+	hp = 10;
 	isinvincible = false;
 	invincible_time = 0.f;
+	isDeath = false;
+	Death_time = 0.f;
 }
 
 User_Interface::~User_Interface()
@@ -113,12 +115,25 @@ void User_Interface::send_hit_packet(int bullet_id, int player_id)
 	do_send(&p);
 }
 
-void User_Interface::send_dead_packet(int bullet_id, int player_id)
+void User_Interface::send_dead_packet(int bullet_id, int player_id, int death_id)
 {
 	SC_DEATH_PACKET p;
 	p.size = sizeof(SC_DEATH_PACKET);
 	p.type = SC_DEATH;
 	p.bullet_id = bullet_id;
 	p.player_id = player_id;
+	p.death_id = death_id;
+	do_send(&p);
+}
+
+void User_Interface::send_respawn_packet(float x, float y, float z, int player_id)
+{
+	SC_RESPAWN_PACKET p;
+	p.size = sizeof(SC_RESPAWN_PACKET);
+	p.type = SC_RESPAWN;
+	p.player_id = player_id;
+	p.respawn_x = x;
+	p.respawn_y = y;
+	p.respawn_z = z;
 	do_send(&p);
 }

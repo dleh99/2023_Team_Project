@@ -26,6 +26,9 @@ public:
 	bool			isinvincible;				// 맞아서 무적 타임인가?
 	float			invincible_time;			// 무적 시간
 
+	bool			isDeath;					// 죽었나?
+	float			Death_time;					// 리스폰 시간
+
 public:
 	User_Interface();
 	~User_Interface();
@@ -40,5 +43,6 @@ public:
 	void send_collision_packet(int id_1, int id_2);
 	void send_bullet_collision_packet(int id_1, int id_2, int c_id);
 	void send_hit_packet(int bullet_id, int player_id);
-	void send_dead_packet(int bullet_id, int player_id);
+	void send_dead_packet(int bullet_id, int player_id, int death_id);
+	void send_respawn_packet(float x, float y, float z, int player_id);
 };

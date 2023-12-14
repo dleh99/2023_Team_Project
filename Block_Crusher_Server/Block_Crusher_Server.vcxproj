@@ -143,6 +143,7 @@
     <ClInclude Include="header.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Overlapped.h" />
+    <ClInclude Include="Physics.h" />
     <ClInclude Include="protocol.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="User_Interface.h" />
@@ -152,6 +153,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Overlapped.cpp" />
+    <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="User_Interface.cpp" />
   </ItemGroup>

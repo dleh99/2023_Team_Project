@@ -88,7 +88,7 @@ void CScene::DisableBullet(int bullet_id, int p_id)
 	for (int i{}; i < m_nObjects; ++i) {
 		if (m_ppObjects[i]->GetObjectType() != TYPE_BULLET) continue;
 		if (((CBulletObject*)m_ppObjects[i])->GetPlayerId() == p_id && ((CBulletObject*)m_ppObjects[i])->GetBulletId() == bullet_id) {
-			std::cout << "찾았다" << std::endl;
+			//std::cout << "찾았다" << std::endl;
 			m_ppObjects[i]->SetIsActive(false);
 			break;
 		}

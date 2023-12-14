@@ -7,6 +7,7 @@
 #include "stdafx.h"
 #pragma comment(lib, "ws2_32")
 #include "Scene.h"
+#include "Player.h"
 using namespace std;
 
 struct Pos {
@@ -38,3 +39,4 @@ Pos GetOtherPlayerPos();
 int GetOtherPlayerId();
 Mouse GetOtherPlayerMouse();
 void SetScene(CScene* Scene);
+void SetPlayers(vector<CPlayer*> players);

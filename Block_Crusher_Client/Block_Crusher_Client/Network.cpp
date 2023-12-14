@@ -17,6 +17,7 @@ Pos otherPlayerPos;
 Mouse otherPlayerMouse;
 CScene* NetScene = NULL;
 int otherPlayer_id = -1;
+vector<CPlayer*> Netplayers;
 
 // 게임 시작 변수
 bool m_gameStart = false;
@@ -156,7 +157,7 @@ void WINAPI do_recv()
 		}
 		case SC_BULLET_COLLISION: {
 			SC_BULLET_COLLISION_PACKET* packet = reinterpret_cast<SC_BULLET_COLLISION_PACKET*>(ptr);
-
+			cout << "총알 번호 : " << packet->bullet_id << ", 블록 번호 : " << packet->block_id << ", 총알 주인 : " << packet->player_id << endl;;
 			NetScene->DisableObject(packet->bullet_id, packet->block_id, packet->player_id);
 			break;
 		}
@@ -169,7 +170,16 @@ void WINAPI do_recv()
 		}
 		case SC_DEATH: {
 			SC_DEATH_PACKET* packet = reinterpret_cast<SC_DEATH_PACKET*>(ptr);
-			cout << "플레이어 [" << packet->player_id << "]가 사망하였습니다." << endl;
+			cout << "플레이어 [" << packet->death_id << "]가 사망하였습니다." << endl;
+			NetScene->DisableBullet(packet->bullet_id, packet->player_id);
+			Netplayers[packet->death_id]->SetIsActive(false);
+			break;
+		}
+		case SC_RESPAWN: {
+			SC_RESPAWN_PACKET* packet = reinterpret_cast<SC_RESPAWN_PACKET*>(ptr);
+			cout << "플레이어 [" << packet->player_id << "] 부활." << endl;
+			Netplayers[packet->player_id]->SetIsActive(true);
+			Netplayers[packet->player_id]->SetPosition(XMFLOAT3(packet->respawn_x, packet->respawn_y, packet->respawn_z));
 			break;
 		}
 		}
@@ -273,4 +283,9 @@ void err_display(int errcode)
 
 void SetScene(CScene* Scene) {
 	NetScene = Scene;
+}
+
+void SetPlayers(vector<CPlayer*> players)
+{
+	Netplayers = players;
 }

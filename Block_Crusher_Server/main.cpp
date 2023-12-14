@@ -4,6 +4,7 @@
 #include "User_Interface.h"
 #include "Timer.h"
 #include "Map.h"
+#include "Physics.h"
 
 using namespace std;
 
@@ -15,6 +16,7 @@ Timer server_timer;
 array<User_Interface, MAX_USER> clients;
 
 Map Map_infromation;
+Physics physics_engine;
 
 atomic_int user_number = 0;
 
@@ -239,15 +241,16 @@ void Physics_Calculation_thread()
 				for (auto& other_player : clients) {
 					if (other_player._state != US_INGAME) continue;
 					if (other_player._id == cl._id) continue;
+					if (true == other_player.isDeath) continue;
 					if (CollisionCheck(cl.bullet[i].GetPosition(), other_player.pos,
 						cl.bullet[i].GetRadius(), other_player._player_radius)) {
 						cl.bullet[i].SetisActive(false);
 						
-						// 맞았을 때 체력을 깎는다. 또한 일정시간 무적을 만든다
+						// 맞았을 때 체력을 깎는다.
 						// 체력 처리 어떻게 할건가? -> 이거 mutex 걸어야 함? 근데 이것도 mutex 걸거면 위치도 걸어야 하는거 아님? 근데 그럼 성능 안 나오는거 아님?
 						if (false == other_player.isinvincible) {
-							cout << "플레이어 [" << other_player._id << "] 맞았다" << endl;
-							other_player.isinvincible = true;
+							//cout << "플레이어 [" << other_player._id << "] 맞았다" << endl;
+							//other_player.isinvincible = true;
 							other_player.hp -= 1;
 
 							// 살아있다면 맞았다는 패킷을, 죽었다면 죽었다는 패킷을 보낸다
@@ -260,10 +263,10 @@ void Physics_Calculation_thread()
 							else
 							{
 								// 죽었을 때 처리 어떻게?
-								//other_player._state = US_EMPTY;
+								other_player.isDeath = true;
 								for (auto& send_cl : clients) {
 									if (send_cl._state != US_INGAME) continue;
-									send_cl.send_dead_packet(cl.bullet[i].GetbulletId(), cl._id);
+									send_cl.send_dead_packet(cl.bullet[i].GetbulletId(), cl._id, other_player._id);
 								}
 							}
 						}
@@ -272,13 +275,32 @@ void Physics_Calculation_thread()
 			}
 		}
 		// 무적이 적용되어 있는 클라이언트들 시간 더하기, 일단 무적시간 3초
+		// 죽은 플레이어가 있다면 타이머 돌리기. 리스폰 시간 5초
 		for (auto& cl : clients) {
 			if (cl._state != US_INGAME) continue;
-			if (false == cl.isinvincible) continue;
-			cl.invincible_time += server_timer.GetTimeElapsed();
-			if (cl.invincible_time >= 3.f) {
-				cl.isinvincible = false;
-				cl.invincible_time = 0.f;
+			if (false == cl.isinvincible && false == cl.isDeath) continue;
+			else if (true == cl.isinvincible) {
+				cl.invincible_time += server_timer.GetTimeElapsed();
+				if (cl.invincible_time >= 3.f) {
+					cl.isinvincible = false;
+					cl.invincible_time = 0.f;
+				}
+			}
+			else if (true == cl.isDeath) {
+			cl.Death_time += server_timer.GetTimeElapsed();
+				if (cl.Death_time >= 5.f) {
+					cl.isDeath = false;
+					cl.Death_time = 0.f;
+					cl.hp = 10;
+
+					XMFLOAT3 random_pos = physics_engine.PickPos();
+
+					//cout << "플레이어 [" << cl._id << "] 부활" << endl;
+					for (auto& send_cl : clients) {
+						if (send_cl._state != US_INGAME)continue;
+						send_cl.send_respawn_packet(random_pos.x, random_pos.y, random_pos.z, cl._id);
+					}
+				}
 			}
 		}
 	}

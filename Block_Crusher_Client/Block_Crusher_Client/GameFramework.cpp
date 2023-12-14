@@ -407,7 +407,9 @@ void CGameFramework::FrameAdvance()
 	//렌더링 코드는 여기에 추가될 것이다.
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList.Get(), m_pCamera);
 
-	if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList.Get(), m_pCamera);
+	if (m_pPlayer)
+		if(true == m_pPlayer->GetIsActive())
+			m_pPlayer->Render(m_pd3dCommandList.Get(), m_pCamera);
 
 	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
 		if (m_pPlayer)
@@ -415,7 +417,8 @@ void CGameFramework::FrameAdvance()
 				continue;
 
 		if (m_vEnemyPlayers[i])
-			m_vEnemyPlayers[i]->Render(m_pd3dCommandList.Get(), m_pCamera);
+			if(true == m_vEnemyPlayers[i]->GetIsActive())
+				m_vEnemyPlayers[i]->Render(m_pd3dCommandList.Get(), m_pCamera);
 	}
 
 
@@ -471,6 +474,8 @@ void CGameFramework::BuildObjects()
 	m_vEnemyPlayers.push_back(pCubePlayer1);
 	m_vEnemyPlayers.push_back(pCubePlayer2);
 
+	SetPlayers(m_vEnemyPlayers);
+
 	m_pPlayer = m_vEnemyPlayers[id];
 #else
 	CMainPlayer* pCubePlayer = new CMainPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
@@ -514,87 +519,89 @@ void CGameFramework::ReleaseObjects()
 
 void CGameFramework::ProcessInput()
 {
-	static UCHAR pKeyBuffer[256];
-	DWORD dwDirection = 0;
+	if (true == m_pPlayer->GetIsActive()) {
+		static UCHAR pKeyBuffer[256];
+		DWORD dwDirection = 0;
 
-	if (::GetKeyboardState(pKeyBuffer))
-	{
-		if (pKeyBuffer[0x57] & 0xF0) dwDirection |= DIR_FORWARD;			// W
-		if (pKeyBuffer[0x53] & 0xF0) dwDirection |= DIR_BACKWARD;			// S
-		if (pKeyBuffer[0x41] & 0xF0) dwDirection |= DIR_LEFT;				// A
-		if (pKeyBuffer[0x44] & 0xF0) dwDirection |= DIR_RIGHT;				// D
-		if (pKeyBuffer[VK_SPACE] & 0xF0) dwDirection |= DIR_UP;
-		if (pKeyBuffer[0x43] & 0xF0) dwDirection |= KEY_SHOOT;
-	}
-
-	float cxDelta = 0.0f, cyDelta = 0.0f;
-	float x, y, z;
-	x = y = z = 0.f;
-	POINT ptCursorPos;
-
-	if (::GetCapture() == m_hWnd)
-	{
-		//마우스 커서를 화면에서 없앤다(보이지 않게 한다).
-		::SetCursor(NULL);
-
-		//현재 마우스 커서의 위치를 가져온다.
-		::GetCursorPos(&ptCursorPos);
-
-		//마우스 버튼이 눌린 상태에서 마우스가 움직인 양을 구한다.
-		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
-
-		//마우스 커서의 위치를 마우스가 눌려졌던 위치로 설정한다.
-		::SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-	}
-
-	//마우스 또는 키 입력이 있으면 플레이어를 이동하거나(dwDirection) 회전한다(cxDelta 또는 cyDelta).
-#ifdef USE_SERVER
-	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
-	{
-		if ((cxDelta != 0.0f) || (cyDelta != 0.0f))
+		if (::GetKeyboardState(pKeyBuffer))
 		{
-			m_pPlayer->SetIsRotate(true);
+			if (pKeyBuffer[0x57] & 0xF0) dwDirection |= DIR_FORWARD;			// W
+			if (pKeyBuffer[0x53] & 0xF0) dwDirection |= DIR_BACKWARD;			// S
+			if (pKeyBuffer[0x41] & 0xF0) dwDirection |= DIR_LEFT;				// A
+			if (pKeyBuffer[0x44] & 0xF0) dwDirection |= DIR_RIGHT;				// D
+			if (pKeyBuffer[VK_SPACE] & 0xF0) dwDirection |= DIR_UP;
+			if (pKeyBuffer[0x43] & 0xF0) dwDirection |= KEY_SHOOT;
 		}
-		//x = m_pPlayer->GetPosition().x;
-		//y = m_pPlayer->GetPosition().y;
-		//z = m_pPlayer->GetPosition().z;
 
-		//send_move_packet(x, y, z, cxDelta, cyDelta);
-	}
-	
-	if(cxDelta == 0.f && cyDelta == 0.f)
-	{
-		if (m_pPlayer->GetIsRotate()) {
-			m_pPlayer->SetIsRotate(false);
+		float cxDelta = 0.0f, cyDelta = 0.0f;
+		float x, y, z;
+		x = y = z = 0.f;
+		POINT ptCursorPos;
+
+		if (::GetCapture() == m_hWnd)
+		{
+			//마우스 커서를 화면에서 없앤다(보이지 않게 한다).
+			::SetCursor(NULL);
+
+			//현재 마우스 커서의 위치를 가져온다.
+			::GetCursorPos(&ptCursorPos);
+
+			//마우스 버튼이 눌린 상태에서 마우스가 움직인 양을 구한다.
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
+
+			//마우스 커서의 위치를 마우스가 눌려졌던 위치로 설정한다.
+			::SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+		}
+
+		//마우스 또는 키 입력이 있으면 플레이어를 이동하거나(dwDirection) 회전한다(cxDelta 또는 cyDelta).
+#ifdef USE_SERVER
+		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+		{
+			if ((cxDelta != 0.0f) || (cyDelta != 0.0f))
+			{
+				m_pPlayer->SetIsRotate(true);
+			}
 			//x = m_pPlayer->GetPosition().x;
 			//y = m_pPlayer->GetPosition().y;
 			//z = m_pPlayer->GetPosition().z;
 
 			//send_move_packet(x, y, z, cxDelta, cyDelta);
 		}
-	}
-	x = m_pPlayer->GetPosition().x;
-	y = m_pPlayer->GetPosition().y;
-	z = m_pPlayer->GetPosition().z;
-	send_move_packet(x, y, z, cxDelta, cyDelta);
+
+		if (cxDelta == 0.f && cyDelta == 0.f)
+		{
+			if (m_pPlayer->GetIsRotate()) {
+				m_pPlayer->SetIsRotate(false);
+				//x = m_pPlayer->GetPosition().x;
+				//y = m_pPlayer->GetPosition().y;
+				//z = m_pPlayer->GetPosition().z;
+
+				//send_move_packet(x, y, z, cxDelta, cyDelta);
+			}
+		}
+		x = m_pPlayer->GetPosition().x;
+		y = m_pPlayer->GetPosition().y;
+		z = m_pPlayer->GetPosition().z;
+		send_move_packet(x, y, z, cxDelta, cyDelta);
 #endif
 
-	if (cxDelta || cyDelta)
-	{
-		/*cxDelta는 y-축의 회전을 나타내고 cyDelta는 x-축의 회전을 나타낸다. 오른쪽 마우스 버튼이 눌려진 경우
-		cxDelta는 z-축의 회전을 나타낸다.*/
-		if (pKeyBuffer[VK_RBUTTON] & 0xF0)
-			m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-		else
-			m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
-	}
-	/*플레이어를 dwDirection 방향으로 이동한다(실제로는 속도 벡터를 변경한다).
-	이동 거리는 시간에 비례하도록 한다. 플레이어의 이동 속력은 (50/초)로 가정한다.*/
-	if (dwDirection) m_pPlayer->Move(dwDirection, 300.0f * m_GameTimer.GetTimeElapsed(), true);
+		if (cxDelta || cyDelta)
+		{
+			/*cxDelta는 y-축의 회전을 나타내고 cyDelta는 x-축의 회전을 나타낸다. 오른쪽 마우스 버튼이 눌려진 경우
+			cxDelta는 z-축의 회전을 나타낸다.*/
+			if (pKeyBuffer[VK_RBUTTON] & 0xF0)
+				m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+			else
+				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+		}
+		/*플레이어를 dwDirection 방향으로 이동한다(실제로는 속도 벡터를 변경한다).
+		이동 거리는 시간에 비례하도록 한다. 플레이어의 이동 속력은 (50/초)로 가정한다.*/
+		if (dwDirection) m_pPlayer->Move(dwDirection, 300.0f * m_GameTimer.GetTimeElapsed(), true);
 
-	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다.
-	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
+		//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다.
+		m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
+	}
 }
 
 void CGameFramework::AnimateObjects()
