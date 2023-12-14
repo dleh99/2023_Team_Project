@@ -6,8 +6,9 @@ SOCKET g_socket;
 SOCKADDR_IN serveraddr;
 char recvBuf[BUF_SIZE];
 
-string SERVER_IP = "127.0.0.1";
+//string SERVER_IP = "127.0.0.1";
 //string SERVER_IP = "14.51.115.70";
+string SERVER_IP;
 
 float start_x, start_y, start_z;
 int id;
@@ -25,6 +26,9 @@ bool m_gameStart = false;
 int NetworkInit()
 {
 	int ret;
+
+	cout << "서버 IP 주소를 입력해주세요 : ";
+	cin >> SERVER_IP;
 
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
 		cout << "WSA START ERROR" << endl;
