@@ -357,7 +357,7 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 	}
 	
 	m_nObjects = 50 * 50 * 10 + m_nblock;
-	m_ppObjects = new CGameObject * [m_nObjects + 2000];
+	m_ppObjects = new CGameObject * [m_nObjects + 1000];
 
 	int cnt = nindex;
 
