@@ -56,7 +56,7 @@ void User_Interface::send_start_packet(char mapkey)
 	do_send(&p);
 }
 
-void User_Interface::send_move_packet(User_Interface* clients, int c_id)
+void User_Interface::send_move_packet(User_Interface* clients, int c_id, long long first_frame, long long server_tim)
 {
 	SC_MOVE_PACKET p;
 	p.size = sizeof(SC_MOVE_PACKET);
@@ -67,6 +67,8 @@ void User_Interface::send_move_packet(User_Interface* clients, int c_id)
 	p.z = clients[c_id].pos.z;
 	p.cxDelta = clients[c_id].cx;
 	p.cyDelta = clients[c_id].cy;
+	p.first_frame_num = first_frame;
+	p.server_time = server_tim;
 	do_send(&p);
 }
 
@@ -108,13 +110,14 @@ void User_Interface::send_bullet_collision_packet(int bullet_id, int block_id, i
 	do_send(&p);
 }
 
-void User_Interface::send_hit_packet(int bullet_id, int player_id)
+void User_Interface::send_hit_packet(int bullet_id, int player_id, int enemy_id)
 {
 	SC_HIT_PACKET p;
 	p.size = sizeof(SC_HIT_PACKET);
 	p.type = SC_HIT;
 	p.bullet_id = bullet_id;
 	p.player_id = player_id;
+	p.enemy_id = enemy_id;
 	do_send(&p);
 }
 

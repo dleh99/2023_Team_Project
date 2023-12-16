@@ -542,6 +542,9 @@ void CGameFramework::FrameAdvance()
 
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
+
+	frame_num++;
+	SetFrame(frame_num);
 }
 
 void CGameFramework::BuildObjects()
@@ -682,7 +685,7 @@ void CGameFramework::ProcessInput()
 		x = m_pPlayer->GetPosition().x;
 		y = m_pPlayer->GetPosition().y;
 		z = m_pPlayer->GetPosition().z;
-		send_move_packet(x, y, z, cxDelta, cyDelta);
+		send_move_packet(x, y, z, cxDelta, cyDelta, frame_num);
 #endif
 
 		if (cxDelta || cyDelta)

@@ -20,6 +20,8 @@ CScene* NetScene = NULL;
 int otherPlayer_id = -1;
 vector<CPlayer*> Netplayers;
 
+long long game_frame;
+
 // 게임 시작 변수
 bool m_gameStart = false;
 char m_mapKey;
@@ -69,7 +71,7 @@ void send_login_packet()
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
-void send_move_packet(float x, float y, float z, float cx, float cy)
+void send_move_packet(float x, float y, float z, float cx, float cy, long long frame_num)
 {
 	CS_MOVE_PACKET p{};
 	p.size = sizeof(CS_MOVE_PACKET);
@@ -79,6 +81,7 @@ void send_move_packet(float x, float y, float z, float cx, float cy)
 	p.z = z;
 	p.cxDelta = cx;
 	p.cyDelta = cy;
+	p.frame_num = frame_num;
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
@@ -143,7 +146,7 @@ void WINAPI do_recv()
 			otherPlayerPos.z = packet->z;
 			otherPlayerMouse.cx = packet->cxDelta;
 			otherPlayerMouse.cy = packet->cyDelta;
-
+			cout << "[" << packet->id << "] 첫 명령 프레임 : " << packet->first_frame_num << ", 서버 시간 : " << packet->server_time << ", 현재 프레임 : " << game_frame << endl;
 			break;
 		}
 		case SC_BULLET_ADD: {
@@ -178,7 +181,7 @@ void WINAPI do_recv()
 			//cout << packet->bullet_id << ", " << packet->player_id << endl;
 			NetScene->DisableBullet(packet->bullet_id, packet->player_id);
 
-			if (id == packet->player_id) {
+			if (id == packet->enemy_id) {
 				int UpdatedHP = Netplayers[id]->GetPlayerHP() - 10;
 				Netplayers[id]->SetPlayerHP(UpdatedHP);
 			} 
@@ -310,4 +313,9 @@ void SetScene(CScene* Scene) {
 void SetPlayers(vector<CPlayer*> players)
 {
 	Netplayers = players;
+}
+
+void SetFrame(long long input)
+{
+	game_frame = input;
 }
