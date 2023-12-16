@@ -549,7 +549,7 @@ void CGameFramework::BuildObjects()
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
 	m_pScene = new CScene();
-	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), GetMapKey());
 	m_pScene->BuildText(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory);
 
 	//ComPtr<ID3D12Resource> fontTexture;

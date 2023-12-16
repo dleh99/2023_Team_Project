@@ -46,7 +46,6 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pBulletMesh = BulletMesh;
 
 	AddBlocksByMapData(pCubeMesh, pTShader, pMaterial, 0, mapkey);
-	std::cout << "추가된 블럭 : " << m_nblock << std::endl;
 }
 
 void CScene::ReleaseObjects()
@@ -376,7 +375,7 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 	}
 }
 
-int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMaterial, int nindex)
+
 int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMaterial, int nindex, char mapkey)
 {
 	std::ifstream in{ "Map/MapData3.bin", std::ios::binary };
