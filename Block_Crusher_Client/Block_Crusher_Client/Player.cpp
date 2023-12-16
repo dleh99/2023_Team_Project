@@ -89,7 +89,6 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 				if (xmf3JumpShift.y > 100.0f) {
 					xmf3JumpShift.y  = 100.0f;
 				}
-
 			}
 			else {
 				m_bPlayerGravity = true;
@@ -99,7 +98,6 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 
 		if (dwDirection & KEY_SHOOT) { 
 			//m_fKeyDownTime += m_fEtime;
-			
 			if (!m_bReloading) {
 				if (m_fKeyDownTime > 0.1f) {
 					int b_id = GetBulletId();
@@ -111,7 +109,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 					send_bullet_add_packet(send_p, send_v, b_id);
 					SetBulletId(b_id + 1);
 					m_nBullet -= 1;
-					cout << m_nBullet << endl;
+					//cout << m_nBullet << endl;
 					m_fKeyDownTime = 0.f;
 
 					if (m_nBullet == 0) m_bReloading = true;
@@ -321,6 +319,7 @@ void CPlayer::Rotate(float x, float y, float z)
 //이 함수는 매 프레임마다 호출된다. 플레이어의 속도 벡터에 중력과 마찰력 등을 적용한다.
 void CPlayer::Update(float fTimeElapsed)
 {
+	m_fEtime = fTimeElapsed;
 	m_fKeyDownTime += fTimeElapsed;
 
 	if (m_fKeyDownTime > 2.0f) {

@@ -27,7 +27,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	//pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/Dia_Cube.dds", RESOURCE_TEXTURE2D, 0);
-	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Lava(Diffuse).dds", RESOURCE_TEXTURE2D, 0);
+	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/rock1.dds", RESOURCE_TEXTURE2D, 0);
 
 	CMaterial* pMaterial = new CMaterial();
 	pMaterial->SetTexture(pTexture);
@@ -354,7 +354,7 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 		pTextFormat.Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush.Get());
 	
 	// 점수
-	
+
 	str = std::to_wstring(m_pPlayer->GetPlayerScore());
 
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 00));
@@ -370,9 +370,17 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 	// 체력
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(50, 675));
 
-	float portion = float(m_pPlayer->GetPlayerHP()) / 100.0f;
 	if (m_pPlayer->GetPlayerHP() > 0) {
+		float portion = float(m_pPlayer->GetPlayerHP()) / 100.0f;
 		m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 300.0f * portion, 50), SolidColorBrush.Get());
+	}
+
+	//장전 UI
+
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 600));
+
+	if(m_pPlayer->) {
+
 	}
 }
 
