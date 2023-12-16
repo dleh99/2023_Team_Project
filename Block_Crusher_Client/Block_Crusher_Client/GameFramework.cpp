@@ -36,6 +36,10 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hWnd)
 	EnumOutputs();
 	CreateDirect3DDevice();
 	CreateCommandQueue();
+
+	CreateD3D11On12Device();
+	CreateD2DDevice();
+
 	CreateRtvAndDsvDescriptorHeaps();
 	CreateSwapChain();
 
@@ -97,6 +101,31 @@ void CGameFramework::EnumOutputs()
 		std::cout << "모니터가 데스크톱에 붙어있는가? : " << currentOutputDesc.AttachedToDesktop << '\n';
 	}
 	std::cout << '\n';
+}
+
+void CGameFramework::CreateD3D11On12Device()
+{
+	// Create an 11 device wrapped around the 12 device and share 12's command queue.
+	ComPtr<ID3D11Device> d3d11Device;
+
+	D3D11On12CreateDevice(m_pd3dDevice.Get(),D3D11_CREATE_DEVICE_BGRA_SUPPORT,nullptr,0,
+		reinterpret_cast<IUnknown**>(m_pd3dCommandQueue.GetAddressOf()),1,0,&d3d11Device,&m_d3d11DeviceContext,nullptr);
+
+	// Query the 11On12 device from the 11 device.
+	d3d11Device.As(&m_d3d11On12Device);
+}
+
+void CGameFramework::CreateD2DDevice()
+{
+	// Create D2D/DWrite components.
+	D2D1_FACTORY_OPTIONS d2dFactoryOptions{};
+	D2D1_DEVICE_CONTEXT_OPTIONS deviceOptions = D2D1_DEVICE_CONTEXT_OPTIONS_NONE;
+	D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory3), &d2dFactoryOptions, &m_d2dFactory);
+	ComPtr<IDXGIDevice> dxgiDevice;
+	m_d3d11On12Device.As(&dxgiDevice);
+	m_d2dFactory->CreateDevice(dxgiDevice.Get(), &m_d2dDevice);
+	m_d2dDevice->CreateDeviceContext(deviceOptions, &m_d2dDeviceContext);
+	DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), &m_dWriteFactory);
 }
 
 void CGameFramework::CreateDirect3DDevice()
@@ -266,8 +295,20 @@ void CGameFramework::CreateRtvAndDsvDescriptorHeaps()
 
 void CGameFramework::CreateRenderTargetViews()
 {
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle =
-		m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	float dpiX;
+	float dpiY;
+#pragma warning(push)
+#pragma warning(disable : 4996) // GetDesktopDpi is deprecated.
+	m_d2dFactory->GetDesktopDpi(&dpiX, &dpiY);
+#pragma warning(pop)
+
+	D2D1_BITMAP_PROPERTIES1 bitmapProperties = D2D1::BitmapProperties1(
+		D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
+		D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED),
+		dpiX,
+		dpiY
+	);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle{ m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart() };
 
 	for (UINT i = 0; i < m_nSwapChainBuffers; i++)
 	{
@@ -275,7 +316,37 @@ void CGameFramework::CreateRenderTargetViews()
 			**)&m_ppd3dRenderTargetBuffers[i]);
 		m_pd3dDevice->CreateRenderTargetView(m_ppd3dRenderTargetBuffers[i].Get(), NULL,
 			d3dRtvCPUDescriptorHandle);
+
+		//d3dRtvCPUDescriptorHandle.Offset(m_nDsvDescriptorIncrementSize);
 		d3dRtvCPUDescriptorHandle.ptr += m_nRtvDescriptorIncrementSize;
+
+		// Create a wrapped 11On12 resource of this back buffer. Since we are 
+		// rendering all D3D12 content first and then all D2D content, we specify 
+		// the In resource state as RENDER_TARGET - because D3D12 will have last 
+		// used it in this state - and the Out resource state as PRESENT. When 
+		// ReleaseWrappedResources() is called on the 11On12 device, the resource 
+		// will be transitioned to the PRESENT state.
+		D3D11_RESOURCE_FLAGS d3d11Flags = { D3D11_BIND_RENDER_TARGET };
+		m_d3d11On12Device->CreateWrappedResource(
+			m_ppd3dRenderTargetBuffers[i].Get(),
+			&d3d11Flags,
+			D3D12_RESOURCE_STATE_RENDER_TARGET,
+			D3D12_RESOURCE_STATE_PRESENT,
+			IID_PPV_ARGS(&m_WrappedBackBuffers[i])
+		);
+
+		// Create a render target for D2D to draw directly to this back buffer.
+		ComPtr<IDXGISurface> surface;
+		m_WrappedBackBuffers[i].As(&surface);
+		m_d2dDeviceContext->CreateBitmapFromDxgiSurface(
+			surface.Get(),
+			&bitmapProperties,
+			&m_d2dRenderTargets[i]
+		);
+
+
+
+		//m_pd3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_pd3dCommandAllocator));
 	}
 }
 
@@ -343,6 +414,29 @@ void CGameFramework::MoveToNextFrame()
 	}
 }
 
+void CGameFramework::Render2D()
+{
+	// Acquire our wrapped render target resource for the current back buffer.
+	m_d3d11On12Device->AcquireWrappedResources(m_WrappedBackBuffers[m_nSwapChainBufferIndex].GetAddressOf(), 1);
+
+	// Render text directly to the back buffer.
+	m_d2dDeviceContext->SetTarget(m_d2dRenderTargets[m_nSwapChainBufferIndex].Get());
+	m_d2dDeviceContext->BeginDraw();
+
+	// 2D 객체 랜더링
+	if (m_pScene) m_pScene->Render2D(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory, m_GameTimer.GetTimeElapsed());
+
+	m_d2dDeviceContext->EndDraw();
+
+	// Release our wrapped render target resource. Releasing 
+	// transitions the back buffer resource to the state specified
+	// as the OutState when the wrapped resource was created.
+	m_d3d11On12Device->ReleaseWrappedResources(m_WrappedBackBuffers[m_nSwapChainBufferIndex].GetAddressOf(), 1);
+
+	// Flush to submit the 11 command list to the shared command queue.
+	m_d3d11DeviceContext->Flush();
+}
+
 void CGameFramework::FrameAdvance()
 {
 	//타이머의 시간이 갱신되도록 하고 프레임 레이트를 계산한다.
@@ -406,7 +500,7 @@ void CGameFramework::FrameAdvance()
 
 	//렌더링 코드는 여기에 추가될 것이다.
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList.Get(), m_pCamera);
-
+	
 	if (m_pPlayer)
 		if(true == m_pPlayer->GetIsActive())
 			m_pPlayer->Render(m_pd3dCommandList.Get(), m_pCamera);
@@ -437,7 +531,8 @@ void CGameFramework::FrameAdvance()
 	//명령 리스트를 명령 큐에 추가하여 실행한다.
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList.Get() };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
-
+	//2D 오브젝트 랜더링
+	Render2D();
 	//GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
 	WaitForGpuComplete();
 
@@ -455,6 +550,10 @@ void CGameFramework::BuildObjects()
 
 	m_pScene = new CScene();
 	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+	m_pScene->BuildText(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory);
+
+	//ComPtr<ID3D12Resource> fontTexture;
+	//CreateWICTextureFromFile(m_pd3dDevice.Get(), L"font_texture.png", fontTexture.ReleaseAndGetAddressOf());
 
 #ifdef USE_SERVER
 	SetScene(m_pScene);

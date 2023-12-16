@@ -6,9 +6,9 @@ SOCKET g_socket;
 SOCKADDR_IN serveraddr;
 char recvBuf[BUF_SIZE];
 
-//string SERVER_IP = "127.0.0.1";
+string SERVER_IP = "127.0.0.1";
 //string SERVER_IP = "14.51.115.70";
-string SERVER_IP;
+//string SERVER_IP;
 
 float start_x, start_y, start_z;
 int id;
@@ -27,8 +27,8 @@ int NetworkInit()
 {
 	int ret;
 
-	cout << "서버 IP 주소를 입력해주세요 : ";
-	cin >> SERVER_IP;
+	//cout << "서버 IP 주소를 입력해주세요 : ";
+	//cin >> SERVER_IP;
 
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
 		cout << "WSA START ERROR" << endl;
@@ -163,6 +163,11 @@ void WINAPI do_recv()
 			SC_BULLET_COLLISION_PACKET* packet = reinterpret_cast<SC_BULLET_COLLISION_PACKET*>(ptr);
 			cout << "총알 번호 : " << packet->bullet_id << ", 블록 번호 : " << packet->block_id << ", 총알 주인 : " << packet->player_id << endl;;
 			NetScene->DisableObject(packet->bullet_id, packet->block_id, packet->player_id);
+	
+			if (id == packet->player_id) {
+				int UpdatedSocre = Netplayers[id]->GetPlayerScore() + 100;
+				Netplayers[id]->SetPlayerScore(UpdatedSocre);
+			}
 			break;
 		}
 		case SC_HIT: {
@@ -170,6 +175,11 @@ void WINAPI do_recv()
 			// 맞았을 때 처리
 			//cout << packet->bullet_id << ", " << packet->player_id << endl;
 			NetScene->DisableBullet(packet->bullet_id, packet->player_id);
+
+			if (id == packet->player_id) {
+				int UpdatedHP = Netplayers[id]->GetPlayerHP() - 10;
+				Netplayers[id]->SetPlayerHP(UpdatedHP);
+			} 
 			break;
 		}
 		case SC_DEATH: {
@@ -184,6 +194,7 @@ void WINAPI do_recv()
 			cout << "플레이어 [" << packet->player_id << "] 부활." << endl;
 			Netplayers[packet->player_id]->SetIsActive(true);
 			Netplayers[packet->player_id]->SetPosition(XMFLOAT3(packet->respawn_x, packet->respawn_y, packet->respawn_z));
+			Netplayers[packet->player_id]->SetPlayerHP(100);
 			break;
 		}
 		}

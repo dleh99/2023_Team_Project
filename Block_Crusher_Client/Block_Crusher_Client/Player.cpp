@@ -23,7 +23,7 @@ CPlayer::CPlayer() : CGameObject()
 	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
 
-	m_fMaxVelocityXZ = 0.0f;
+	m_fMaxVelocityXZ = 125.0f;
 	m_fMaxVelocityY = 0.0f;
 
 	m_fFriction = 0.0f;
@@ -98,19 +98,25 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		}
 
 		if (dwDirection & KEY_SHOOT) { 
-			m_fKeyDownTime += m_fEtime;
-			if (m_fKeyDownTime > 0.1f) {
-				int b_id = GetBulletId();
-				m_pScene->AddObjects(0,m_xmf3Position,GetLookVector(), GetPlayerId(), b_id);
-				//cout << GetPlayerId() << "가 총을 쏴서 서버에 보냈습니다" << endl;
-				XMFLOAT3 send_p = m_xmf3Position;
-				XMFLOAT3 send_v = GetLookVector();
+			//m_fKeyDownTime += m_fEtime;
+			
+			if (!m_bReloading) {
+				if (m_fKeyDownTime > 0.1f) {
+					int b_id = GetBulletId();
+					m_pScene->AddObjects(0, m_xmf3Position, GetLookVector(), GetPlayerId(), b_id);
+					//cout << GetPlayerId() << "가 총을 쏴서 서버에 보냈습니다" << endl;
+					XMFLOAT3 send_p = m_xmf3Position;
+					XMFLOAT3 send_v = GetLookVector();
 
-				send_bullet_add_packet(send_p, send_v, b_id);
-				SetBulletId(b_id + 1);
-				m_fKeyDownTime = 0.f;
+					send_bullet_add_packet(send_p, send_v, b_id);
+					SetBulletId(b_id + 1);
+					m_nBullet -= 1;
+					cout << m_nBullet << endl;
+					m_fKeyDownTime = 0.f;
+
+					if (m_nBullet == 0) m_bReloading = true;
+				}
 			}
-			//std::cout << "asd" << std::endl;
 		}
 		
 		//플레이어를 현재 위치 벡터에서 xmf3Shift 벡터만큼 이동한다.
@@ -144,7 +150,7 @@ void CPlayer::Jump(float fTimeElapsed)
 		
 		XMFLOAT3 shiftY = { 0,0,0 };
 
-		xmf3JumpShift.y -= 98.f * m_fPlayerGravityTime * fTimeElapsed;
+		xmf3JumpShift.y -= 100.f * m_fPlayerGravityTime * fTimeElapsed;
 		shiftY.y = xmf3JumpShift.y * fTimeElapsed;
 
 		m_fPlayerGravityTime += fTimeElapsed;
@@ -315,7 +321,14 @@ void CPlayer::Rotate(float x, float y, float z)
 //이 함수는 매 프레임마다 호출된다. 플레이어의 속도 벡터에 중력과 마찰력 등을 적용한다.
 void CPlayer::Update(float fTimeElapsed)
 {
-	m_fEtime = fTimeElapsed;
+	m_fKeyDownTime += fTimeElapsed;
+
+	if (m_fKeyDownTime > 2.0f) {
+		m_bReloading = false;
+		m_fKeyDownTime = 0.f;
+		m_nBullet = 30;
+	}
+
 	/*플레이어의 속도 벡터를 중력 벡터와 더한다. 중력 벡터에 fTimeElapsed를 곱하는 것은 중력을 시간에 비례하도록
 	적용한다는 의미이다.*/
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Gravity, fTimeElapsed, false));
@@ -325,10 +338,9 @@ void CPlayer::Update(float fTimeElapsed)
 	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
 	float fMaxVelocityXZ = m_fMaxVelocityXZ * fTimeElapsed;
 
-	if (fLength > m_fMaxVelocityXZ)
-	{
-		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
-		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
+	if (fLength > m_fMaxVelocityXZ){
+		m_xmf3Velocity.x *= (m_fMaxVelocityXZ / fLength);
+		m_xmf3Velocity.z *= (m_fMaxVelocityXZ / fLength);
 	}
 
 	/*플레이어의 속도 벡터의 y-성분의 크기를 구한다. 이것이 y-축 방향의 최대 속력보다 크면 속도 벡터의 y-방향 성

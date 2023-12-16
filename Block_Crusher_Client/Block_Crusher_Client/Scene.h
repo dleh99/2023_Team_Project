@@ -19,11 +19,13 @@ public:
 	bool ProcessInput(UCHAR* pKeyBuffer);
 	void AnimateObjects(float fTimeElapsed);
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	void Render2D(const ComPtr<ID2D1DeviceContext2>&  m_d2dDeviceContext, ComPtr<ID2D1Factory3> m_d2dFactory,ComPtr<IDWriteFactory> m_dWriteFactory, float fTimeElapsed);
 	void AddObjects(int type, XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector, int p_id, int b_id);
 	void ReleaseUploadBuffers();
 
 	void DisableObject(int id_1, int id_2, int p_id);
 	void DisableBullet(int bullet_id, int p_id);
+	void BuildText(ComPtr<ID2D1DeviceContext2> const m_d2dDeviceContext, ComPtr<ID2D1Factory3> m_d2dFactory, ComPtr<IDWriteFactory> m_dWriteFactory);
 
 	int FindEmptySlot();
 	bool BSCollisionCheck(XMFLOAT3 Position1, XMFLOAT3 Position2, float Radius1, float Radius2);
@@ -44,10 +46,15 @@ protected:
 	int m_nObjects = 0;
 	int m_nRandObject = 0;
 
+	float m_fPlayTime = 180.0f;
+
 	CShader* m_pSceneShader;
 	CCubeMeshDiffused* pBulletMesh = NULL;
 
 	CSkyBox* m_pSkyBox = NULL;
+
+	ComPtr<IDWriteTextFormat> pTextFormat = NULL;
+	ComPtr<ID2D1SolidColorBrush> SolidColorBrush = nullptr;
 
 	ComPtr<ID3D12RootSignature> m_pd3dGraphicsRootSignature = NULL;
 

@@ -1,15 +1,31 @@
 ﻿// header.h: 표준 시스템 포함 파일
 // 또는 프로젝트 특정 포함 파일이 들어 있는 포함 파일입니다.
 //
-
 #pragma once
 #pragma warning(disable: 4996)
 
 #include "targetver.h"
 #define WIN32_LEAN_AND_MEAN             // 거의 사용되지 않는 내용을 Windows 헤더에서 제외합니다.
 
+// Import 라이브러리
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "Winmm.lib")		// ::timeGetTime()
+
+#pragma comment(lib, "dwrite")
+#pragma comment(lib, "d2d1")
+#pragma comment(lib, "d3d11")
+
+//Direct3D 2D UI
+#include <d3d11.h>
+#include <d3d11on12.h>
+#include <d2d1_3.h>
+#include <dwrite.h>
+
 // Windows 헤더 파일
-#include <windows.h>
+//#include <windows.h>
 // C 런타임 헤더 파일입니다.
 #include <stdlib.h>
 #include <malloc.h>
@@ -25,8 +41,8 @@
 #include <string>
 #include <random>
 
+
 // Direct3D 12
-#include <string>
 #include <shellapi.h>
 #include <wrl.h>						// ComPtr
 using Microsoft::WRL::ComPtr;			// ComPtr
@@ -47,13 +63,6 @@ using Microsoft::WRL::ComPtr;			// ComPtr
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;
-
-// Import 라이브러리
-#pragma comment(lib, "dxgi.lib")
-#pragma comment(lib, "d3d12.lib")
-#pragma comment(lib, "dxguid.lib")
-#pragma comment(lib, "d3dcompiler.lib")
-#pragma comment(lib, "Winmm.lib")		// ::timeGetTime()
 
 // 클라이언트 영역 크기 정의
 #define FRAME_BUFFER_WIDTH 1024

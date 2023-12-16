@@ -1,4 +1,4 @@
-#include "stdafx.h"
+Ôªø#include "stdafx.h"
 #include "Scene.h"
 #include "Player.h"
 
@@ -18,9 +18,10 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
+
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
 
-	// ∞°∑Œ x ºº∑Œ x ±Ì¿Ã∞° 12 x 12 x 12¿Œ ¡§¿∞∏È√º ∏ﬁΩ¨ ª˝º∫
+	// Í∞ÄÎ°ú x ÏÑ∏Î°ú x ÍπäÏù¥Í∞Ä 12 x 12 x 12Ïù∏ Ï†ïÏú°Î©¥Ï≤¥ Î©îÏâ¨ ÏÉùÏÑ±
 	CCubeMeshTextured* pCubeMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
 	CCubeMeshDiffused* BulletMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 2.0f, 2.0f, 2.0f);
 
@@ -45,7 +46,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pBulletMesh = BulletMesh;
 
 	AddBlocksByMapData(pCubeMesh, pTShader, pMaterial, 0);
-	std::cout << "√ﬂ∞°µ» ∫Ì∑∞ : " << m_nblock << std::endl;
+	std::cout << "Ï∂îÍ∞ÄÎêú Î∏îÎü≠ : " << m_nblock << std::endl;
 }
 
 void CScene::ReleaseObjects()
@@ -76,7 +77,7 @@ void CScene::DisableObject(int bullet_id, int block_id, int p_id)
 	for (int i{}; i < m_nObjects; ++i) {
 		if (m_ppObjects[i]->GetObjectType() != TYPE_BULLET) continue;
 		if (((CBulletObject*)m_ppObjects[i])->GetPlayerId() == p_id && ((CBulletObject*)m_ppObjects[i])->GetBulletId() == bullet_id) {
-			//std::cout << "√Êµπ √≥∏Æ π◊ ªË¡¶ øœ∑·" << std::endl;
+			//std::cout << "Ï∂©Îèå Ï≤òÎ¶¨ Î∞è ÏÇ≠Ï†ú ÏôÑÎ£å" << std::endl;
 			m_ppObjects[i]->SetIsActive(false);
 			break;
 		}
@@ -88,7 +89,7 @@ void CScene::DisableBullet(int bullet_id, int p_id)
 	for (int i{}; i < m_nObjects; ++i) {
 		if (m_ppObjects[i]->GetObjectType() != TYPE_BULLET) continue;
 		if (((CBulletObject*)m_ppObjects[i])->GetPlayerId() == p_id && ((CBulletObject*)m_ppObjects[i])->GetBulletId() == bullet_id) {
-			//std::cout << "√£æ“¥Ÿ" << std::endl;
+			//std::cout << "Ï∞æÏïòÎã§" << std::endl;
 			m_ppObjects[i]->SetIsActive(false);
 			break;
 		}
@@ -288,7 +289,7 @@ void CScene::AddObjects(int type,XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector,
 	m_ppObjects[m_nObjects]->SetPosition(BulletPosition);
 	m_ppObjects[m_nObjects]->SetIsActive(true);
 
-	//std::cout << "√—æÀ ª˝º∫" << std::endl;
+	//std::cout << "Ï¥ùÏïå ÏÉùÏÑ±" << std::endl;
 	
 	m_nObjects++;
 }
@@ -315,11 +316,71 @@ bool CScene::BSCollisionCheck(XMFLOAT3 Position1, XMFLOAT3 Position2,float Radiu
 	return false;
 }
 
+void CScene::BuildText(ComPtr<ID2D1DeviceContext2> const m_d2dDeviceContext, ComPtr<ID2D1Factory3> m_d2dFactory, ComPtr<IDWriteFactory> m_dWriteFactory)
+{
+	m_dWriteFactory->CreateTextFormat(
+		L"Verdana",
+		NULL,
+		DWRITE_FONT_WEIGHT_NORMAL,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_CONDENSED,
+		50,
+		L"",
+		&pTextFormat
+	);
+	//¬†IDWriteTextFormatÏùò¬†SetXxx¬†Ìò∏Ï∂úÌïòÏó¨¬†Ìè¨Îß∑¬†ÏÜçÏÑ±¬†ÏßÄÏ†ï.
+	pTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	pTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Tan), SolidColorBrush.GetAddressOf());
+}
+
+void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, ComPtr<ID2D1Factory3> m_d2dFactory, ComPtr<IDWriteFactory> m_dWriteFactory,
+	float fTimeElapsed)
+{	
+	// Ï†úÌïúÏãúÍ∞Ñ
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(410, 0));
+
+	m_fPlayTime -= fTimeElapsed;
+
+	std::wstring min = std::to_wstring(int(m_fPlayTime) / 60) + L":";
+	std::wstring sec = std::to_wstring(int(m_fPlayTime) % 60);
+
+	if (int(m_fPlayTime) % 60 < 10) sec = L"0" + std::to_wstring(int(m_fPlayTime) % 60);
+	if(int(m_fPlayTime) < 0) sec = L"00";
+
+	std::wstring str = min + sec;
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat.Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush.Get());
+	
+	// Ï†êÏàò
+	
+	str = std::to_wstring(m_pPlayer->GetPlayerScore());
+
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 00));
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat.Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush.Get());
+
+	// Ï¥ùÏïå
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 650));
+	str = std::to_wstring(m_pPlayer->GetBulletNum()) + L"/30";
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat.Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush.Get());
+
+	// Ï≤¥Î†•
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(50, 675));
+
+	float portion = float(m_pPlayer->GetPlayerHP()) / 100.0f;
+	if (m_pPlayer->GetPlayerHP() > 0) {
+		m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 300.0f * portion, 50), SolidColorBrush.Get());
+	}
+}
+
 int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMaterial, int nindex)
 {
 	std::ifstream in{ "Map/MapData3.bin", std::ios::binary };
 
-	//if (!in) std::cout << "ππ¿” §µ§≤" << std::endl;
+	//if (!in) std::cout << "Î≠êÏûÑ „ÖÖ„ÖÇ" << std::endl;
 
 	int mapdata[50][50];
 
@@ -357,7 +418,7 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 	}
 	
 	m_nObjects = 50 * 50 * 10 + m_nblock;
-	m_ppObjects = new CGameObject * [m_nObjects + 1000];
+	m_ppObjects = new CGameObject * [m_nObjects + 2000];
 
 	int cnt = nindex;
 
@@ -394,7 +455,7 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 
 				m_ppObjects[cnt] = pBlockObject;
 				m_ppObjects[cnt]->SetPosition(position);
-				//std::cout << cnt << "π¯¬∞ √ﬂ∞°?" << std::endl;
+				//std::cout << cnt << "Î≤àÏß∏ Ï∂îÍ∞Ä?" << std::endl;
 				
 				cnt++;
 			}

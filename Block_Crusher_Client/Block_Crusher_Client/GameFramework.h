@@ -37,6 +37,19 @@ private:
 
 	ComPtr<IDXGISwapChain3> m_pdxgiSwapChain;
 
+	//Directx11on12 for 2D UI
+	ComPtr<ID3D11DeviceContext> m_d3d11DeviceContext;
+	ComPtr<ID3D11On12Device> m_d3d11On12Device;
+	ComPtr<ID2D1Device2> m_d2dDevice;
+	ComPtr<ID2D1Factory3> m_d2dFactory;
+	ComPtr<ID2D1DeviceContext2> m_d2dDeviceContext;
+	ComPtr<IDWriteFactory> m_dWriteFactory;
+
+	ComPtr<ID3D11Resource> m_WrappedBackBuffers[m_nSwapChainBuffers];
+	ComPtr<ID2D1Bitmap1> m_d2dRenderTargets[m_nSwapChainBuffers];
+
+	UINT m_CurrBackbufferIndex = 0;
+
 	// 리소스 멤버들
 	ComPtr<ID3D12Resource> m_ppd3dRenderTargetBuffers[m_nSwapChainBuffers];
 	ComPtr<ID3D12DescriptorHeap> m_pd3dRtvDescriptorHeap;
@@ -72,6 +85,9 @@ public:
 	void CreateCommandQueue();
 	void CreateSwapChain();
 
+	void CreateD3D11On12Device();
+	void CreateD2DDevice();
+
 	void CreateRtvAndDsvDescriptorHeaps();
 	void CreateRenderTargetViews();
 	void CreateDepthStencilView();
@@ -82,6 +98,7 @@ public:
 	void ProcessInput();
 	void AnimateObjects();
 	void FrameAdvance();
+	void Render2D();
 
 	void WaitForGpuComplete();
 

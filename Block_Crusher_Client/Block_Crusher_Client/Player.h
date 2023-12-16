@@ -26,9 +26,14 @@ protected:
 	float m_fYaw;
 	float m_fRoll;
 
+	//플레이 관련
+	int m_iPlayerHP = 100;
+	int m_iPlayerScore = 0;
+	int m_nBullet = 30;
 	float m_fKeyDownTime = 9999;
-	//
 	float m_fEtime = 0;
+	bool m_bReloading = false;
+
 	//플레이어 중력적용(y좌표 감소) 여부
 	bool m_bPlayerGravity = false;
 	//플레이어 점프키
@@ -77,6 +82,10 @@ public:
 	CPlayer();
 	virtual ~CPlayer();
 
+	int GetPlayerHP() { return m_iPlayerHP; };
+	int GetPlayerScore() { return m_iPlayerScore; };
+	int GetBulletNum() { return m_nBullet; };
+
 	XMFLOAT3 GetPosition() { return(m_xmf3Position); }
 	XMFLOAT3 GetLookVector() { return(m_xmf3Look); }
 	XMFLOAT3 GetUpVector() { return(m_xmf3Up); }
@@ -85,6 +94,10 @@ public:
 	float GetPitch() { return(m_fPitch); }
 	float GetYaw() { return(m_fYaw); }
 	float GetRoll() { return(m_fRoll); }
+
+	void SetPlayerHP(int hp) { m_iPlayerHP = hp; };
+	void SetPlayerScore(int score) { m_iPlayerScore = score; };
+	void SetBulletNum(int nBullet) { m_nBullet = nBullet; };
 
 	void SetFriction(float fFriction) { m_fFriction = fFriction; }
 	void SetGravity(XMFLOAT3 xmf3Gravity) { m_xmf3Gravity = xmf3Gravity; }

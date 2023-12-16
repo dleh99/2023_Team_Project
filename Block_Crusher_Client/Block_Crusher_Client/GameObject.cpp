@@ -698,17 +698,17 @@ void CBulletObject::Animate(float fTimeElapsed)
 
 	position = Vector3::Add(position, velocity);
 
-	if (position.x > 200.0f || position.x < -200.0f) {
+	if (position.x > 800.0f || position.x < -800.0f) {
 		m_bActive = false;
 		return;
 	}
 
-	if (position.z > 200.0f || position.z < -200.0f) {
+	if (position.z > 800.0f || position.z < -800.0f) {
 		m_bActive = false;
 		return;
 	}
 
-	if (position.y > 200.0f || position.y < -200.0f) {
+	if (position.y > 500.0f || position.y < -200.0f) {
 		m_bActive = false;
 		return;
 	}
@@ -723,7 +723,7 @@ CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	SetMesh(pSkyBoxMesh);
 
 	CTexture* pSkyBoxTexture = new CTexture(1, RESOURCE_TEXTURE_CUBE, 0, 1);
-	pSkyBoxTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/SkyBox_0.dds", RESOURCE_TEXTURE_CUBE, 0);
+	pSkyBoxTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Space.dds", RESOURCE_TEXTURE_CUBE, 0);
 
 	CSkyBoxShader* pSkyBoxShader = new CSkyBoxShader();
 	pSkyBoxShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
