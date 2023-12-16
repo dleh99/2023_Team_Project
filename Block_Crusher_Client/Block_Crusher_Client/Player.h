@@ -187,4 +187,6 @@ public:
 
 	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
 	virtual void Update(float fTimeElapsed, ULONG nDirection);
+
+	void OtherPlayerAnimationUpdate(DWORD dwOtherPlayerDirection);
 };

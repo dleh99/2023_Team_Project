@@ -487,7 +487,6 @@ void CGameFramework::BuildObjects()
 	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
 
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed(), NULL);
-	//auto pp = m_pScene->m_pPlayer->GetPosition();
 
 	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
 		m_vEnemyPlayers[i]->Update(m_GameTimer.GetTimeElapsed(), NULL);
@@ -500,8 +499,6 @@ void CGameFramework::BuildObjects()
 	WaitForGpuComplete();
 
 	//if (m_pScene)m_pScene->ReleaseUploadBuffers();
-
-	//m_vEnemyPlayers[0]->Render()
 
 	m_GameTimer.Reset();
 }
@@ -595,6 +592,17 @@ void CGameFramework::ProcessInput()
 
 	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다.
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed(), dwDirection);
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+
+	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
+		if (m_pPlayer)
+			if (m_pPlayer->GetPlayerId() == i)
+				continue;
+
+		if (m_vEnemyPlayers[i])
+			m_vEnemyPlayers[i]->OtherPlayerAnimationUpdate(dwDirection);
+	}
 }
 
 void CGameFramework::AnimateObjects()
@@ -604,6 +612,15 @@ void CGameFramework::AnimateObjects()
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
 
 	m_pPlayer->Animate(fTimeElapsed);
+
+	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
+		if (m_pPlayer)
+			if (m_pPlayer->GetPlayerId() == i)
+				continue;
+
+		if (m_vEnemyPlayers[i])
+			m_vEnemyPlayers[i]->Animate(fTimeElapsed);
+	}
 }
 
 void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
