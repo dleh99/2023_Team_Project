@@ -40,4 +40,4 @@ Pos GetOtherPlayerPos();
 int GetOtherPlayerId();
 Mouse GetOtherPlayerMouse();
 void SetScene(CScene* Scene);
-void SetPlayers(vector<CPlayer*> players);
+void SetPlayers(vector<CMainPlayer*> players);

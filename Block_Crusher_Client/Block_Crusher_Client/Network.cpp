@@ -18,7 +18,7 @@ Pos otherPlayerPos;
 Mouse otherPlayerMouse;
 CScene* NetScene = NULL;
 int otherPlayer_id = -1;
-vector<CPlayer*> Netplayers;
+vector<CMainPlayer*> Netplayers;
 
 // 게임 시작 변수
 bool m_gameStart = false;
@@ -307,7 +307,7 @@ void SetScene(CScene* Scene) {
 	NetScene = Scene;
 }
 
-void SetPlayers(vector<CPlayer*> players)
+void SetPlayers(vector<CMainPlayer*> players)
 {
 	Netplayers = players;
 }
