@@ -122,11 +122,11 @@ D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(const WCHAR* pszFileName, L
 	if (pd3dErrorBlob != nullptr) {
 		std::cout << (char*)pd3dErrorBlob->GetBufferPointer() << std::endl;
 
-		//OutputDebugStringA((char*)pd3dErrorBlob->GetBufferPointer());
+		OutputDebugStringA((char*)pd3dErrorBlob->GetBufferPointer());
 	}
 
-	//if (FAILED(hr))
-	//	std::cout << "Fail" << std::endl;
+	if (FAILED(hr))
+		std::cout << "Fail" << std::endl;
 
 	D3D12_SHADER_BYTECODE d3dShaderByteCode;
 	d3dShaderByteCode.BytecodeLength = (*ppd3dShaderBlob)->GetBufferSize();
@@ -379,7 +379,7 @@ void CPlayerShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* 
 
 void CPlayerShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	pd3dCommandList->SetPipelineState(m_ppd3dPlayerPipelineStates[0]);
+	if (m_ppd3dPlayerPipelineStates) pd3dCommandList->SetPipelineState(m_ppd3dPlayerPipelineStates[0]);
 	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
 }
 
@@ -468,4 +468,67 @@ void CSkyBoxShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* 
 
 	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, m_ppd3dPipelineStates);
 
+}
+
+CSkinnedAnimationPlayerShader::CSkinnedAnimationPlayerShader()
+{
+}
+
+CSkinnedAnimationPlayerShader::~CSkinnedAnimationPlayerShader()
+{
+}
+
+D3D12_INPUT_LAYOUT_DESC CSkinnedAnimationPlayerShader::CreateInputLayout()
+{
+	UINT nInputElementDescs = 6;
+	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
+		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0,
+		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[2] = { "TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 2, 0,
+		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[3] = { "UV", 0, DXGI_FORMAT_R32G32_FLOAT, 3, 0,
+		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[4] = { "BONEINDEX", 0, DXGI_FORMAT_R32G32B32A32_SINT, 4, 0,
+		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[5] = { "BONEWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 5, 0,
+		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+	::ZeroMemory(&d3dInputLayoutDesc, sizeof(D3D12_INPUT_LAYOUT_DESC));
+	d3dInputLayoutDesc.NumElements = nInputElementDescs;
+	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+
+	return d3dInputLayoutDesc;
+}
+
+D3D12_SHADER_BYTECODE CSkinnedAnimationPlayerShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
+{
+	return CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSSkinnedAnimationStandard", "vs_5_1", ppd3dShaderBlob);
+}
+
+D3D12_SHADER_BYTECODE CSkinnedAnimationPlayerShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
+{
+	return CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSSkinnedAnimationStandard", "ps_5_1", ppd3dShaderBlob);
+}
+
+void CSkinnedAnimationPlayerShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	m_nSkinnedPlayerPipelineStates = 1;
+	m_ppd3dSkinnedPlayerPipelineStates = new ID3D12PipelineState * [m_nSkinnedPlayerPipelineStates];
+
+	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, m_ppd3dSkinnedPlayerPipelineStates);
+}
+
+void CSkinnedAnimationPlayerShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	if (m_ppd3dSkinnedPlayerPipelineStates) pd3dCommandList->SetPipelineState(m_ppd3dSkinnedPlayerPipelineStates[0]);
+	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
+}
+
+void CSkinnedAnimationPlayerShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	OnPrepareRender(pd3dCommandList);
 }

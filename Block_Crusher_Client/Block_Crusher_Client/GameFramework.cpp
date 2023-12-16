@@ -590,11 +590,10 @@ void CGameFramework::BuildObjects()
 
 	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
 
-	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
-	//auto pp = m_pScene->m_pPlayer->GetPosition();
+	m_pPlayer->Update(m_GameTimer.GetTimeElapsed(), NULL);
 
 	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
-		m_vEnemyPlayers[i]->Update(m_GameTimer.GetTimeElapsed());
+		m_vEnemyPlayers[i]->Update(m_GameTimer.GetTimeElapsed(), NULL);
 	}
 
 	m_pd3dCommandList->Close();
@@ -603,9 +602,7 @@ void CGameFramework::BuildObjects()
 
 	WaitForGpuComplete();
 
-	if (m_pScene)m_pScene->ReleaseUploadBuffers();
-
-	//m_vEnemyPlayers[0]->Render()
+	//if (m_pScene)m_pScene->ReleaseUploadBuffers();
 
 	m_GameTimer.Reset();
 }
@@ -698,14 +695,37 @@ void CGameFramework::ProcessInput()
 		이동 거리는 시간에 비례하도록 한다. 플레이어의 이동 속력은 (50/초)로 가정한다.*/
 		if (dwDirection) m_pPlayer->Move(dwDirection, 300.0f * m_GameTimer.GetTimeElapsed(), true);
 
-		//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다.
-		m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
+	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다.
+	m_pPlayer->Update(m_GameTimer.GetTimeElapsed(), dwDirection);
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+
+	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
+		if (m_pPlayer)
+			if (m_pPlayer->GetPlayerId() == i)
+				continue;
+
+		if (m_vEnemyPlayers[i])
+			m_vEnemyPlayers[i]->OtherPlayerAnimationUpdate(dwDirection);
 	}
 }
 
 void CGameFramework::AnimateObjects()
 {
-	if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed());
+	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
+
+	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
+
+	m_pPlayer->Animate(fTimeElapsed);
+
+	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
+		if (m_pPlayer)
+			if (m_pPlayer->GetPlayerId() == i)
+				continue;
+
+		if (m_vEnemyPlayers[i])
+			m_vEnemyPlayers[i]->Animate(fTimeElapsed);
+	}
 }
 
 void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)

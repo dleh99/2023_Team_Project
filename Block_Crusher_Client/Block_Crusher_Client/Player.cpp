@@ -459,8 +459,7 @@ void CPlayer::OnPrepareRender()
 
 void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	//카메라 모드가 3인칭이면 플레이어 객체를 렌더링한다.
-	if (m_pShader) m_pShader->Render(pd3dCommandList, pCamera);
+	//if (m_pShader) m_pShader->Render(pd3dCommandList, pCamera);
 	CGameObject::Render(pd3dCommandList, pCamera);
 
 	//std::cout << "이 플레이어의 네트워크 ID : " << m_playerNetworkId << std::endl;
@@ -550,8 +549,34 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	pPlayerShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
 	pPlayerShader->CreateShaderResourceViews(pd3dDevice, pTexture, 0, 4);
 
-	CGameObject* pPlayerObject = CGameObject::LoadHierarchyModelFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
-		"Models/player model data.bin", pPlayerShader);
+	CSkinnedAnimationPlayerShader* pSkinnedPlayerShader = new CSkinnedAnimationPlayerShader();
+	pSkinnedPlayerShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pSkinnedPlayerShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	pSkinnedPlayerShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+	pSkinnedPlayerShader->CreateShaderResourceViews(pd3dDevice, pTexture, 0, 4);
+
+	CLoadedModelInfo* pPlayerModel = CGameObject::LoadModelAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+		"Models/player model data.bin", "Models/player animation data.bin", pPlayerShader, pSkinnedPlayerShader);
+	SetChild(pPlayerModel->m_pModelRootObject);
+
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 8, pPlayerModel);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);	// Idle
+	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);	// Run_Forward
+	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);	// Run_Left
+	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3);	// Run_Right
+	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4);	// Run_Back
+	m_pSkinnedAnimationController->SetTrackAnimationSet(5, 5);	// Fire_Bullet
+	m_pSkinnedAnimationController->SetTrackAnimationSet(6, 6);	// Damaged_Motion
+	m_pSkinnedAnimationController->SetTrackAnimationSet(7, 7);	// Death
+	m_pSkinnedAnimationController->m_pAnimationTracks[6].m_nType = ANIMATION_TYPE_ONCE;
+	m_pSkinnedAnimationController->m_pAnimationTracks[7].m_nType = ANIMATION_TYPE_ONCE;
+	m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	m_pSkinnedAnimationController->SetTrackEnable(4, false);
+	m_pSkinnedAnimationController->SetTrackEnable(5, false);
+	m_pSkinnedAnimationController->SetTrackEnable(6, false);
+	m_pSkinnedAnimationController->SetTrackEnable(7, false);
 
 	CMaterial* pMat = new CMaterial();
 	pMat->SetTexture(pTexture);
@@ -559,11 +584,7 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 
 	SetPosition(XMFLOAT3(x, y, z));
 
-	SetChild(pPlayerObject);
-
 	m_pCamera = CreateCamera(0.0f);
-
-	SetShader(pPlayerShader);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -593,7 +614,7 @@ CCamera* CMainPlayer::CreateCamera(float fTimeElapsed)
 	m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
 
 	//플레이어를 시간의 경과에 따라 갱신(위치와 방향을 변경: 속도, 마찰력, 중력 등을 처리)한다.
-	Update(fTimeElapsed);
+	Update(fTimeElapsed, NULL);
 
 	return(m_pCamera);
 }
@@ -601,4 +622,305 @@ CCamera* CMainPlayer::CreateCamera(float fTimeElapsed)
 void CMainPlayer::OnPrepareRender()
 {
 	CPlayer::OnPrepareRender();
+}
+
+void CMainPlayer::OtherPlayerAnimationUpdate(DWORD dwOtherPlayerDirection)
+{
+	if (dwOtherPlayerDirection)	// Move or Shoot
+	{
+		if (dwOtherPlayerDirection & KEY_SHOOT)	// Shoot
+		{
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(5, true);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
+			m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(7, false);
+			m_pSkinnedAnimationController->SetTrackPosition(7, 0.0f);
+		}
+		else if (dwOtherPlayerDirection & DIR_FORWARD)
+		{
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(1, true);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
+			m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(7, false);
+			m_pSkinnedAnimationController->SetTrackPosition(7, 0.0f);
+		}
+		else if (dwOtherPlayerDirection & DIR_LEFT)
+		{
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(2, true);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
+			m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(7, false);
+			m_pSkinnedAnimationController->SetTrackPosition(7, 0.0f);
+		}
+		else if (dwOtherPlayerDirection & DIR_RIGHT)
+		{
+
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(3, true);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
+			m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(7, false);
+			m_pSkinnedAnimationController->SetTrackPosition(7, 0.0f);
+		}
+		else if (dwOtherPlayerDirection & DIR_BACKWARD)
+		{
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(4, true);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
+			m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(7, false);
+			m_pSkinnedAnimationController->SetTrackPosition(7, 0.0f);
+		}
+		else			// Move & Don't Shoot
+		{
+			m_pSkinnedAnimationController->SetTrackEnable(0, true);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
+			m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(7, false);
+			m_pSkinnedAnimationController->SetTrackPosition(7, 0.0f);
+		}
+	}
+
+	// Move
+
+	if (m_pSkinnedAnimationController)
+	{
+		float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+		if (::IsZero(fLength))
+		{
+			m_pSkinnedAnimationController->SetTrackEnable(0, true);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
+			m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(7, false);
+			m_pSkinnedAnimationController->SetTrackPosition(7, 0.0f);
+
+			if (dwOtherPlayerDirection & KEY_SHOOT)
+			{
+				m_pSkinnedAnimationController->SetTrackEnable(0, false);
+				m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
+				m_pSkinnedAnimationController->SetTrackEnable(5, true);
+			}
+		}
+	}
+}
+
+void CMainPlayer::Update(float fTimeElapsed, DWORD dwDirection)
+{
+	CPlayer::Update(fTimeElapsed);
+
+	if (m_pSkinnedAnimationController)
+	{
+		float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+		if (::IsZero(fLength))
+		{
+			m_pSkinnedAnimationController->SetTrackEnable(0, true);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
+			m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(7, false);
+			m_pSkinnedAnimationController->SetTrackPosition(7, 0.0f);
+
+			if (dwDirection & KEY_SHOOT)
+			{
+				m_pSkinnedAnimationController->SetTrackEnable(0, false);
+				m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
+				m_pSkinnedAnimationController->SetTrackEnable(5, true);
+			}
+		}
+	}
+}
+
+void CMainPlayer::Move(DWORD dwDirection, float fDistance, bool bVelocity)
+{
+	if (dwDirection)	// Move or Shoot
+	{
+		if (dwDirection & KEY_SHOOT)	// Shoot
+		{
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(5, true);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
+			m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(7, false);
+			m_pSkinnedAnimationController->SetTrackPosition(7, 0.0f);
+		}
+		else if (dwDirection & DIR_FORWARD)
+		{
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(1, true);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
+			m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(7, false);
+			m_pSkinnedAnimationController->SetTrackPosition(7, 0.0f);
+		}
+		else if (dwDirection & DIR_LEFT)
+		{
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(2, true);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
+			m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(7, false);
+			m_pSkinnedAnimationController->SetTrackPosition(7, 0.0f);
+		}
+		else if (dwDirection & DIR_RIGHT)
+		{
+
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(3, true);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
+			m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(7, false);
+			m_pSkinnedAnimationController->SetTrackPosition(7, 0.0f);
+		}
+		else if (dwDirection & DIR_BACKWARD)
+		{
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(4, true);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
+			m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(7, false);
+			m_pSkinnedAnimationController->SetTrackPosition(7, 0.0f);
+		}
+		else			// Move & Don't Shoot
+		{
+			m_pSkinnedAnimationController->SetTrackEnable(0, true);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
+			m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(7, false);
+			m_pSkinnedAnimationController->SetTrackPosition(7, 0.0f);
+		}
+	}
+
+	CPlayer::Move(dwDirection, fDistance, bVelocity);
 }

@@ -123,7 +123,7 @@ ComPtr<ID3D12RootSignature> CScene::CreateGraphicsRootSignature(ID3D12Device* pd
 	pd3dDescriptorRange[2].RegisterSpace = 0;
 	pd3dDescriptorRange[2].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameter[5];
+	D3D12_ROOT_PARAMETER pd3dRootParameter[7];
 	::ZeroMemory(&pd3dRootParameter, sizeof(pd3dRootParameter));
 	pd3dRootParameter[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameter[0].Constants.Num32BitValues = 16;
@@ -151,6 +151,16 @@ ComPtr<ID3D12RootSignature> CScene::CreateGraphicsRootSignature(ID3D12Device* pd
 	pd3dRootParameter[4].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameter[4].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRange[2];
 	pd3dRootParameter[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	pd3dRootParameter[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameter[5].Descriptor.ShaderRegister = 2; //Skinned Bone Offsets
+	pd3dRootParameter[5].Descriptor.RegisterSpace = 0;
+	pd3dRootParameter[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+	pd3dRootParameter[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameter[6].Descriptor.ShaderRegister = 3; //Skinned Bone Transforms
+	pd3dRootParameter[6].Descriptor.RegisterSpace = 0;
+	pd3dRootParameter[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |

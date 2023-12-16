@@ -113,8 +113,8 @@ public:
 	UINT64 m_nFenceValues[m_nSwapChainBuffers];
 	CScene* m_pScene;
 	CCamera* m_pCamera = NULL;
-	CPlayer* m_pPlayer = NULL;
-	vector<CPlayer*> m_vEnemyPlayers;
+	CMainPlayer* m_pPlayer = NULL;
+	vector<CMainPlayer*> m_vEnemyPlayers;
 	POINT m_ptOldCursorPos; 
 };
 

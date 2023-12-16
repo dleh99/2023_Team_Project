@@ -106,6 +106,25 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 };
 
+class CSkinnedAnimationPlayerShader : public CPlayerShader
+{
+public:
+	int m_nSkinnedPlayerPipelineStates = 0;
+	ID3D12PipelineState** m_ppd3dSkinnedPlayerPipelineStates = NULL;
+
+public:
+	CSkinnedAnimationPlayerShader();
+	virtual ~CSkinnedAnimationPlayerShader();
+
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
+
+	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+};
+
 class CSkyBoxShader : public CShader
 {
 public:
