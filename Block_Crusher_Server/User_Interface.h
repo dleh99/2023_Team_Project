@@ -37,7 +37,7 @@ public:
 	void do_send(void* packet);
 
 	void send_login_info_packet();
-	void send_start_packet();
+	void send_start_packet(char mapkey);
 	void send_move_packet(User_Interface* clients, int c_id);
 	void send_bullet_add_packet(User_Interface* clients, int c_id, int bullet_num);
 	void send_collision_packet(int id_1, int id_2);

@@ -14,7 +14,7 @@ CScene::~CScene()
 
 }
 
-void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char mapkey)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
@@ -44,7 +44,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	pBulletMesh = BulletMesh;
 
-	AddBlocksByMapData(pCubeMesh, pTShader, pMaterial, 0);
+	AddBlocksByMapData(pCubeMesh, pTShader, pMaterial, 0, mapkey);
 	std::cout << "추가된 블럭 : " << m_nblock << std::endl;
 }
 
@@ -315,7 +315,7 @@ bool CScene::BSCollisionCheck(XMFLOAT3 Position1, XMFLOAT3 Position2,float Radiu
 	return false;
 }
 
-int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMaterial, int nindex)
+int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMaterial, int nindex, char mapkey)
 {
 	std::ifstream in{ "Map/MapData3.bin", std::ios::binary };
 
@@ -332,7 +332,7 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 		in >> c;
 		//std::cout << c << " ";
 
-		if (c == 'd') {
+		if (c == mapkey) {
 			flag = true;
 			continue;
 		}

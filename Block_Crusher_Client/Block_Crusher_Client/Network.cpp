@@ -6,9 +6,9 @@ SOCKET g_socket;
 SOCKADDR_IN serveraddr;
 char recvBuf[BUF_SIZE];
 
-//string SERVER_IP = "127.0.0.1";
+string SERVER_IP = "127.0.0.1";
 //string SERVER_IP = "14.51.115.70";
-string SERVER_IP;
+//string SERVER_IP;
 
 float start_x, start_y, start_z;
 int id;
@@ -22,13 +22,14 @@ vector<CPlayer*> Netplayers;
 
 // 게임 시작 변수
 bool m_gameStart = false;
+char m_mapKey;
 
 int NetworkInit()
 {
 	int ret;
 
-	cout << "서버 IP 주소를 입력해주세요 : ";
-	cin >> SERVER_IP;
+	//cout << "서버 IP 주소를 입력해주세요 : ";
+	//cin >> SERVER_IP;
 
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
 		cout << "WSA START ERROR" << endl;
@@ -129,6 +130,7 @@ void WINAPI do_recv()
 		case SC_START: {	// 게임 시작 조건이 달성되면(6명) 게임을 시작함. 초기 지형 위치 보냄
 			SC_START_PACKET* packet = reinterpret_cast<SC_START_PACKET*>(ptr);
 			m_gameStart = true;
+			m_mapKey = packet->map_key;
 			//cout << "시작 패킷 받음" << endl;
 			break;
 		}
@@ -195,6 +197,11 @@ void WINAPI do_recv()
 bool GetGameState()
 {
 	return m_gameStart;
+}
+
+char GetMapKey()
+{
+	return m_mapKey;
 }
 
 Pos GetStartPos()

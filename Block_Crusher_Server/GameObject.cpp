@@ -90,6 +90,15 @@ Block::Block()
 	SetisActive(true);
 }
 
+Block::Block(int input_id, XMFLOAT3 input_pos)
+{
+	SetId(input_id);
+	SetPosition(input_pos.x, input_pos.y, input_pos.z);
+	float rad = sqrt(144.f * 3.f) / 2.f;
+	SetRadius(rad);
+	SetisActive(true);
+}
+
 Block::~Block()
 {
 	

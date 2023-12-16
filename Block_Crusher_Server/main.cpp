@@ -59,7 +59,7 @@ void packet_process(int c_id, char* packet)
 		if (user_number == 3)
 			for (auto& cl : clients)
 				if (cl._state == US_INGAME)
-					cl.send_start_packet();
+					cl.send_start_packet(Map_infromation.MapChar);
 		break;
 	}
 	case CS_MOVE: {
@@ -223,7 +223,7 @@ void Physics_Calculation_thread()
 			for (int i{}; i < MAX_BULLET_NUM; ++i) {
 				if (false == cl.bullet[i].GetisActive()) continue;
 				// 총알과 블록 충돌 처리
-				for (int j{}; j < 1008; ++j) {
+				for (int j{}; j < Map_infromation.block_num; ++j) {
 					if (false == Map_infromation.Map_Block[j].GetisActive()) continue;
 					if (CollisionCheck(cl.bullet[i].GetPosition(), Map_infromation.Map_Block[j].GetPosition(),
 						cl.bullet[i].GetRadius(), Map_infromation.Map_Block[j].GetRadius())){

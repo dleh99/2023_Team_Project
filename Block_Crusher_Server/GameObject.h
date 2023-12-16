@@ -29,6 +29,7 @@ class Block : public GameObject
 {
 public:
 	Block();
+	Block(int input_id, XMFLOAT3 input_pos);
 	~Block();
 };
 
