@@ -184,4 +184,7 @@ public:
 
 	virtual CCamera* CreateCamera(float fTimeElapsed);
 	virtual void OnPrepareRender();
+
+	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
+	virtual void Update(float fTimeElapsed, ULONG nDirection);
 };

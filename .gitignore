@@ -25,6 +25,11 @@ mono_crash.*
 *.raw
 *.mp3
 *.wav
+*.mat
+*.fbx
+*.prefab
+*.unity
+*.png
 
 # Build results
 [Dd]ebug/
