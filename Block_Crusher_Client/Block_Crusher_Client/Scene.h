@@ -13,7 +13,7 @@ public:
 	bool OnPrecessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	bool OnPrecessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
-	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char mapkey);
 	void ReleaseObjects();
 
 	bool ProcessInput(UCHAR* pKeyBuffer);
@@ -29,7 +29,7 @@ public:
 
 	int FindEmptySlot();
 	bool BSCollisionCheck(XMFLOAT3 Position1, XMFLOAT3 Position2, float Radius1, float Radius2);
-	int AddBlocksByMapData(CMesh* pMesh, CShader* pShader, CMaterial* pMaterial,int nindex);
+	int AddBlocksByMapData(CMesh* pMesh, CShader* pShader, CMaterial* pMaterial,int nindex, char mapkey);
 
 	ComPtr<ID3D12RootSignature> CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 	ComPtr<ID3D12RootSignature> GetGraphicsRootSignature();

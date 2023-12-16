@@ -1,6 +1,8 @@
 #pragma once
 #include "header.h"
 
+constexpr int TYPE_NORMAL = 1;
+
 class GameObject
 {
 private:
@@ -27,9 +29,14 @@ public:
 
 class Block : public GameObject
 {
+private:
+	int type;
 public:
 	Block();
+	Block(int input_id, XMFLOAT3 input_pos);
 	~Block();
+
+	int GetBlockType() { return type; };
 };
 
 class BulletObject : public GameObject

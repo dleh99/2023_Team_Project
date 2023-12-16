@@ -78,6 +78,7 @@ struct SC_START_PACKET
 {
 	unsigned char		size;
 	char				type;
+	char				map_key;
 	// 초기 지형 위치
 };
 
@@ -118,6 +119,7 @@ struct SC_BULLET_COLLISION_PACKET {
 	int					bullet_id;
 	int					block_id;
 	int					player_id;
+	int					block_type;
 };
 
 struct SC_HIT_PACKET {

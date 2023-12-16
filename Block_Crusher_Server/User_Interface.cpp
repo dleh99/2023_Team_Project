@@ -46,11 +46,13 @@ void User_Interface::send_login_info_packet()
 	do_send(&p);
 }
 
-void User_Interface::send_start_packet()
+void User_Interface::send_start_packet(char mapkey)
 {
 	SC_START_PACKET p;
 	p.size = sizeof(SC_START_PACKET);
 	p.type = SC_START;
+	p.map_key = mapkey;
+	std::cout << mapkey << "¸¦ º¸³¿" << std::endl;
 	do_send(&p);
 }
 
@@ -94,7 +96,7 @@ void User_Interface::send_collision_packet(int id_1, int id_2)
 	do_send(&p);
 }
 
-void User_Interface::send_bullet_collision_packet(int bullet_id, int block_id, int c_id)
+void User_Interface::send_bullet_collision_packet(int bullet_id, int block_id, int c_id, int block_type)
 {
 	SC_BULLET_COLLISION_PACKET p;
 	p.size = sizeof(SC_BULLET_COLLISION_PACKET);
@@ -102,6 +104,7 @@ void User_Interface::send_bullet_collision_packet(int bullet_id, int block_id, i
 	p.bullet_id = bullet_id;
 	p.block_id = block_id;
 	p.player_id = c_id;
+	p.block_type = block_type;
 	do_send(&p);
 }
 

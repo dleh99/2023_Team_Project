@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include "..\..\Block_Crusher_Server\protocol.h"
+#include "protocol.h"
 #include <ws2tcpip.h> 
 #include <winsock2.h> 
 #include "stdafx.h"
@@ -31,6 +31,7 @@ void err_display(const char* msg);
 void err_display(int errcode);
 void WINAPI do_recv();
 
+char GetMapKey();
 bool GetGameState();
 Pos GetStartPos();
 int GetNetworkPlayerId();

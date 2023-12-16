@@ -7,6 +7,7 @@
 #include <thread>
 #include <array>
 #include <chrono>
+#include <fstream>
 
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "MSWSock.lib")

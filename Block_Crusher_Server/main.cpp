@@ -59,15 +59,14 @@ void packet_process(int c_id, char* packet)
 		if (user_number == 3)
 			for (auto& cl : clients)
 				if (cl._state == US_INGAME)
-					cl.send_start_packet();
+					cl.send_start_packet(Map_infromation.MapChar);
 		break;
 	}
 	case CS_MOVE: {
 		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
 		// 패킷에서 보내온 방향에 따라 위치 이동 코드
-		clients[c_id].pos.x = p->x;
-		clients[c_id].pos.y = p->y;
-		clients[c_id].pos.z = p->z;
+		XMFLOAT3 accept_position{ p->x, p->y, p->z };
+		clients[c_id].pos = accept_position;
 		clients[c_id].cx = p->cxDelta;
 		clients[c_id].cy = p->cyDelta;
 
@@ -223,7 +222,7 @@ void Physics_Calculation_thread()
 			for (int i{}; i < MAX_BULLET_NUM; ++i) {
 				if (false == cl.bullet[i].GetisActive()) continue;
 				// 총알과 블록 충돌 처리
-				for (int j{}; j < 1008; ++j) {
+				for (int j{}; j < Map_infromation.block_num; ++j) {
 					if (false == Map_infromation.Map_Block[j].GetisActive()) continue;
 					if (CollisionCheck(cl.bullet[i].GetPosition(), Map_infromation.Map_Block[j].GetPosition(),
 						cl.bullet[i].GetRadius(), Map_infromation.Map_Block[j].GetRadius())){
@@ -232,7 +231,8 @@ void Physics_Calculation_thread()
 						//cout << "충돌함" << endl;
 						for (auto& send_cl : clients) {
 							if (send_cl._state != US_INGAME) continue;
-							send_cl.send_bullet_collision_packet(cl.bullet[i].GetbulletId(), Map_infromation.Map_Block[j].GetId(), cl._id);
+							send_cl.send_bullet_collision_packet(cl.bullet[i].GetbulletId(), Map_infromation.Map_Block[j].GetId(),
+								cl._id, Map_infromation.Map_Block[j].GetBlockType());
 						}
 					}
 				}
@@ -336,7 +336,7 @@ int main()
 
 	vector<thread> worker_threads;
 	int thread_num = thread::hardware_concurrency();
-	for (int i{}; i < thread_num; ++i)
+	for (int i{}; i < thread_num - 1; ++i)
 		worker_threads.emplace_back(worker_thread, iocp_h);
 	
 	// 계산 스레드

@@ -4,7 +4,10 @@
 class Map
 {
 public:
-	Block Map_Block[1008];
+	char	MapChar;
+	int		block_num;
+public:
+	std::vector<Block> Map_Block;
 
 public:
 	Map();
