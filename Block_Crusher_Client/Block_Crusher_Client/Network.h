@@ -24,7 +24,7 @@ struct Mouse {
 int NetworkInit();
 void NetCleanup();
 void send_login_packet();
-void send_move_packet(float x, float y, float z, float cx, float cy);
+void send_move_packet(float x, float y, float z, float cx, float cy, long long frame_num);
 void send_bullet_add_packet(XMFLOAT3 pos, XMFLOAT3 vec, int bullet_id);
 void err_quit(const char* msg);
 void err_display(const char* msg);
@@ -41,3 +41,4 @@ int GetOtherPlayerId();
 Mouse GetOtherPlayerMouse();
 void SetScene(CScene* Scene);
 void SetPlayers(vector<CMainPlayer*> players);
+void SetFrame(long long input);

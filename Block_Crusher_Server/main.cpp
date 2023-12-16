@@ -7,6 +7,7 @@
 #include "Physics.h"
 
 using namespace std;
+using namespace chrono;
 
 HANDLE iocp_h;
 SOCKET g_s_socket, g_c_socket;
@@ -19,6 +20,8 @@ Map Map_infromation;
 Physics physics_engine;
 
 atomic_int user_number = 0;
+
+auto start_time = system_clock::now();
 
 int set_client_id()
 {
@@ -70,11 +73,17 @@ void packet_process(int c_id, char* packet)
 		clients[c_id].cx = p->cxDelta;
 		clients[c_id].cy = p->cyDelta;
 
+		//cout << "[" << c_id << "] 클라이언트 받은 프레임 : " << p->frame_num << endl;
+		auto now_time = system_clock::now();
+		auto exec_time = now_time - start_time;
+		auto ms = duration_cast<milliseconds>(exec_time).count();
+		cout << ms << endl;
+
 		// 다른 클라이언트들에게 뿌리기
 		for (auto& cl : clients) {
 			if (cl._state != US_INGAME) continue;
 			if (cl._id == c_id) continue;
-			cl.send_move_packet(clients.data(), c_id);
+			cl.send_move_packet(clients.data(), c_id, p->frame_num, ms);
 		}
 		break;
 	}
@@ -257,7 +266,7 @@ void Physics_Calculation_thread()
 							if (other_player.hp > 0) {
 								for (auto& send_cl : clients) {
 									if (send_cl._state != US_INGAME) continue;
-									send_cl.send_hit_packet(cl.bullet[i].GetbulletId(), cl._id);
+									send_cl.send_hit_packet(cl.bullet[i].GetbulletId(), cl._id, other_player._id);
 								}
 							}
 							else

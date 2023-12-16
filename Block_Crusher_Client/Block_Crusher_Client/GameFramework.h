@@ -73,6 +73,8 @@ private:
 	// 프레임 레이트를 주 윈도우의 캡션에 출력하기 위한 문자열
 	_TCHAR m_pszFrameRate[50];
 
+	long long frame_num = 0;
+
 public:
 	CGameFramework();
 	~CGameFramework();
@@ -107,6 +109,8 @@ public:
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 	void ChangeSwapChainState();
+
+	long long GetFrame() { return frame_num; };
 
 public:
 	void MoveToNextFrame();

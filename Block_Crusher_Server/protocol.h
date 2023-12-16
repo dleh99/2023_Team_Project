@@ -50,6 +50,7 @@ struct CS_MOVE_PACKET {
 	float				z;
 	float				cxDelta;
 	float				cyDelta;
+	long long			frame_num;
 };
 
 struct CS_BULLET_ADD_PACKET {
@@ -91,6 +92,8 @@ struct SC_MOVE_PACKET {
 	float				z;
 	float				cxDelta;
 	float				cyDelta;
+	long long			first_frame_num;
+	long long			server_time;
 };
 
 struct SC_BULLET_ADD_PACKET {
@@ -127,6 +130,7 @@ struct SC_HIT_PACKET {
 	char				type;
 	int					bullet_id;
 	int					player_id;
+	int					enemy_id;
 };
 
 struct SC_DEATH_PACKET {
