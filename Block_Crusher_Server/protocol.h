@@ -119,6 +119,7 @@ struct SC_BULLET_COLLISION_PACKET {
 	int					bullet_id;
 	int					block_id;
 	int					player_id;
+	int					block_type;
 };
 
 struct SC_HIT_PACKET {

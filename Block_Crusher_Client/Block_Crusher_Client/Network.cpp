@@ -165,6 +165,7 @@ void WINAPI do_recv()
 			SC_BULLET_COLLISION_PACKET* packet = reinterpret_cast<SC_BULLET_COLLISION_PACKET*>(ptr);
 			cout << "총알 번호 : " << packet->bullet_id << ", 블록 번호 : " << packet->block_id << ", 총알 주인 : " << packet->player_id << endl;;
 			NetScene->DisableObject(packet->bullet_id, packet->block_id, packet->player_id);
+			// packet->block_type 쓰면 int 하나가 날아옴. 지금은 1 = normal_block으로 보내는 중
 			break;
 		}
 		case SC_HIT: {

@@ -88,6 +88,8 @@ Block::Block()
 	SetRadius(rad);
 
 	SetisActive(true);
+
+	type = TYPE_NORMAL;
 }
 
 Block::Block(int input_id, XMFLOAT3 input_pos)
