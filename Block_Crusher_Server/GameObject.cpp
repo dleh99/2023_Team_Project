@@ -64,17 +64,17 @@ void BulletObject::Move(float fTimeElapsed)
 
 	position = { position.x + velocity.x, position.y + velocity.y, position.z + velocity.z };
 
-	if (position.x > 200.0f || position.x < -200.0f) {
+	if (position.x > 800.0f || position.x < -800.0f) {
 		SetisActive(false);
 		return;
 	}
 
-	if (position.z > 200.0f || position.z < -200.0f) {
+	if (position.z > 800.0f || position.z < -800.0f) {
 		SetisActive(false);
 		return;
 	}
 
-	if (position.y > 200.0f || position.y < -200.0f) {
+	if (position.y > 500.0f || position.y < -200.0f) {
 		SetisActive(false);
 		return;
 	}

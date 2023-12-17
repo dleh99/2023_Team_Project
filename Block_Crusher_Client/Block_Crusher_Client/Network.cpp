@@ -14,10 +14,9 @@ float start_x, start_y, start_z;
 int id;
 
 float otherPlayer_x, otherPlayer_y, otherPlayer_z;
-Pos otherPlayerPos;
-Mouse otherPlayerMouse;
+Pos otherPlayerPos[3];
+Mouse otherPlayerMouse[3];
 CScene* NetScene = NULL;
-int otherPlayer_id = -1;
 vector<CMainPlayer*> Netplayers;
 
 long long game_frame;
@@ -140,13 +139,20 @@ void WINAPI do_recv()
 		case SC_MOVE_PLAYER: {
 			SC_MOVE_PACKET* packet = reinterpret_cast<SC_MOVE_PACKET*>(ptr);
 			//cout << packet->id << "의 위치를 받아왔습니다." << packet->x << ", " << packet->y << ", " << packet->z << endl;
-			otherPlayer_id = packet->id;
+			/*otherPlayer_id = packet->id;
 			otherPlayerPos.x = packet->x;
 			otherPlayerPos.y = packet->y;
 			otherPlayerPos.z = packet->z;
 			otherPlayerMouse.cx = packet->cxDelta;
-			otherPlayerMouse.cy = packet->cyDelta;
-			cout << "[" << packet->id << "] 첫 명령 프레임 : " << packet->first_frame_num << ", 서버 시간 : " << packet->server_time << ", 현재 프레임 : " << game_frame << endl;
+			otherPlayerMouse.cy = packet->cyDelta;*/
+			int p_id = packet->id;
+			otherPlayerPos[p_id].x = packet->x;
+			otherPlayerPos[p_id].y = packet->y;
+			otherPlayerPos[p_id].z = packet->z;
+			otherPlayerMouse[p_id].cx = packet->cxDelta;
+			otherPlayerMouse[p_id].cy = packet->cyDelta;
+			cout << "[" << p_id << "] " << otherPlayerPos[p_id].x << ", " << otherPlayerPos[p_id].y << ", " << otherPlayerPos[p_id].z << endl;
+			//cout << "[" << packet->id << "] 첫 명령 프레임 : " << packet->first_frame_num << ", 서버 시간 : " << packet->server_time << ", 현재 프레임 : " << game_frame << endl;
 			break;
 		}
 		case SC_BULLET_ADD: {
@@ -245,19 +251,14 @@ int GetNetworkPlayerId()
 	return playerId;
 }
 
-Pos GetOtherPlayerPos()
+Pos GetOtherPlayerPos(int id)
 {
-	return otherPlayerPos;
+	return otherPlayerPos[id];
 }
 
-int GetOtherPlayerId()
+Mouse GetOtherPlayerMouse(int id)
 {
-	return otherPlayer_id;
-}
-
-Mouse GetOtherPlayerMouse()
-{
-	return otherPlayerMouse;
+	return otherPlayerMouse[id];
 }
 
 void NetCleanup()

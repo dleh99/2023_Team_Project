@@ -445,16 +445,14 @@ void CGameFramework::FrameAdvance()
 #ifdef USE_SERVER
 	do_recv();
 
-	// 나는 바보다. 바보고.
-	int otherPlayerId = GetOtherPlayerId();
-	
-	if (otherPlayerId != -1) {
-		Pos otherPlayerPos = GetOtherPlayerPos();
-		Mouse otherPlayerMouse = GetOtherPlayerMouse();
-		m_vEnemyPlayers[otherPlayerId]->Rotate(otherPlayerMouse.cy, otherPlayerMouse.cx, 0.f);
-		m_vEnemyPlayers[otherPlayerId]->SetPosition(XMFLOAT3(otherPlayerPos.x, otherPlayerPos.y, otherPlayerPos.z));
+	for (int i{}; i < m_vEnemyPlayers.size(); ++i) {
+		if (i == m_pPlayer->GetPlayerId()) continue;
+		Pos otherPlayerPos = GetOtherPlayerPos(i);
+		Mouse otherPlayerMouse = GetOtherPlayerMouse(i);
+		cout << "[" << i << "] " << otherPlayerPos.x << ", " << otherPlayerPos.y << ", " << otherPlayerPos.z << ", " << otherPlayerMouse.cx << ", " << otherPlayerMouse.cy << endl;
+		m_vEnemyPlayers[i]->Rotate(otherPlayerMouse.cy, otherPlayerMouse.cx, 0.f);
+		m_vEnemyPlayers[i]->SetPosition(XMFLOAT3(otherPlayerPos.x, otherPlayerPos.y, otherPlayerPos.z));
 	}
-
 #endif
 
 	ProcessInput();
@@ -597,7 +595,8 @@ void CGameFramework::BuildObjects()
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed(), NULL);
 
 	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
-		m_vEnemyPlayers[i]->Update(m_GameTimer.GetTimeElapsed(), NULL);
+		if(m_vEnemyPlayers[i])
+			m_vEnemyPlayers[i]->Update(m_GameTimer.GetTimeElapsed(), NULL);
 	}
 
 	m_pd3dCommandList->Close();
@@ -683,6 +682,7 @@ void CGameFramework::ProcessInput()
 		x = m_pPlayer->GetPosition().x;
 		y = m_pPlayer->GetPosition().y;
 		z = m_pPlayer->GetPosition().z;
+		cout << x << ", " << y << ", " << z << endl;
 		send_move_packet(x, y, z, cxDelta, cyDelta, frame_num);
 #endif
 
