@@ -449,7 +449,7 @@ void CGameFramework::FrameAdvance()
 		if (i == m_pPlayer->GetPlayerId()) continue;
 		Pos otherPlayerPos = GetOtherPlayerPos(i);
 		Mouse otherPlayerMouse = GetOtherPlayerMouse(i);
-		cout << "[" << i << "] " << otherPlayerPos.x << ", " << otherPlayerPos.y << ", " << otherPlayerPos.z << ", " << otherPlayerMouse.cx << ", " << otherPlayerMouse.cy << endl;
+		//cout << "[" << i << "] " << otherPlayerPos.x << ", " << otherPlayerPos.y << ", " << otherPlayerPos.z << ", " << otherPlayerMouse.cx << ", " << otherPlayerMouse.cy << endl;
 		m_vEnemyPlayers[i]->Rotate(otherPlayerMouse.cy, otherPlayerMouse.cx, 0.f);
 		m_vEnemyPlayers[i]->SetPosition(XMFLOAT3(otherPlayerPos.x, otherPlayerPos.y, otherPlayerPos.z));
 	}

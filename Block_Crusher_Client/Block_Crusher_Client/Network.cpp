@@ -29,8 +29,8 @@ int NetworkInit()
 {
 	int ret;
 
-	//cout << "서버 IP 주소를 입력해주세요 : ";
-	//cin >> SERVER_IP;
+	/*cout << "서버 IP 주소를 입력해주세요 : ";
+	cin >> SERVER_IP;*/
 
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
 		cout << "WSA START ERROR" << endl;
@@ -151,7 +151,7 @@ void WINAPI do_recv()
 			otherPlayerPos[p_id].z = packet->z;
 			otherPlayerMouse[p_id].cx = packet->cxDelta;
 			otherPlayerMouse[p_id].cy = packet->cyDelta;
-			cout << "[" << p_id << "] " << otherPlayerPos[p_id].x << ", " << otherPlayerPos[p_id].y << ", " << otherPlayerPos[p_id].z << endl;
+			//cout << "[" << p_id << "] " << otherPlayerPos[p_id].x << ", " << otherPlayerPos[p_id].y << ", " << otherPlayerPos[p_id].z << endl;
 			//cout << "[" << packet->id << "] 첫 명령 프레임 : " << packet->first_frame_num << ", 서버 시간 : " << packet->server_time << ", 현재 프레임 : " << game_frame << endl;
 			break;
 		}

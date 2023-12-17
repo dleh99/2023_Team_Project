@@ -4,32 +4,45 @@ XMFLOAT3 Physics::PickPos()
 {
     XMFLOAT3 pos;
 
-    int random = rand() % 6;
+    srand(static_cast<unsigned int>(time(nullptr)));
+    int random = rand() % 9;
 
     switch (random)
     {
     case 0: {
-        pos = { -60.f, 50.f, -60.f };
+        pos = { -100.f, 50.f, -80.f };
         break;
     }
     case 1: {
-        pos = { -60.f, 50.f, 20.f };
+        pos = { -100.f, 50.f, -260.f };
         break;
     }
     case 2: {
-        pos = { 20.f, 50.f, -60.f };
+        pos = { -100.f, 50.f, -440.f };
         break;
     }
     case 3: {
-        pos = { 20.f, 50.f, 20.f };
+        pos = { -280.f, 50.f, -80.f };
         break;
     }
     case 4: {
-        pos = { 0.f, 50.f, 0.f };
+        pos = { -280.f, 50.f, -260.f };
         break;
     }
     case 5: {
-        pos = { -20.f, 50.f, 0.f };
+        pos = { -280.f, 50.f, -440.f };
+        break;
+    }
+    case 6: {
+        pos = { -460.f, 50.f, -80.f };
+        break;
+    }
+    case 7: {
+        pos = { -460.f, 50.f, -260.f };
+        break;
+    }
+    case 8: {
+        pos = { -460.f, 50.f, -440.f };
         break;
     }
     }
