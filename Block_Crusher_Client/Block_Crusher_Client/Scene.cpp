@@ -72,7 +72,8 @@ void CScene::ReleaseUploadBuffers()
 
 void CScene::DisableObject(int bullet_id, int block_id, int p_id)
 {
-	m_ppObjects[block_id]->SetIsActive(false);
+	if (m_ppObjects[block_id])
+		m_ppObjects[block_id]->SetIsActive(false);
 	for (int i{}; i < m_nObjects; ++i) {
 		if (m_ppObjects[i]->GetObjectType() != TYPE_BULLET) continue;
 		if (((CBulletObject*)m_ppObjects[i])->GetPlayerId() == p_id && ((CBulletObject*)m_ppObjects[i])->GetBulletId() == bullet_id) {

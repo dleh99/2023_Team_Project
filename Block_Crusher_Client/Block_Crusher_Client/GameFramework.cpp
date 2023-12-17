@@ -445,6 +445,7 @@ void CGameFramework::FrameAdvance()
 #ifdef USE_SERVER
 	do_recv();
 
+	// 나는 바보다. 바보고.
 	int otherPlayerId = GetOtherPlayerId();
 	
 	if (otherPlayerId != -1) {

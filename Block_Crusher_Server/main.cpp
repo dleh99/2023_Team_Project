@@ -77,7 +77,7 @@ void packet_process(int c_id, char* packet)
 		auto now_time = system_clock::now();
 		auto exec_time = now_time - start_time;
 		auto ms = duration_cast<milliseconds>(exec_time).count();
-		cout << ms << endl;
+		//cout << ms << endl;
 
 		// 다른 클라이언트들에게 뿌리기
 		for (auto& cl : clients) {
