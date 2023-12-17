@@ -682,7 +682,7 @@ void CGameFramework::ProcessInput()
 		x = m_pPlayer->GetPosition().x;
 		y = m_pPlayer->GetPosition().y;
 		z = m_pPlayer->GetPosition().z;
-		cout << x << ", " << y << ", " << z << endl;
+		//cout << x << ", " << y << ", " << z << endl;
 		send_move_packet(x, y, z, cxDelta, cyDelta, frame_num);
 #endif
 
