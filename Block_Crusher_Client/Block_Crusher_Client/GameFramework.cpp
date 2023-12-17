@@ -556,8 +556,23 @@ void CGameFramework::BuildObjects()
 	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), GetMapKey());
 	m_pScene->BuildText(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory);
 
-	//ComPtr<ID3D12Resource> fontTexture;
-	//CreateWICTextureFromFile(m_pd3dDevice.Get(), L"font_texture.png", fontTexture.ReleaseAndGetAddressOf());
+	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTexture->LoadTextureFromDDSFile(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), L"Textures/SpaceMan_Rank_01_Black.dds", RESOURCE_TEXTURE2D, 0);
+
+	CPlayerShader* pPlayerShader = new CPlayerShader();
+	pPlayerShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature().Get());
+	pPlayerShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+	pPlayerShader->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 1);
+	pPlayerShader->CreateShaderResourceViews(m_pd3dDevice.Get(), pTexture, 0, 4);
+
+	CSkinnedAnimationPlayerShader* pSkinnedPlayerShader = new CSkinnedAnimationPlayerShader();
+	pSkinnedPlayerShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature().Get());
+	pSkinnedPlayerShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+	pSkinnedPlayerShader->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 1);
+	pSkinnedPlayerShader->CreateShaderResourceViews(m_pd3dDevice.Get(), pTexture, 0, 4);
+
+	CMaterial* pMat = new CMaterial();
+	pMat->SetTexture(pTexture);
 
 #ifdef USE_SERVER
 	SetScene(m_pScene);
@@ -565,13 +580,13 @@ void CGameFramework::BuildObjects()
 	int id = GetNetworkPlayerId();
 	
 	CMainPlayer* pCubePlayer0 = new CMainPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, -30.0f);
+		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, -30.0f, pPlayerShader, pSkinnedPlayerShader, pMat);
 
 	CMainPlayer* pCubePlayer1 = new CMainPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 0.0f);
+		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 0.0f, pPlayerShader, pSkinnedPlayerShader, pMat);
 
 	CMainPlayer* pCubePlayer2 = new CMainPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 30.0f);
+		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 30.0f, pPlayerShader, pSkinnedPlayerShader, pMat);
 
 	m_vEnemyPlayers.push_back(pCubePlayer0);
 	m_vEnemyPlayers.push_back(pCubePlayer1);
@@ -582,7 +597,7 @@ void CGameFramework::BuildObjects()
 	m_pPlayer = m_vEnemyPlayers[id];
 #else
 	CMainPlayer* pCubePlayer = new CMainPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 0.0f);
+		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 0.0f, pPlayerShader, pSkinnedPlayerShader, pMat);
 
 	m_pPlayer = pCubePlayer;
 #endif
@@ -592,6 +607,7 @@ void CGameFramework::BuildObjects()
 	m_pPlayer->m_pScene = m_pScene;
 	m_pCamera = m_pPlayer->GetCamera();
 
+	m_pPlayer->SetBlockNum(m_pScene->m_nBlock);
 	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
 
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed(), NULL);

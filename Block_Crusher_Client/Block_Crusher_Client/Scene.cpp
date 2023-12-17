@@ -342,7 +342,17 @@ void CScene::BuildText(ComPtr<ID2D1DeviceContext2> const m_d2dDeviceContext, Com
 	pTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 	pTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
-	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Tan), SolidColorBrush.GetAddressOf());
+	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), SolidColorBrush[0].GetAddressOf());
+	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Red), SolidColorBrush[1].GetAddressOf());
+	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Green), SolidColorBrush[2].GetAddressOf());
+	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Blue), SolidColorBrush[3].GetAddressOf());
+	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::PaleVioletRed), SolidColorBrush[4].GetAddressOf());
+	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Yellow), SolidColorBrush[5].GetAddressOf());
+	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::DeepSkyBlue), SolidColorBrush[6].GetAddressOf());
+	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), SolidColorBrush[7].GetAddressOf());
+	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::LightPink), SolidColorBrush[8].GetAddressOf());
+	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::LightGreen), SolidColorBrush[9].GetAddressOf());
+
 }
 
 void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, ComPtr<ID2D1Factory3> m_d2dFactory, ComPtr<IDWriteFactory> m_dWriteFactory,
@@ -361,36 +371,41 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 
 	std::wstring str = min + sec;
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
-		pTextFormat.Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush.Get());
+		pTextFormat.Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
 	
 	// 점수
-
 	str = std::to_wstring(m_pPlayer->GetPlayerScore());
 
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 00));
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
-		pTextFormat.Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush.Get());
-
-	// 총알
-	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 650));
-	str = std::to_wstring(m_pPlayer->GetBulletNum()) + L"/30";
-	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
-		pTextFormat.Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush.Get());
+		pTextFormat.Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
 
 	// 체력
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(50, 675));
-
 	if (m_pPlayer->GetPlayerHP() > 0) {
 		float portion = float(m_pPlayer->GetPlayerHP()) / 100.0f;
-		m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 300.0f * portion, 50), SolidColorBrush.Get());
+		m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 300.0f * portion, 40), SolidColorBrush[6].Get());
+		m_d2dDeviceContext->DrawRectangle(D2D1::RectF(0, 0, 300.0f, 40), SolidColorBrush[0].Get());
+	}
+	else {
+		m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 0, 40), SolidColorBrush[6].Get());
+		m_d2dDeviceContext->DrawRectangle(D2D1::RectF(0, 0, 300.0f, 40), SolidColorBrush[0].Get());
 	}
 
+	// 총알
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 650));
+
+	if (m_pPlayer->GetBulletNum() < 10)
+		str = L"0" + std::to_wstring(m_pPlayer->GetBulletNum()) + L"/30";
+	else str = std::to_wstring(m_pPlayer->GetBulletNum()) + L"/30";
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat.Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush[6].Get());
+
 	//장전 UI
-
-	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 600));
-
-	if(m_pPlayer->) {
-
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(830, 650));
+	if(m_pPlayer->GetPlayerReloading()) {
+		float portion = m_pPlayer->m_fKeyDownTime / 2.0f;
+		m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 135.0f * portion, 15), SolidColorBrush[6].Get());
 	}
 }
 
@@ -401,7 +416,14 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 
 	//if (!in) std::cout << "뭐임 ㅅㅂ" << std::endl;
 
-	int mapdata[50][50];
+	int** mapdata = new int* [50];
+	for (int i = 0; i < 50; i++) {
+		mapdata[i] = new int[50];
+	}
+	for (int i = 0; i < 50; i++) {
+		for (int j = 0; j < 50; j++)
+			mapdata[i][j] = 0;
+	}
 
 	int x = 0;
 	int y = 0;
@@ -412,7 +434,7 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 		in >> c;
 		//std::cout << c << " ";
 
-		if (c == 'd') {
+		if (c == mapkey) {
 			flag = true;
 			continue;
 		}
@@ -474,18 +496,18 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 
 				m_ppObjects[cnt] = pBlockObject;
 				m_ppObjects[cnt]->SetPosition(position);
-				//std::cout << cnt << "번째 추가?" << std::endl;
+				
 				
 				cnt++;
 			}
 		}
 
-	//for (int i = 0; i < 50; ++i) {
-	//	for (int j = 0; j < 50; j++) {
-	//		std::cout << mapdata[i][j] << " ";
-	//	}
-	//	std::cout << std::endl;
-	//}
+	for (int i = 0; i < 50; ++i) {
+		delete mapdata[i];
+	}
+	delete[] mapdata;
 
-	return m_nblock;
+	std::cout << m_nObjects << "개 블럭 추가" << std::endl;
+	m_nBlock = m_nObjects;
+	return m_nObjects;
 }

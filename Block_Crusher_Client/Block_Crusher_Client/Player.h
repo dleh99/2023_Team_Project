@@ -30,7 +30,6 @@ protected:
 	int m_iPlayerHP = 100;
 	int m_iPlayerScore = 0;
 	int m_nBullet = 30;
-	float m_fKeyDownTime = 9999;
 	float m_fEtime = 0;
 	bool m_bReloading = false;
 
@@ -44,6 +43,8 @@ protected:
 	XMFLOAT3 xmf3JumpShift;
 	// 플레이어 바운딩 볼륨의 반지름
 	float m_fPlayerBoundingRadius;
+	// 블록의 수
+	int m_nBlock = 0;
 
 	//플레이어의 이동 속도를 나타내는 벡터이다.
 	XMFLOAT3 m_xmf3Velocity;
@@ -76,6 +77,7 @@ protected:
 	int bullet_id = 0;
 
 public:
+	float m_fKeyDownTime = 9999;
 	CGameObject** m_ppObjects = NULL;
 	CScene* m_pScene = NULL;
 
@@ -85,6 +87,8 @@ public:
 	int GetPlayerHP() { return m_iPlayerHP; };
 	int GetPlayerScore() { return m_iPlayerScore; };
 	int GetBulletNum() { return m_nBullet; };
+	int GetBlockNum() { return m_nBlock; };
+	bool GetPlayerReloading() { return m_bReloading; };
 
 	XMFLOAT3 GetPosition() { return(m_xmf3Position); }
 	XMFLOAT3 GetLookVector() { return(m_xmf3Look); }
@@ -98,6 +102,7 @@ public:
 	void SetPlayerHP(int hp) { m_iPlayerHP = hp; };
 	void SetPlayerScore(int score) { m_iPlayerScore = score; };
 	void SetBulletNum(int nBullet) { m_nBullet = nBullet; };
+	void SetBlockNum(int nBlock) { m_nBlock = nBlock; };
 
 	void SetFriction(float fFriction) { m_fFriction = fFriction; }
 	void SetGravity(XMFLOAT3 xmf3Gravity) { m_xmf3Gravity = xmf3Gravity; }
@@ -192,7 +197,7 @@ class CMainPlayer : public CPlayer
 {
 public:
 	CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-		ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z);
+		ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z, CShader* pPlayerShader, CShader* pSkinnedPlayerShader, CMaterial* pMaterial);
 	virtual ~CMainPlayer();
 
 	virtual CCamera* CreateCamera(float fTimeElapsed);

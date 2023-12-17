@@ -388,10 +388,10 @@ public:
 
 	static CLoadedModelInfo* LoadModelAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrModelFileName, const char* pstrAnimationFileName,
-		CShader* pPlayerMeshShader, CShader* pPlayerSkinnedMeshShader);
+		CShader* pPlayerMeshShader, CShader* pPlayerSkinnedMeshShader, CMaterial* pMaterial);
 	static CGameObject* LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		ID3D12RootSignature* pd3dGraphicsRootSignature, std::ifstream& fileStream,
-		CShader* pPlayerMeshShader, CShader* pPlayerSkinnedMeshShader, int* pnSkinnedMeshes);
+		CShader* pPlayerMeshShader, CShader* pPlayerSkinnedMeshShader, int* pnSkinnedMeshes, CMaterial* pMaterial);
 	static void LoadAnimationFromFile(std::ifstream& fileStream, CLoadedModelInfo* pLoadedModel);
 
 	static CMeshLoadInfo* LoadMeshInfoFromFile(std::ifstream& fileStream, float modelScaleFactor);

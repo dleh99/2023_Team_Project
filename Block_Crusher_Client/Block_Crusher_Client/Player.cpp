@@ -80,12 +80,13 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		//‘Page Up’을 누르면 로컬 y-축 방향으로 이동한다. ‘Page Down’을 누르면 반대 방향으로 이동한다.
 		//if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, fDistance);
 		if (dwDirection & DIR_UP) { 
+			cout << m_bPlayerGravity << endl;
 			//이미 공중에서 중력을 받는 상태
 			if (m_bPlayerGravity) {
 				
 				m_fPlayerGravityTime = 0;
 
-				xmf3JumpShift.y += 1000.0f * m_fEtime;
+				xmf3JumpShift.y += 500.0f * m_fEtime;
 				if (xmf3JumpShift.y > 100.0f) {
 					xmf3JumpShift.y  = 100.0f;
 				}
@@ -101,10 +102,17 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 			if (!m_bReloading) {
 				if (m_fKeyDownTime > 0.1f) {
 					int b_id = GetBulletId();
-					m_pScene->AddObjects(0, m_xmf3Position, GetLookVector(), GetPlayerId(), b_id);
+					XMFLOAT3 BP = m_xmf3Position;
+					XMFLOAT3 LockVec = GetLookVector();
+					XMFLOAT3 RightVec = GetRightVector();
+					BP.y += 9.0f;
+					BP.x += LockVec.x * 10.0f + RightVec.x * 3.0f;
+					BP.z += LockVec.z * 10.0f + RightVec.z * 3.0f;
+
+					m_pScene->AddObjects(0, BP, LockVec, GetPlayerId(), b_id);
 					//cout << GetPlayerId() << "가 총을 쏴서 서버에 보냈습니다" << endl;
-					XMFLOAT3 send_p = m_xmf3Position;
-					XMFLOAT3 send_v = GetLookVector();
+					XMFLOAT3 send_p = BP;
+					XMFLOAT3 send_v = LockVec;
 
 					send_bullet_add_packet(send_p, send_v, b_id);
 					SetBulletId(b_id + 1);
@@ -148,7 +156,7 @@ void CPlayer::Jump(float fTimeElapsed)
 		
 		XMFLOAT3 shiftY = { 0,0,0 };
 
-		xmf3JumpShift.y -= 100.f * m_fPlayerGravityTime * fTimeElapsed;
+		xmf3JumpShift.y -= 150.f * m_fPlayerGravityTime * fTimeElapsed;
 		shiftY.y = xmf3JumpShift.y * fTimeElapsed;
 
 		m_fPlayerGravityTime += fTimeElapsed;
@@ -189,22 +197,24 @@ bool CPlayer::SBCollisionCheck(XMFLOAT3 Position)
 	else if (m_xmf3Position.x > bx + size) 	BoxPoint.x = bx + size;
 	else BoxPoint.x = m_xmf3Position.x;
 
-	if (m_xmf3Position.y < by - size) 	BoxPoint.y = by - size;
-	else if (m_xmf3Position.y > by + size) 	BoxPoint.y = by + size;
-	else BoxPoint.y = m_xmf3Position.y;
+	if (m_xmf3Position.y + 5.0f < by - size) 	BoxPoint.y = by - size;
+	else if (m_xmf3Position.y + 5.0f > by + size) 	BoxPoint.y = by + size;
+	else BoxPoint.y = m_xmf3Position.y + 5.0f;
 
 	if (m_xmf3Position.z < bz - size) 	BoxPoint.z = bz - size;
 	else if (m_xmf3Position.z > bz + size) 	BoxPoint.z = bz + size;
 	else BoxPoint.z = m_xmf3Position.z;
 
 	XMFLOAT3 Dist;
-	Dist = Vector3::Subtract(m_xmf3Position, BoxPoint);
+	XMFLOAT3 bbPosition = m_xmf3Position;
+	bbPosition.y += 5.0f; // 바운딩 스피어 위치 조정
+	Dist = Vector3::Subtract(bbPosition, BoxPoint);
 	float length = Vector3::Length(Dist);
 
 	if (m_fPlayerBoundingRadius > length) { 
-		if (by + size > m_xmf3Position.y - m_fPlayerBoundingRadius / 2.0f) return false;
+		if (by + size > m_xmf3Position.y + 2.5f) return false;
 
-		m_xmf3Position.y = Position.y + size + m_fPlayerBoundingRadius + 0.01f;
+		m_xmf3Position.y = by + size + 0.01f;
 		//std::cout << m_xmf3Position.y << "\n";
 		return true; 
 	}
@@ -226,9 +236,9 @@ XMFLOAT3 CPlayer::SBCollisionMoveXZ(XMFLOAT3 Position, XMFLOAT3 Velocity) {
 	else if (m_xmf3Position.x > bx + size) 	BoxPoint.x = bx + size;
 	else BoxPoint.x = m_xmf3Position.x;
 
-	if (m_xmf3Position.y + 3.6f < by - size) 	BoxPoint.y = by - size;
-	else if (m_xmf3Position.y + 3.6f > by + size) 	BoxPoint.y = by + size;
-	else BoxPoint.y = m_xmf3Position.y + 3.6f;
+	if (m_xmf3Position.y + 8.6f < by - size) 	BoxPoint.y = by - size;
+	else if (m_xmf3Position.y + 8.6f > by + size) 	BoxPoint.y = by + size;
+	else BoxPoint.y = m_xmf3Position.y + 8.6f;
 
 	if (m_xmf3Position.z < bz - size) 	BoxPoint.z = bz - size;
 	else if (m_xmf3Position.z > bz + size) 	BoxPoint.z = bz + size;
@@ -238,7 +248,7 @@ XMFLOAT3 CPlayer::SBCollisionMoveXZ(XMFLOAT3 Position, XMFLOAT3 Velocity) {
 	XMFLOAT3 BackVector;
 
 	Dist = Vector3::Subtract(m_xmf3Position, BoxPoint);
-	Dist.y += 3.6f;
+	Dist.y += 8.6f;
 	float length = Vector3::Length(Dist);
 
 	if (m_fPlayerBoundingRadius + 3.4f > length) {
@@ -358,7 +368,7 @@ void CPlayer::Update(float fTimeElapsed)
 	if (m_ppObjects != NULL) {
 		int cnt = 0;
 
-		for (int i = 0; i < 50 * 50 * 10 + 826; ++i) {
+		for (int i = 0; i < m_nBlock; ++i) {
 			if (m_ppObjects[i]) {
 				if (m_ppObjects[i]->GetIsActive()) {
 					if (BSCollisionCheck(m_ppObjects[i]->GetPosition(),
@@ -379,7 +389,7 @@ void CPlayer::Update(float fTimeElapsed)
 		}
 
 
-		for (int i = 0; i < 50 * 50 * 10 + 826; ++i) {
+		for (int i = 0; i < m_nBlock; ++i) {
 			if (m_ppObjects[i]) {
 				if (m_ppObjects[i]->GetIsActive()) {
 					if (BSCollisionCheck(m_ppObjects[i]->GetPosition(),
@@ -397,7 +407,7 @@ void CPlayer::Update(float fTimeElapsed)
 			}
 		}
 
-		if (cnt == 50 * 50 * 10 + 826) m_bPlayerGravity = true;
+		if (cnt == m_nBlock) m_bPlayerGravity = true;
 		//std::cout << m_ppObjects[0]->GetPosition().x << " " << m_ppObjects[0]->GetPosition().y << " " << m_ppObjects[0]->GetPosition().z << "\n";
 	}
 	
@@ -542,25 +552,11 @@ CCamera* CCubePlayer::CreateCamera(float fTimeElapsed)
 }
 
 CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-	ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z) : CPlayer()
+	ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z,
+	CShader* pPlayerShader, CShader* pSkinnedPlayerShader, CMaterial* pMaterial) : CPlayer()
 {
-	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/SpaceMan_Rank_01_Black.dds", RESOURCE_TEXTURE2D, 0);
-
-	CPlayerShader* pPlayerShader = new CPlayerShader();
-	pPlayerShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
-	pPlayerShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	pPlayerShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-	pPlayerShader->CreateShaderResourceViews(pd3dDevice, pTexture, 0, 4);
-
-	CSkinnedAnimationPlayerShader* pSkinnedPlayerShader = new CSkinnedAnimationPlayerShader();
-	pSkinnedPlayerShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
-	pSkinnedPlayerShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	pSkinnedPlayerShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-	pSkinnedPlayerShader->CreateShaderResourceViews(pd3dDevice, pTexture, 0, 4);
-
 	CLoadedModelInfo* pPlayerModel = CGameObject::LoadModelAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
-		"Models/player model data.bin", "Models/player animation data.bin", pPlayerShader, pSkinnedPlayerShader);
+		"Models/player model data.bin", "Models/player animation data.bin", pPlayerShader, pSkinnedPlayerShader, pMaterial);
 	SetChild(pPlayerModel->m_pModelRootObject);
 
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 8, pPlayerModel);
@@ -582,9 +578,7 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	m_pSkinnedAnimationController->SetTrackEnable(6, false);
 	m_pSkinnedAnimationController->SetTrackEnable(7, false);
 
-	CMaterial* pMat = new CMaterial();
-	pMat->SetTexture(pTexture);
-	SetMaterial(pMat);
+	//SetMaterial(pMaterial);
 
 	SetPosition(XMFLOAT3(x, y, z));
 

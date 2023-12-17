@@ -500,7 +500,7 @@ void CGameObject::SetTrackAnimationPosition(int nAnimationTrack, float fPosition
 }
 
 CLoadedModelInfo* CGameObject::LoadModelAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
-	const char* pstrModelFileName, const char* pstrAnimationFileName, CShader* pPlayerMeshShader, CShader* pPlayerSkinnedMeshShader)
+	const char* pstrModelFileName, const char* pstrAnimationFileName, CShader* pPlayerMeshShader, CShader* pPlayerSkinnedMeshShader, CMaterial* pMaterial)
 {
 	std::ifstream fPlayerModelFile{ pstrModelFileName, std::ios::binary };
 
@@ -512,7 +512,7 @@ CLoadedModelInfo* CGameObject::LoadModelAndAnimationFromFile(ID3D12Device* pd3dD
 	CLoadedModelInfo* pLoadedModel = new CLoadedModelInfo();
 
 	pLoadedModel->m_pModelRootObject = CGameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
-		fPlayerModelFile, pPlayerMeshShader, pPlayerSkinnedMeshShader, &pLoadedModel->m_nSkinnedMeshes);
+		fPlayerModelFile, pPlayerMeshShader, pPlayerSkinnedMeshShader, &pLoadedModel->m_nSkinnedMeshes, pMaterial);
 
 	std::ifstream fPlayerAnimationFile{ pstrAnimationFileName, std::ios::binary };
 
@@ -529,7 +529,7 @@ CLoadedModelInfo* CGameObject::LoadModelAndAnimationFromFile(ID3D12Device* pd3dD
 
 CGameObject* CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	ID3D12RootSignature* pd3dGraphicsRootSignature, std::ifstream& fileStream,
-	CShader* pPlayerMeshShader, CShader* pPlayerSkinnedMeshShader, int* pnSkinnedMeshes)
+	CShader* pPlayerMeshShader, CShader* pPlayerSkinnedMeshShader, int* pnSkinnedMeshes, CMaterial* pMaterial)
 {
 	CGameObject* pGameObject = NULL;
 	pGameObject = new CGameObject();
@@ -599,7 +599,7 @@ CGameObject* CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, I
 			{
 				for (int i = 0; i < nChildren; ++i) {
 					CGameObject* pChild = CGameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList,
-						pd3dGraphicsRootSignature, fileStream, pPlayerMeshShader, pPlayerSkinnedMeshShader, pnSkinnedMeshes);
+						pd3dGraphicsRootSignature, fileStream, pPlayerMeshShader, pPlayerSkinnedMeshShader, pnSkinnedMeshes, pMaterial);
 
 					if (pChild) pGameObject->SetChild(pChild);
 				}
@@ -608,6 +608,7 @@ CGameObject* CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, I
 		else if ('m' == token)
 		{
 			pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, fileStream, pGameObject, pPlayerMeshShader);
+			pGameObject->SetMaterial(pMaterial);
 		}
 		else if ('E' == token)
 		{

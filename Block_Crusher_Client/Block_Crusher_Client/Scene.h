@@ -35,7 +35,7 @@ public:
 	ComPtr<ID3D12RootSignature> GetGraphicsRootSignature();
 	
 	CGameObject** m_ppObjects = NULL;
-
+	int m_nBlock = 0;
 	CPlayer* m_pPlayer= NULL;
 
 protected:
@@ -54,7 +54,7 @@ protected:
 	CSkyBox* m_pSkyBox = NULL;
 
 	ComPtr<IDWriteTextFormat> pTextFormat = NULL;
-	ComPtr<ID2D1SolidColorBrush> SolidColorBrush = nullptr;
+	ComPtr<ID2D1SolidColorBrush> SolidColorBrush[10];
 
 	ComPtr<ID3D12RootSignature> m_pd3dGraphicsRootSignature = NULL;
 
