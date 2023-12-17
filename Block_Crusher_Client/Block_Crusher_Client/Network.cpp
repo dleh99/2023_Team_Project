@@ -113,6 +113,14 @@ void send_bullet_add_packet(XMFLOAT3 pos, XMFLOAT3 bullet_v, int bullet_id)
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
+void send_fall_packet()
+{
+	CS_FALL_PACKET p{};
+	p.size = sizeof(CS_FALL_PACKET);
+	p.type = CS_FALL;
+	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
+}
+
 void WINAPI do_recv()
 {
 	int ret;
@@ -223,6 +231,11 @@ void WINAPI do_recv()
 			Netplayers[packet->player_id]->SetDeath(false);
 			Netplayers[packet->player_id]->SetPosition(XMFLOAT3(packet->respawn_x, packet->respawn_y, packet->respawn_z));
 			Netplayers[packet->player_id]->SetPlayerHP(100);
+			break;
+		}
+		case SC_FALL: {
+			SC_FALL_PACKET* packet = reinterpret_cast<SC_FALL_PACKET*>(ptr);
+			Netplayers[packet->fall_id]->SetDeath(true);
 			break;
 		}
 		}

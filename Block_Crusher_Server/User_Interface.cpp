@@ -142,3 +142,12 @@ void User_Interface::send_respawn_packet(float x, float y, float z, int player_i
 	p.respawn_z = z;
 	do_send(&p);
 }
+
+void User_Interface::send_fall_packet(int fall_id)
+{
+	SC_FALL_PACKET p;
+	p.size = sizeof(SC_FALL_PACKET);
+	p.type = SC_FALL;
+	p.fall_id = fall_id;
+	do_send(&p);
+}

@@ -24,6 +24,7 @@ constexpr int WORLD_HEIGHT = 3600;		// 블럭 = 60cm(px), 높이 = 아래 30개, 위 30�
 constexpr char CS_LOGIN = 0;
 constexpr char CS_MOVE = 1;
 constexpr char CS_BULLET_ADD = 5;
+constexpr char CS_FALL = 12;
 
 constexpr char SC_LOGIN = 2;
 constexpr char SC_START = 3;
@@ -34,6 +35,7 @@ constexpr char SC_BULLET_COLLISION = 8;
 constexpr char SC_HIT = 9;
 constexpr char SC_DEATH = 10;
 constexpr char SC_RESPAWN = 11;
+constexpr char SC_FALL = 13;
 
 enum Animation
 {
@@ -75,6 +77,11 @@ struct CS_BULLET_ADD_PACKET {
 	float				b_y;
 	float				b_z;
 	int					bullet_id;
+};
+
+struct CS_FALL_PACKET {
+	unsigned char		size;
+	char				type;
 };
 
 //===========================
@@ -159,6 +166,12 @@ struct SC_RESPAWN_PACKET {
 	float				respawn_x;
 	float				respawn_y;
 	float				respawn_z;
+};
+
+struct SC_FALL_PACKET {
+	unsigned char		size;
+	char				type;
+	int					fall_id;
 };
 
 #pragma pack(pop)

@@ -46,4 +46,5 @@ public:
 	void send_hit_packet(int bullet_id, int player_id, int enemy_id);
 	void send_dead_packet(int bullet_id, int player_id, int death_id);
 	void send_respawn_packet(float x, float y, float z, int player_id);
+	void send_fall_packet(int fall_id);
 };

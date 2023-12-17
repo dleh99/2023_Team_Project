@@ -707,6 +707,11 @@ void CGameFramework::ProcessInput()
 		//cout << x << ", " << y << ", " << z << endl;
 		//cout << m_pPlayer->GetAniState() << endl;
 		send_move_packet(x, y, z, cxDelta, cyDelta, m_pPlayer->GetAniState());
+
+		if (y < -150.f) {
+			send_fall_packet();
+			m_pPlayer->SetDeath(true);
+		}
 		//cout << dwDirection << endl;
 #endif
 		if (!m_pPlayer->GetDeath())			// Alive

@@ -119,6 +119,16 @@ void packet_process(int c_id, char* packet)
 		}
 		break;
 	}
+	case CS_FALL: {
+		CS_FALL_PACKET* p = reinterpret_cast<CS_FALL_PACKET*>(packet);
+		clients[c_id].isDeath = true;
+		for (auto& cl : clients) {
+			if (cl._state != US_INGAME) continue;
+			if (cl._id == c_id) continue;
+			cl.send_fall_packet(c_id);
+		}
+		break;
+	}
 	}
 }
 
