@@ -750,7 +750,7 @@ void CMainPlayer::Move(DWORD dwDirection, float fDistance, bool bVelocity)
 
 		if (m_bOnAir)
 		{
-			SetWalkAnimationSpeed(fAnimationSpeed * 0.5f);
+			SetWalkAnimationSpeed(fAnimationSpeed * 0.6f);
 		}
 		else
 		{
