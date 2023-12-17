@@ -701,18 +701,14 @@ void CMainPlayer::Update(float fTimeElapsed, DWORD dwDirection)
 					m_pSkinnedAnimationController->SetTrackEnable(5, true);
 				}
 			}
-
-			std::cout << GetPlayerId() << "╢б ╬х ав╬З╢ы!!!" << std::endl;
 		}
 		else		// Death
 		{
 			m_pSkinnedAnimationController->SetTracksEnable(7);
 
-			//std::cout << GetPlayerId() << "╢б ав╬З╢ы!!!" << std::endl;
 		}
 	}
-	else
-		std::cout << GetPlayerId() << "╢б ав╬З╢ы!!!" << std::endl;
+
 }
 
 void CMainPlayer::Move(DWORD dwDirection, float fDistance, bool bVelocity)

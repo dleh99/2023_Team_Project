@@ -88,7 +88,7 @@ public:
 	int GetPlayerHP() { return m_iPlayerHP; };
 	int GetPlayerScore() { return m_iPlayerScore; };
 	int GetBulletNum() { return m_nBullet; };
-	bool GetDeath() { return m_bDeath; }
+	bool GetDeath() { return m_bDeath; };
 	int GetBlockNum() { return m_nBlock; };
 	bool GetPlayerReloading() { return m_bReloading; };
 
