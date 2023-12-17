@@ -254,6 +254,7 @@ public:
 
 	void SetTrackAnimationSet(int nAnimationTrack, int nAnimationSet);
 
+	void SetTracksEnable(int nAnimationTrack);
 	void SetTrackEnable(int nAnimationTrack, bool bEnable);
 	void SetTrackPosition(int nAnimationTrack, float fPosition);
 	void SetTrackSpeed(int nAnimationTrack, float fSpeed);

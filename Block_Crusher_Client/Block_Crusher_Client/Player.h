@@ -32,6 +32,7 @@ protected:
 	int m_nBullet = 30;
 	float m_fEtime = 0;
 	bool m_bReloading = false;
+	bool m_bDeath = false;
 
 	//플레이어 중력적용(y좌표 감소) 여부
 	bool m_bPlayerGravity = false;
@@ -87,6 +88,7 @@ public:
 	int GetPlayerHP() { return m_iPlayerHP; };
 	int GetPlayerScore() { return m_iPlayerScore; };
 	int GetBulletNum() { return m_nBullet; };
+	bool GetDeath() { return m_bDeath; }
 	int GetBlockNum() { return m_nBlock; };
 	bool GetPlayerReloading() { return m_bReloading; };
 
@@ -103,6 +105,7 @@ public:
 	void SetPlayerScore(int score) { m_iPlayerScore = score; };
 	void SetBulletNum(int nBullet) { m_nBullet = nBullet; };
 	void SetBlockNum(int nBlock) { m_nBlock = nBlock; };
+	void SetDeath(bool bDeath) { m_bDeath = bDeath; }
 
 	void SetFriction(float fFriction) { m_fFriction = fFriction; }
 	void SetGravity(XMFLOAT3 xmf3Gravity) { m_xmf3Gravity = xmf3Gravity; }
