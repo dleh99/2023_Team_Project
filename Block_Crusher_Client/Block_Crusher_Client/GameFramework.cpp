@@ -705,7 +705,9 @@ void CGameFramework::ProcessInput()
 		y = m_pPlayer->GetPosition().y;
 		z = m_pPlayer->GetPosition().z;
 		//cout << x << ", " << y << ", " << z << endl;
-		send_move_packet(x, y, z, cxDelta, cyDelta, frame_num);
+		//cout << m_pPlayer->GetAniState() << endl;
+		send_move_packet(x, y, z, cxDelta, cyDelta, m_pPlayer->GetAniState());
+		//cout << dwDirection << endl;
 #endif
 		if (!m_pPlayer->GetDeath())			// Alive
 		{
@@ -733,8 +735,10 @@ void CGameFramework::ProcessInput()
 				if (m_pPlayer->GetPlayerId() == i)
 					continue;
 
-			if (m_vEnemyPlayers[i])
-				m_vEnemyPlayers[i]->OtherPlayerAnimationUpdate(dwDirection);
+			if (m_vEnemyPlayers[i]) {
+				m_vEnemyPlayers[i]->OtherPlayerAnimationUpdate(GetOtherAni(i));
+				//cout << "[" << i << "] " << GetOtherAni(i) << endl;
+			}
 		}
 	//}
 }

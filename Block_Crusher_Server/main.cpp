@@ -82,18 +82,19 @@ void packet_process(int c_id, char* packet)
 		clients[c_id].pos = accept_position;
 		clients[c_id].cx = p->cxDelta;
 		clients[c_id].cy = p->cyDelta;
+		//cout << "[" << c_id << "] " << p->animation_state << endl;
 
 		//cout << "[" << c_id << "] 클라이언트 받은 프레임 : " << p->frame_num << endl;
-		auto now_time = system_clock::now();
+		/*auto now_time = system_clock::now();
 		auto exec_time = now_time - start_time;
-		auto ms = duration_cast<milliseconds>(exec_time).count();
+		auto ms = duration_cast<milliseconds>(exec_time).count();*/
 		//cout << ms << endl;
 
 		// 다른 클라이언트들에게 뿌리기
 		for (auto& cl : clients) {
 			if (cl._state != US_INGAME) continue;
 			if (cl._id == c_id) continue;
-			cl.send_move_packet(clients.data(), c_id, p->frame_num, ms);
+			cl.send_move_packet(clients.data(), c_id, p->animation_state);
 		}
 		break;
 	}

@@ -35,6 +35,18 @@ constexpr char SC_HIT = 9;
 constexpr char SC_DEATH = 10;
 constexpr char SC_RESPAWN = 11;
 
+enum Animation
+{
+	ANIMATION_IDLE,					// assigned 0
+	ANIMATION_WALK_FORAWRRD,		// assigned 1
+	ANIMATION_WALK_LEFT,			// assigned 2
+	ANIMATION_WALK_RIGHT,			// assigned 3
+	ANIMATION_WALK_BACKWARD,		// assigned 4
+	ANIMATION_SHOOT,				// assigned 5
+	ANIMATION_DAMAGED,				// assigned 6
+	ANIMATION_DEATH,				// assigned 7
+};
+
 #pragma pack(push, 1)
 
 struct CS_LOGIN_PACKET {
@@ -50,7 +62,7 @@ struct CS_MOVE_PACKET {
 	float				z;
 	float				cxDelta;
 	float				cyDelta;
-	long long			frame_num;
+	Animation			animation_state;
 };
 
 struct CS_BULLET_ADD_PACKET {
@@ -92,8 +104,7 @@ struct SC_MOVE_PACKET {
 	float				z;
 	float				cxDelta;
 	float				cyDelta;
-	long long			first_frame_num;
-	long long			server_time;
+	Animation			animation_state;
 };
 
 struct SC_BULLET_ADD_PACKET {

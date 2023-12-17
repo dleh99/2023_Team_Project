@@ -2,6 +2,7 @@
 #include "header.h"
 #include "Overlapped.h"
 #include "GameObject.h"
+#include "protocol.h"
 
 constexpr int MAX_BULLET_NUM = 1000;
 
@@ -38,7 +39,7 @@ public:
 
 	void send_login_info_packet();
 	void send_start_packet(char mapkey);
-	void send_move_packet(User_Interface* clients, int c_id, long long first_frame, long long server_time);
+	void send_move_packet(User_Interface* clients, int c_id, Animation animation_state);
 	void send_bullet_add_packet(User_Interface* clients, int c_id, int bullet_num);
 	void send_collision_packet(int id_1, int id_2);
 	void send_bullet_collision_packet(int id_1, int id_2, int c_id, int block_type);

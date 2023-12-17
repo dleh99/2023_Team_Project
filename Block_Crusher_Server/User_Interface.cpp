@@ -56,7 +56,7 @@ void User_Interface::send_start_packet(char mapkey)
 	do_send(&p);
 }
 
-void User_Interface::send_move_packet(User_Interface* clients, int c_id, long long first_frame, long long server_tim)
+void User_Interface::send_move_packet(User_Interface* clients, int c_id, Animation animation_state)
 {
 	SC_MOVE_PACKET p;
 	p.size = sizeof(SC_MOVE_PACKET);
@@ -67,8 +67,7 @@ void User_Interface::send_move_packet(User_Interface* clients, int c_id, long lo
 	p.z = clients[c_id].pos.z;
 	p.cxDelta = clients[c_id].cx;
 	p.cyDelta = clients[c_id].cy;
-	p.first_frame_num = first_frame;
-	p.server_time = server_tim;
+	p.animation_state = animation_state;
 	do_send(&p);
 }
 
