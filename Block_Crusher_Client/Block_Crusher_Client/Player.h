@@ -35,6 +35,7 @@ protected:
 	bool m_bReloading = false;
 	bool m_bDeath = false;
 	bool m_bOnAir = false;
+	bool m_bIsShoot = false;
 
 	// 플레이어 부스터
 	float m_fJumpTime = 0;
@@ -97,6 +98,7 @@ public:
 	bool GetDeath() { return m_bDeath; };
 	int GetBlockNum() { return m_nBlock; };
 	bool GetPlayerReloading() { return m_bReloading; };
+	bool GetIsShoot() { return m_bIsShoot; }
 
 	XMFLOAT3 GetPosition() { return(m_xmf3Position); }
 	XMFLOAT3 GetLookVector() { return(m_xmf3Look); }
@@ -112,6 +114,7 @@ public:
 	void SetBulletNum(int nBullet) { m_nBullet = nBullet; };
 	void SetBlockNum(int nBlock) { m_nBlock = nBlock; };
 	void SetDeath(bool bDeath) { m_bDeath = bDeath; }
+	void SetIsShoot(bool bIsShoot) { m_bIsShoot = bIsShoot; }
 
 	void SetFriction(float fFriction) { m_fFriction = fFriction; }
 	void SetGravity(XMFLOAT3 xmf3Gravity) { m_xmf3Gravity = xmf3Gravity; }

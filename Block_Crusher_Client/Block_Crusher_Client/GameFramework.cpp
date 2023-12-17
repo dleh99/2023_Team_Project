@@ -651,7 +651,11 @@ void CGameFramework::ProcessInput()
 			if (pKeyBuffer[0x41] & 0xF0) dwDirection |= DIR_LEFT;				// A
 			if (pKeyBuffer[0x44] & 0xF0) dwDirection |= DIR_RIGHT;				// D
 			if (pKeyBuffer[VK_SPACE] & 0xF0) dwDirection |= DIR_UP;
-			if (pKeyBuffer[0x43] & 0xF0) dwDirection |= KEY_SHOOT;
+			if (pKeyBuffer[0x43] & 0xF0)
+			{
+				dwDirection |= KEY_SHOOT;
+				m_pPlayer->SetIsShoot(true);
+			}
 		}
 
 		float cxDelta = 0.0f, cyDelta = 0.0f;
@@ -733,6 +737,7 @@ void CGameFramework::ProcessInput()
 		//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다.
 		m_pPlayer->Update(m_GameTimer.GetTimeElapsed(), dwDirection);
 
+		m_pPlayer->SetIsShoot(false);
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 
 		for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {

@@ -524,6 +524,67 @@ CLoadedModelInfo* CGameObject::LoadModelAndAnimationFromFile(ID3D12Device* pd3dD
 	CGameObject::LoadAnimationFromFile(fPlayerAnimationFile, pLoadedModel);
 	pLoadedModel->PrepareSkinning();
 
+	char token[64] = { 0, };
+	//strcpy(token, "ForwardAndShoot");
+
+	CAnimationSet* pShootAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[5];
+
+	for (int k = 0; k < 4; ++k)
+	{
+		CAnimationSet* pWalkAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[1 + k];
+
+		float fLength = pWalkAnimationSet->m_fLength;
+		int nFramesPerSecond = pWalkAnimationSet->m_nFramePerSecond;
+		int nKeyFrames = pWalkAnimationSet->m_nKeyFrames;
+
+		pLoadedModel->m_pAnimationSets->m_pAnimationSets[8 + k] =
+			new CAnimationSet(fLength, nFramesPerSecond, nKeyFrames, pLoadedModel->m_pAnimationSets->m_nBoneFrames,
+				token);
+
+		CAnimationSet* pAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[8 + k];		
+
+		for (int i = 0; i < nKeyFrames; ++i)
+		{
+			pAnimationSet->m_pKeyFrameTimes[i] = pWalkAnimationSet->m_pKeyFrameTimes[i];
+
+			for (int j = 0; j < 12; ++j)
+			{
+				if (j == 2)			// Pelvis
+				{
+					if (i < pShootAnimationSet->m_nKeyFrames)
+					{
+						pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+							= pShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
+					}
+					else
+					{
+						pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+							= pShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 27][j];
+					}
+				}
+				else
+				{
+					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+						= pWalkAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
+				}
+			}
+
+			for (int j = 12; j < pLoadedModel->m_pAnimationSets->m_nBoneFrames; ++j)
+			{
+				if (i < pShootAnimationSet->m_nKeyFrames)
+				{
+					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+						= pShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
+				}
+				else
+				{
+					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+						= pShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 27][j];
+				}
+			}
+		}
+	}
+
 	return pLoadedModel;
 }
 
@@ -635,7 +696,7 @@ void CGameObject::LoadAnimationFromFile(std::ifstream& fileStream, CLoadedModelI
 		if (!strcmp(token, "<AnimationSets>: "))
 		{
 			fileStream.read((char*)&nAnimationSets, sizeof(int));
-			pLoadedModel->m_pAnimationSets = new CAnimationSets(nAnimationSets);
+			pLoadedModel->m_pAnimationSets = new CAnimationSets(nAnimationSets + 4);
 		}
 		else if (!strcmp(token, "<FrameNames>: "))
 		{
