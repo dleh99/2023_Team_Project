@@ -159,7 +159,6 @@ public:
 
 	//플레이어를 회전하는 함수이다.
 	void Rotate(float x, float y, float z);
-	void Rotate(float y);
 
 	//플레이어의 위치와 회전 정보를 경과 시간에 따라 갱신하는 함수이다.
 	void Update(float fTimeElapsed);
