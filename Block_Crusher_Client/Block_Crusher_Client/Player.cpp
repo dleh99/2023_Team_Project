@@ -80,20 +80,23 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		//‘Page Up’을 누르면 로컬 y-축 방향으로 이동한다. ‘Page Down’을 누르면 반대 방향으로 이동한다.
 		//if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, fDistance);
 		if (dwDirection & DIR_UP) { 
-			cout << m_bPlayerGravity << endl;
 			//이미 공중에서 중력을 받는 상태
 			if (m_bPlayerGravity) {
-				
-				m_fPlayerGravityTime = 0;
 
-				xmf3JumpShift.y += 500.0f * m_fEtime;
-				if (xmf3JumpShift.y > 100.0f) {
-					xmf3JumpShift.y  = 100.0f;
+				m_fJumpTime += m_fEtime;
+				if (m_fJumpTime > 0.2f ) {
+					xmf3JumpShift.y += 400.0f * m_fEtime;
+					m_fPlayerGravityTime = 0;
+				}
+
+				if (xmf3JumpShift.y > 50.f) {
+					xmf3JumpShift.y  = 50.0f;
 				}
 			}
 			else {
+				m_fJumpTime = 0;
 				m_bPlayerGravity = true;
-				xmf3JumpShift.y = 100.0f;
+				xmf3JumpShift.y = 50.0f;
 			}
 		}
 
@@ -331,7 +334,7 @@ void CPlayer::Update(float fTimeElapsed)
 {
 	m_fEtime = fTimeElapsed;
 	m_fKeyDownTime += fTimeElapsed;
-
+	//cout << m_bPlayerGravity << " ";
 	if (m_fKeyDownTime > 2.0f) {
 		m_bReloading = false;
 		m_fKeyDownTime = 0.f;
@@ -407,10 +410,18 @@ void CPlayer::Update(float fTimeElapsed)
 			}
 		}
 
-		if (cnt == m_nBlock) m_bPlayerGravity = true;
+		if (cnt == m_nBlock) { 
+			m_bPlayerGravity = true; 
+		}
 		//std::cout << m_ppObjects[0]->GetPosition().x << " " << m_ppObjects[0]->GetPosition().y << " " << m_ppObjects[0]->GetPosition().z << "\n";
 	}
 	
+	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
+	if (fLength > 0) {
+		m_bOnAir = true;
+	}
+	else m_bOnAir = false;
+	//cout << m_bOnAir << endl;
 	/*플레이어의 위치가 변경될 때 추가로 수행할 작업을 수행한다. 플레이어의 새로운 위치가 유효한 위치가 아닐 수도
 	있고 또는 플레이어의 충돌 검사 등을 수행할 필요가 있다. 이러한 상황에서 플레이어의 위치를 유효한 위치로 다시
 	변경할 수 있다.*/
@@ -710,6 +721,7 @@ void CMainPlayer::Update(float fTimeElapsed, DWORD dwDirection)
 	}
 
 }
+
 
 void CMainPlayer::Move(DWORD dwDirection, float fDistance, bool bVelocity)
 {

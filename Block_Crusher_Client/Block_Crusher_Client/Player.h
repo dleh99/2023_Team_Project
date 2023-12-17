@@ -12,6 +12,18 @@
 #include "Scene.h"
 #include "Camera.h"
 
+enum Animation
+{
+	ANIMATION_IDLE, // assigned 0
+	ANIMATION_WALK_FORAWRRD,   // assigned 1
+	ANIMATION_WALK_LEFT,  // assigned 2
+	ANIMATION_WALK_RIGHT, // assigned 3
+	ANIMATION_WALK_BACKWARD, // assigned 4
+	ANIMATION_SHOOT,  // assigned 5
+	ANIMATION_DAMAGED,  // assigned 6
+	ANIMATION_DEATH,  // assigned 7
+};
+
 class CPlayer : public CGameObject
 {
 protected:
@@ -33,7 +45,10 @@ protected:
 	float m_fEtime = 0;
 	bool m_bReloading = false;
 	bool m_bDeath = false;
+	bool m_bOnAir = false;
 
+	// 플레이어 부스터
+	float m_fJumpTime = 0;
 	//플레이어 중력적용(y좌표 감소) 여부
 	bool m_bPlayerGravity = false;
 	//플레이어 점프키

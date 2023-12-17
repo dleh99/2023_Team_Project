@@ -336,11 +336,23 @@ void CScene::BuildText(ComPtr<ID2D1DeviceContext2> const m_d2dDeviceContext, Com
 		DWRITE_FONT_STRETCH_CONDENSED,
 		50,
 		L"",
-		&pTextFormat
+		&pTextFormat[0]
 	);
-	// IDWriteTextFormat의 SetXxx 호출하여 포맷 속성 지정.
-	pTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
-	pTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+	pTextFormat[0]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	pTextFormat[0]->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+	m_dWriteFactory->CreateTextFormat(
+		L"Verdana",
+		NULL,
+		DWRITE_FONT_WEIGHT_BOLD,
+		DWRITE_FONT_STYLE_OBLIQUE,
+		DWRITE_FONT_STRETCH_NORMAL,
+		100,
+		L"",
+		&pTextFormat[1]
+	);
+	pTextFormat[1]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	pTextFormat[1]->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
 	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), SolidColorBrush[0].GetAddressOf());
 	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Red), SolidColorBrush[1].GetAddressOf());
@@ -360,25 +372,21 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 {	
 	// 제한시간
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(410, 0));
-
 	m_fPlayTime -= fTimeElapsed;
-
 	std::wstring min = std::to_wstring(int(m_fPlayTime) / 60) + L":";
 	std::wstring sec = std::to_wstring(int(m_fPlayTime) % 60);
-
 	if (int(m_fPlayTime) % 60 < 10) sec = L"0" + std::to_wstring(int(m_fPlayTime) % 60);
 	if(int(m_fPlayTime) < 0) sec = L"00";
-
 	std::wstring str = min + sec;
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
-		pTextFormat.Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
+		pTextFormat[0].Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
 	
 	// 점수
 	str = std::to_wstring(m_pPlayer->GetPlayerScore());
 
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 00));
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
-		pTextFormat.Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
+		pTextFormat[0].Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
 
 	// 체력
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(50, 675));
@@ -399,7 +407,7 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 		str = L"0" + std::to_wstring(m_pPlayer->GetBulletNum()) + L"/30";
 	else str = std::to_wstring(m_pPlayer->GetBulletNum()) + L"/30";
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
-		pTextFormat.Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush[6].Get());
+		pTextFormat[0].Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush[6].Get());
 
 	//장전 UI
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(830, 650));
@@ -407,6 +415,13 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 		float portion = m_pPlayer->m_fKeyDownTime / 2.0f;
 		m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 135.0f * portion, 15), SolidColorBrush[6].Get());
 	}
+
+	// 승리 패배 알림
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(400, 200));
+
+	str = L"승리";
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat[1].Get(), D2D1::RectF(0, 0, 200, 300), SolidColorBrush[0].Get());
 }
 
 

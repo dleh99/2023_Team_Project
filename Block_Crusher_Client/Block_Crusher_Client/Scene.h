@@ -54,7 +54,7 @@ protected:
 
 	CSkyBox* m_pSkyBox = NULL;
 
-	ComPtr<IDWriteTextFormat> pTextFormat = NULL;
+	ComPtr<IDWriteTextFormat> pTextFormat[2];
 	ComPtr<ID2D1SolidColorBrush> SolidColorBrush[10];
 
 	ComPtr<ID3D12RootSignature> m_pd3dGraphicsRootSignature = NULL;
