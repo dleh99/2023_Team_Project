@@ -140,7 +140,6 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 	{
 		//플레이어의 속도 벡터를 xmf3Shift 벡터만큼 변경한다.
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);
-		std::cout <<"( " << xmf3Shift.x << ", " << xmf3Shift.y << ", " << xmf3Shift.z << " )" << std::endl;
 	}
 	else
 	{
@@ -154,8 +153,6 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 
 void CPlayer::Jump(float fTimeElapsed)
 {
-	//std::cout << m_xmf3Position.x << " " << m_xmf3Position.y << std::endl;
-
 	if (m_bPlayerGravity) {
 		
 		XMFLOAT3 shiftY = { 0,0,0 };
@@ -170,7 +167,6 @@ void CPlayer::Jump(float fTimeElapsed)
 		}
 
 		m_xmf3Position = Vector3::Add(m_xmf3Position, shiftY);
-		//std::cout << m_xmf3Gravity.y << "\n";
 		
 		if (m_pCamera) m_pCamera->Move(shiftY);
 	}
@@ -219,7 +215,7 @@ bool CPlayer::SBCollisionCheck(XMFLOAT3 Position)
 		if (by + size > m_xmf3Position.y + 2.5f) return false;
 
 		m_xmf3Position.y = by + size + 0.01f;
-		//std::cout << m_xmf3Position.y << "\n";
+
 		return true; 
 	}
 
@@ -269,7 +265,6 @@ XMFLOAT3 CPlayer::SBCollisionMoveXZ(XMFLOAT3 Position, XMFLOAT3 Velocity) {
 		BackVector.x *= -XZlength;
 		BackVector.z *= -XZlength;
 
-		//std::cout << XZlength << "\n";
 		return BackVector;
 	}
 
@@ -387,7 +382,6 @@ void CPlayer::Update(float fTimeElapsed)
 							m_fPlayerGravityTime = 0;
 							xmf3JumpShift.y = 0;
 							m_bPlayerGravity = false;
-							//std::cout << m_xmf3Position.x << " " << m_xmf3Position.y << " " << m_xmf3Position.z << "\n";
 							break;
 						}
 					}
@@ -418,15 +412,14 @@ void CPlayer::Update(float fTimeElapsed)
 		if (cnt == m_nBlock) { 
 			m_bPlayerGravity = true; 
 		}
-		//std::cout << m_ppObjects[0]->GetPosition().x << " " << m_ppObjects[0]->GetPosition().y << " " << m_ppObjects[0]->GetPosition().z << "\n";
 	}
 	
-	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
-	if (fLength > 0) {
+	fLength = sqrtf(xmf3JumpShift.y * xmf3JumpShift.y);
+	if (fLength > 0.3f) {
 		m_bOnAir = true;
 	}
 	else m_bOnAir = false;
-	//cout << m_bOnAir << endl;
+	//cout << fLength << endl;
 	/*플레이어의 위치가 변경될 때 추가로 수행할 작업을 수행한다. 플레이어의 새로운 위치가 유효한 위치가 아닐 수도
 	있고 또는 플레이어의 충돌 검사 등을 수행할 필요가 있다. 이러한 상황에서 플레이어의 위치를 유효한 위치로 다시
 	변경할 수 있다.*/
@@ -489,7 +482,6 @@ void CPlayer::OnPrepareRender()
 
 void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	//if (m_pShader) m_pShader->Render(pd3dCommandList, pCamera);
 	CGameObject::Render(pd3dCommandList, pCamera);
 
 	//std::cout << "이 플레이어의 네트워크 ID : " << m_playerNetworkId << std::endl;
@@ -522,7 +514,6 @@ CCubePlayer::CCubePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	m_playerNetworkId = id;
 
 	//플레이어의 위치를 설정한다.
-	std::cout << x << ", " << y << ", " << z << std::endl;
 	SetPosition(XMFLOAT3(x, y, z));
 
 	//플레이어 메쉬를 렌더링할 때 사용할 셰이더를 생성한다.
@@ -743,17 +734,6 @@ void CMainPlayer::Move(DWORD dwDirection, float fDistance, bool bVelocity)
 {
 	if (!GetDeath())
 	{
-		//if (m_bPlayerGravity)
-		//{
-		//	SetWalkAnimationSpeed(1.4f * 0.5f);
-		//	//std::cout << "AIR!!!AIR!!!AIR!!!AIR!!!" << std::endl;
-		//}
-		//else
-		//{
-		//	SetWalkAnimationSpeed(1.4f);
-		//	//std::cout << "NOT AIR!!!" << std::endl;
-		//}
-
 		float length = Vector3::Length(GetVelocity());
 		float ratio = length / 117.0f;
 
@@ -766,7 +746,16 @@ void CMainPlayer::Move(DWORD dwDirection, float fDistance, bool bVelocity)
 		else if (ratio < 0.7f)
 			ratio = 0.7f;
 
-		SetWalkAnimationSpeed(1.4f * ratio);
+		float fAnimationSpeed = 1.4f * ratio;
+
+		if (m_bOnAir)
+		{
+			SetWalkAnimationSpeed(fAnimationSpeed * 0.5f);
+		}
+		else
+		{
+			SetWalkAnimationSpeed(fAnimationSpeed);
+		}
 
 		if (dwDirection)	// Move or Shoot
 		{
