@@ -81,8 +81,6 @@ protected:
 
 	int bullet_id = 0;
 
-	float m_fPlayerAngle = 0;
-
 	Animation m_ani_state;
 
 public:
@@ -99,7 +97,6 @@ public:
 	bool GetDeath() { return m_bDeath; };
 	int GetBlockNum() { return m_nBlock; };
 	bool GetPlayerReloading() { return m_bReloading; };
-	float GetPlayerAngle() { return m_fPlayerAngle; };
 
 	XMFLOAT3 GetPosition() { return(m_xmf3Position); }
 	XMFLOAT3 GetLookVector() { return(m_xmf3Look); }
