@@ -7,7 +7,7 @@ User_Interface::User_Interface()
 	pos.x = pos.y = pos.z = 0.f;
 	_prev_remain = 0;
 	cx = cy = 0;
-	_player_radius = 5.f;
+	_player_radius = 7.f;
 	hp = 10;
 	isinvincible = false;
 	invincible_time = 0.f;

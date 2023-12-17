@@ -6,9 +6,9 @@ SOCKET g_socket;
 SOCKADDR_IN serveraddr;
 char recvBuf[BUF_SIZE];
 
-string SERVER_IP = "127.0.0.1";
+//string SERVER_IP = "127.0.0.1";
 //string SERVER_IP = "14.51.115.70";
-//string SERVER_IP;
+string SERVER_IP;
 
 float start_x, start_y, start_z;
 int id;
@@ -31,6 +31,19 @@ int NetworkInit()
 
 	/*cout << "서버 IP 주소를 입력해주세요 : ";
 	cin >> SERVER_IP;*/
+
+	const char* filePath = "IP.txt";
+
+	ifstream inputFile(filePath);
+
+	if (!inputFile.is_open()) {
+		cerr << "파일을 열 수 없습니다" << endl;
+		return 1;
+	}
+
+	getline(inputFile, SERVER_IP);
+
+	inputFile.close();
 
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
 		cout << "WSA START ERROR" << endl;

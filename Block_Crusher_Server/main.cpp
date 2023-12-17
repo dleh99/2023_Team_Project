@@ -40,7 +40,17 @@ void disconnect(int c_id)
 	user_number--;
 }
 
-bool CollisionCheck(XMFLOAT3 p1, XMFLOAT3 p2, float r1, float r2)
+bool CollisionCheck_Person(XMFLOAT3 bullet, XMFLOAT3 player, float bullet_r, float player_r)
+{
+	float x = bullet.x - player.x;
+	float y = bullet.y - (player.y + 7.f);
+	float z = bullet.z - player.z;
+
+	if (bullet_r + player_r > sqrt(x * x + y * y + z * z)) return true;
+	return false;
+}
+
+bool CollisionCheck_objects(XMFLOAT3 p1, XMFLOAT3 p2, float r1, float r2)
 {
 	float x = p1.x - p2.x;
 	float y = p1.y - p2.y;
@@ -233,7 +243,7 @@ void Physics_Calculation_thread()
 				// 총알과 블록 충돌 처리
 				for (int j{}; j < Map_infromation.block_num; ++j) {
 					if (false == Map_infromation.Map_Block[j].GetisActive()) continue;
-					if (CollisionCheck(cl.bullet[i].GetPosition(), Map_infromation.Map_Block[j].GetPosition(),
+					if (CollisionCheck_objects(cl.bullet[i].GetPosition(), Map_infromation.Map_Block[j].GetPosition(),
 						cl.bullet[i].GetRadius(), Map_infromation.Map_Block[j].GetRadius())){
 						cl.bullet[i].SetisActive(false);
 						Map_infromation.Map_Block[j].SetisActive(false);
@@ -251,7 +261,7 @@ void Physics_Calculation_thread()
 					if (other_player._state != US_INGAME) continue;
 					if (other_player._id == cl._id) continue;
 					if (true == other_player.isDeath) continue;
-					if (CollisionCheck(cl.bullet[i].GetPosition(), other_player.pos,
+					if (CollisionCheck_Person(cl.bullet[i].GetPosition(), other_player.pos,
 						cl.bullet[i].GetRadius(), other_player._player_radius)) {
 						cl.bullet[i].SetisActive(false);
 						
