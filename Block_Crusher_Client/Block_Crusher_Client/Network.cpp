@@ -167,11 +167,16 @@ void WINAPI do_recv()
 			otherPlayerPos.z = packet->z;
 			otherPlayerMouse.cx = packet->cxDelta;
 			otherPlayerMouse.cy = packet->cyDelta;*/
+
 			int p_id = packet->id;
+			if (p_id > 2 || p_id < 0) break;
+				
 			otherPlayerPos[p_id].x = packet->x;
 			otherPlayerPos[p_id].y = packet->y;
 			otherPlayerPos[p_id].z = packet->z;
 			otherPlayerMouse[p_id].cx = packet->cxDelta;
+			otherPlayerMouse[p_id].cy = packet->cyDelta - otherPlayerMouse[p_id].cy;
+
 			otherPlayerMouse[p_id].cy = packet->cyDelta;
 			otherPlayerAni[p_id] = packet->animation_state;
 			//cout << "[" << p_id << "] " << packet->animation_state << endl;

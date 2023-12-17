@@ -20,8 +20,8 @@ struct Pos {
 };
 
 struct Mouse {
-	float cx;
-	float cy;
+	float cx = 0;
+	float cy = 0;
 };
 
 int NetworkInit();

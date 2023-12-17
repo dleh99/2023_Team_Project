@@ -450,7 +450,7 @@ void CGameFramework::FrameAdvance()
 		Pos otherPlayerPos = GetOtherPlayerPos(i);
 		Mouse otherPlayerMouse = GetOtherPlayerMouse(i);
 		//cout << "[" << i << "] " << otherPlayerPos.x << ", " << otherPlayerPos.y << ", " << otherPlayerPos.z << ", " << otherPlayerMouse.cx << ", " << otherPlayerMouse.cy << endl;
-		m_vEnemyPlayers[i]->Rotate(otherPlayerMouse.cy, otherPlayerMouse.cx, 0.f);
+		m_vEnemyPlayers[i]->Rotate(otherPlayerMouse.cy);
 		m_vEnemyPlayers[i]->SetPosition(XMFLOAT3(otherPlayerPos.x, otherPlayerPos.y, otherPlayerPos.z));
 	}
 #endif
@@ -706,7 +706,7 @@ void CGameFramework::ProcessInput()
 		z = m_pPlayer->GetPosition().z;
 		//cout << x << ", " << y << ", " << z << endl;
 		//cout << m_pPlayer->GetAniState() << endl;
-		send_move_packet(x, y, z, cxDelta, cyDelta, m_pPlayer->GetAniState());
+		send_move_packet(x, y, z, cxDelta, m_fPlayerAngle, m_pPlayer->GetAniState());
 
 		if (y < -150.f) {
 			send_fall_packet();
@@ -723,7 +723,7 @@ void CGameFramework::ProcessInput()
 				if (pKeyBuffer[VK_RBUTTON] & 0xF0)
 					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
 				else
-					m_pPlayer->Rotate(0, cxDelta, 0.0f);
+					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 			}
 			/*플레이어를 dwDirection 방향으로 이동한다(실제로는 속도 벡터를 변경한다).
 			이동 거리는 시간에 비례하도록 한다. 플레이어의 이동 속력은 (50/초)로 가정한다.*/
