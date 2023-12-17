@@ -36,9 +36,8 @@ bool GetGameState();
 Pos GetStartPos();
 int GetNetworkPlayerId();
 
-Pos GetOtherPlayerPos();
-int GetOtherPlayerId();
-Mouse GetOtherPlayerMouse();
+Pos GetOtherPlayerPos(int id);
+Mouse GetOtherPlayerMouse(int id);
 void SetScene(CScene* Scene);
 void SetPlayers(vector<CMainPlayer*> players);
 void SetFrame(long long input);

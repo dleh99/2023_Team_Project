@@ -433,12 +433,17 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 		char c;
 		in >> c;
 		//std::cout << c << " ";
-
+#ifdef USE_SERVER
 		if (c == mapkey) {
 			flag = true;
 			continue;
 		}
-
+#else
+		if (c == 'd') {
+			flag = true;
+			continue;
+		}
+#endif
 		if (flag) {
 			int num = c - 48;
 

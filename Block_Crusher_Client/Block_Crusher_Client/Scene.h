@@ -1,6 +1,7 @@
 #pragma once
 #include "Timer.h"
 #include "Shader.h"
+#include "protocol.h"
 
 #define MAX_OBJ_COUNT 3000
 
