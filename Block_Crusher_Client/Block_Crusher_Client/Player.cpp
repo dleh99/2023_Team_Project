@@ -137,6 +137,7 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 	{
 		//플레이어의 속도 벡터를 xmf3Shift 벡터만큼 변경한다.
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);
+		std::cout <<"( " << xmf3Shift.x << ", " << xmf3Shift.y << ", " << xmf3Shift.z << " )" << std::endl;
 	}
 	else
 	{
@@ -361,6 +362,10 @@ void CPlayer::Update(float fTimeElapsed)
 
 	//플레이어를 속도 벡터 만큼 실제로 이동한다(카메라도 이동될 것이다)
 	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
+
+	xmf3Velocity.x *= 0.5f;
+	xmf3Velocity.y *= 0.5f;
+	xmf3Velocity.z *= 0.5f;
 
 	Move(xmf3Velocity, false);
 	Jump(fTimeElapsed);
@@ -681,6 +686,17 @@ void CMainPlayer::OtherPlayerAnimationUpdate(DWORD dwOtherPlayerDirection)
 	}
 }
 
+void CMainPlayer::SetWalkAnimationSpeed(float fSpeed)
+{
+	if (m_pSkinnedAnimationController)
+	{
+		m_pSkinnedAnimationController->SetTrackSpeed(1, fSpeed);
+		m_pSkinnedAnimationController->SetTrackSpeed(2, fSpeed);
+		m_pSkinnedAnimationController->SetTrackSpeed(3, fSpeed);
+		m_pSkinnedAnimationController->SetTrackSpeed(4, fSpeed);
+	}
+}
+
 void CMainPlayer::Update(float fTimeElapsed, DWORD dwDirection)
 {
 	CPlayer::Update(fTimeElapsed);
@@ -715,6 +731,31 @@ void CMainPlayer::Move(DWORD dwDirection, float fDistance, bool bVelocity)
 {
 	if (!GetDeath())
 	{
+		//if (m_bPlayerGravity)
+		//{
+		//	SetWalkAnimationSpeed(1.4f * 0.5f);
+		//	//std::cout << "AIR!!!AIR!!!AIR!!!AIR!!!" << std::endl;
+		//}
+		//else
+		//{
+		//	SetWalkAnimationSpeed(1.4f);
+		//	//std::cout << "NOT AIR!!!" << std::endl;
+		//}
+
+		float length = Vector3::Length(GetVelocity());
+		float ratio = length / 117.0f;
+
+		if (ratio < 0.1f)
+			ratio = 0.4f;
+		else if (ratio < 0.3f)
+			ratio = 0.5f;
+		else if (ratio < 0.5f)
+			ratio = 0.6f;
+		else if (ratio < 0.7f)
+			ratio = 0.7f;
+
+		SetWalkAnimationSpeed(1.4f * ratio);
+
 		if (dwDirection)	// Move or Shoot
 		{
 			if (dwDirection & KEY_SHOOT)	// Shoot

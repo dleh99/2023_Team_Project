@@ -210,4 +210,5 @@ public:
 	virtual void Update(float fTimeElapsed, ULONG nDirection);
 
 	void OtherPlayerAnimationUpdate(DWORD dwOtherPlayerDirection);
+	void SetWalkAnimationSpeed(float fSpeed);
 };

@@ -726,6 +726,10 @@ void CGameFramework::ProcessInput()
 		//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다.
 		m_pPlayer->Update(m_GameTimer.GetTimeElapsed(), dwDirection);
 
+		float length = Vector3::Length(m_pPlayer->GetVelocity());
+
+		std::cout << length << std::endl;
+
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 
 		for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
