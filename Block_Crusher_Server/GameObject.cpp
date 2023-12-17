@@ -33,7 +33,7 @@ BulletObject::BulletObject()
 	bullet_vec.y = 0.f;
 	bullet_vec.z = 0.f;
 
-	float rad = 2.f;
+	float rad = 1.f;
 	SetRadius(rad);
 }
 

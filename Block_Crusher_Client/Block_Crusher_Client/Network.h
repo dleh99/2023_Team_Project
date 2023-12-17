@@ -8,6 +8,7 @@
 #pragma comment(lib, "ws2_32")
 #include "Scene.h"
 #include "Player.h"
+#include <fstream>
 using namespace std;
 
 struct Pos {
