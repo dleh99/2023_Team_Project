@@ -67,7 +67,7 @@ void CGameFramework::OnDestroy()
 void CGameFramework::EnumOutputs()
 {
 	if (FAILED(CreateDXGIFactory(__uuidof(IDXGIFactory4), (void**)m_pdxgiFactory.GetAddressOf()))) {
-		std::cout << "DXGI Factory COM 객체 생성 실패 . . ." << '\n';
+		//td::cout << "DXGI Factory COM 객체 생성 실패 . . ." << '\n';
 		return;
 	}
 
@@ -80,10 +80,10 @@ void CGameFramework::EnumOutputs()
 	{
 		m_adapters.push_back(currentDxgiAdapter);
 		currentDxgiAdapter->GetDesc(&currentAdapterDesc);
-		std::cout << "VRAM 용량 : " << currentAdapterDesc.DedicatedVideoMemory << '\n';
-		std::cout << "시스템 용량 : " << currentAdapterDesc.DedicatedSystemMemory << '\n';
+		//std::cout << "VRAM 용량 : " << currentAdapterDesc.DedicatedVideoMemory << '\n';
+		//std::cout << "시스템 용량 : " << currentAdapterDesc.DedicatedSystemMemory << '\n';
 	}
-	std::cout << '\n';
+	//std::cout << '\n';
 	m_pdxgiMainAdapter = m_adapters[0];		// 이 응용 프로그램은 default 어댑터를 사용
 
 	ComPtr<IDXGIOutput> currentDxgiOutput = nullptr;
@@ -96,9 +96,9 @@ void CGameFramework::EnumOutputs()
 		m_outputs.push_back(currentDxgiOutput);
 		currentDxgiOutput->GetDesc(&currentOutputDesc);
 		//std::cout << "모니터 이름 : " << currentOutputDesc.DeviceName << '\n';
-		std::cout << "모니터 오른쪽 좌표 : " << currentOutputDesc.DesktopCoordinates.right
-			<< ", 모니터 바닥 좌표 : " << currentOutputDesc.DesktopCoordinates.bottom << '\n';
-		std::cout << "모니터가 데스크톱에 붙어있는가? : " << currentOutputDesc.AttachedToDesktop << '\n';
+		//std::cout << "모니터 오른쪽 좌표 : " << currentOutputDesc.DesktopCoordinates.right
+		//	<< ", 모니터 바닥 좌표 : " << currentOutputDesc.DesktopCoordinates.bottom << '\n';
+		//std::cout << "모니터가 데스크톱에 붙어있는가? : " << currentOutputDesc.AttachedToDesktop << '\n';
 	}
 	std::cout << '\n';
 }
@@ -134,23 +134,23 @@ void CGameFramework::CreateDirect3DDevice()
 	if (FAILED(D3D12CreateDevice(m_pdxgiMainAdapter.Get(), D3D_FEATURE_LEVEL_12_0,
 		__uuidof(ID3D12Device), (void**)pDevice.GetAddressOf())))
 	{
-		std::cout << "이 컴퓨터의 어댑터는 Feature Level 12_0을 지원하지 않습니다." << '\n';
-		std::cout << "Warp 어댑터를 사용하여 디바이스 생성을 시도하겠습니다." << '\n';
+		//std::cout << "이 컴퓨터의 어댑터는 Feature Level 12_0을 지원하지 않습니다." << '\n';
+		//std::cout << "Warp 어댑터를 사용하여 디바이스 생성을 시도하겠습니다." << '\n';
 
 		ComPtr<IDXGIAdapter> pWarpAdapter = nullptr;
 		m_pdxgiFactory->EnumWarpAdapter(__uuidof(IDXGIAdapter), (void**)pWarpAdapter.GetAddressOf());
 		if (FAILED(D3D12CreateDevice(pWarpAdapter.Get(), D3D_FEATURE_LEVEL_12_0,
 			__uuidof(ID3D12Device), (void**)pDevice.GetAddressOf()))) {
-			std::cout << "이 컴퓨터는 Warp 어댑터를 이용한 Feature Level 12_0도 지원하지 않습니다." << '\n';
-			std::cout << "모든 Direct3D 디바이스의 생성에 실패했습니다." << '\n';
+			//std::cout << "이 컴퓨터는 Warp 어댑터를 이용한 Feature Level 12_0도 지원하지 않습니다." << '\n';
+			//std::cout << "모든 Direct3D 디바이스의 생성에 실패했습니다." << '\n';
 		}
 		else {
-			std::cout << "Warp 어댑터를 이용한 Direct3D 디바이스의 생성 성공!" << '\n' << '\n';
+			//std::cout << "Warp 어댑터를 이용한 Direct3D 디바이스의 생성 성공!" << '\n' << '\n';
 			m_pd3dDevice = pDevice;
 		}
 	}
 	else {
-		std::cout << "Default 어댑터를 이용한 Direct3D 디바이스의 생성 성공!" << '\n' << '\n';
+		//std::cout << "Default 어댑터를 이용한 Direct3D 디바이스의 생성 성공!" << '\n' << '\n';
 		m_pd3dDevice = pDevice;
 	}
 
@@ -172,10 +172,10 @@ void CGameFramework::CreateDirect3DDevice()
 	if (FAILED(m_pd3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE,
 		__uuidof(ID3D12Fence), (void**)m_pd3dFence.GetAddressOf())))
 	{
-		std::cout << "Fence 객체 생성에 실패했습니다 . . ." << '\n' << '\n';
+		//std::cout << "Fence 객체 생성에 실패했습니다 . . ." << '\n' << '\n';
 	}
 	else
-		std::cout << "Fence 객체 생성 성공!!!" << '\n' << '\n';
+		//std::cout << "Fence 객체 생성 성공!!!" << '\n' << '\n';
 	m_nFenceValue = 0;
 
 	/*펜스와 동기화를 위한 이벤트 객체를 생성한다(이벤트 객체의 초기값을 FALSE이다).
@@ -195,26 +195,26 @@ void CGameFramework::CreateCommandQueue()
 
 	if (SUCCEEDED(m_pd3dDevice->CreateCommandQueue(&commandQueueDesc,
 		__uuidof(ID3D12CommandQueue), (void**)m_pd3dCommandQueue.GetAddressOf()))) {
-		std::cout << "Command Queue 생성 성공!" << '\n' << '\n';
+		//std::cout << "Command Queue 생성 성공!" << '\n' << '\n';
 	}
 	else {
-		std::cout << "Command Queue 생성 실패 . . ." << '\n' << '\n';
+		//std::cout << "Command Queue 생성 실패 . . ." << '\n' << '\n';
 	}
 
 	if (SUCCEEDED(m_pd3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
 		__uuidof(ID3D12CommandAllocator), (void**)m_pd3dCommandAllocator.GetAddressOf()))) {
-		std::cout << "Command Allocator 생성 성공!" << '\n' << '\n';
+		//std::cout << "Command Allocator 생성 성공!" << '\n' << '\n';
 	}
 	else {
-		std::cout << "Command Allocator 생성 실패 . . ." << '\n' << '\n';
+		//std::cout << "Command Allocator 생성 실패 . . ." << '\n' << '\n';
 	}
 
 	if (SUCCEEDED(m_pd3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_pd3dCommandAllocator.Get(),
 		NULL, __uuidof(ID3D12GraphicsCommandList), (void**)m_pd3dCommandList.GetAddressOf()))) {
-		std::cout << "Command List 생성 성공!" << '\n' << '\n';
+		//std::cout << "Command List 생성 성공!" << '\n' << '\n';
 	}
 	else {
-		std::cout << "Command List 생성 실패 . . ." << '\n' << '\n';
+		//std::cout << "Command List 생성 실패 . . ." << '\n' << '\n';
 	}
 
 	m_pd3dCommandList->Close();
@@ -256,11 +256,11 @@ void CGameFramework::CreateSwapChain()
 	if (SUCCEEDED(m_pdxgiFactory->CreateSwapChain(m_pd3dCommandQueue.Get(),
 		&dxgiSwapChainDesc, (IDXGISwapChain**)m_pdxgiSwapChain.GetAddressOf())))
 	{
-		std::cout << "Swap Chain 생성 성공!" << '\n' << '\n';
+		//std::cout << "Swap Chain 생성 성공!" << '\n' << '\n';
 	}
 	else
 	{
-		std::cout << "Swap Chain 생성 실패 . . ." << '\n' << '\n';
+		//std::cout << "Swap Chain 생성 실패 . . ." << '\n' << '\n';
 	}
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
 

@@ -36,7 +36,7 @@ void disconnect(int c_id)
 {
 	closesocket(clients[c_id]._socket);
 	clients[c_id]._state = US_EMPTY;
-	cout << "Å»ÅðÇÔ" << endl;
+	cout << "[" << c_id << "] Å»ÅðÇÔ" << endl;
 	user_number--;
 }
 
@@ -66,13 +66,15 @@ void packet_process(int c_id, char* packet)
 	case CS_LOGIN: {
 		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
 		cout << c_id << " Á¢¼Ó ¿Ï·á" << endl;
-		clients[c_id]._state = US_INGAME;
+		//clients[c_id]._state = US_INGAME;
 		clients[c_id].send_login_info_packet();
 		user_number++;
 		if (user_number == 3)
 			for (auto& cl : clients)
-				if (cl._state == US_INGAME)
+				if (cl._state == US_CONNECTING) {
+					cl._state = US_INGAME;
 					cl.send_start_packet(Map_infromation.MapChar);
+				}
 		break;
 	}
 	case CS_MOVE: {
@@ -146,7 +148,7 @@ void worker_thread(HANDLE iocp_h)
 		if (FALSE == ret) {
 			if (ex_over->_overlapped_type == OT_ACCEPT) std::cout << "Error of Accept";
 			else {
-				std::cout << "Error on client [" << key << "] in GQCS" << std::endl;
+				//std::cout << "Error on client [" << key << "] in GQCS" << std::endl;
 				disconnect(key);
 				if (ex_over->_overlapped_type == OT_SEND) delete ex_over;
 				continue;
