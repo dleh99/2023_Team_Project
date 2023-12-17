@@ -192,12 +192,14 @@ void WINAPI do_recv()
 			cout << "플레이어 [" << packet->death_id << "]가 사망하였습니다." << endl;
 			NetScene->DisableBullet(packet->bullet_id, packet->player_id);
 			Netplayers[packet->death_id]->SetIsActive(false);
+			Netplayers[packet->death_id]->SetDeath(true);
 			break;
 		}
 		case SC_RESPAWN: {
 			SC_RESPAWN_PACKET* packet = reinterpret_cast<SC_RESPAWN_PACKET*>(ptr);
 			cout << "플레이어 [" << packet->player_id << "] 부활." << endl;
 			Netplayers[packet->player_id]->SetIsActive(true);
+			Netplayers[packet->player_id]->SetDeath(false);
 			Netplayers[packet->player_id]->SetPosition(XMFLOAT3(packet->respawn_x, packet->respawn_y, packet->respawn_z));
 			Netplayers[packet->player_id]->SetPlayerHP(100);
 			break;

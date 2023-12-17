@@ -1088,6 +1088,22 @@ void CAnimationController::SetTrackAnimationSet(int nAnimationTrack, int nAnimat
 	if (m_pAnimationTracks) m_pAnimationTracks[nAnimationTrack].m_nAnimationSet = nAnimationSet;
 }
 
+void CAnimationController::SetTracksEnable(int nAnimationTrack)
+{
+	for (int i = 0; i < m_nAnimationTracks; ++i)
+	{
+		if (i == nAnimationTrack)
+		{
+			SetTrackEnable(i, true);
+		}
+		else
+		{
+			SetTrackEnable(i, false);
+			SetTrackPosition(i, 0.0f);
+		}
+	}
+}
+
 void CAnimationController::SetTrackEnable(int nAnimationTrack, bool bEnable)
 {
 	if (m_pAnimationTracks) m_pAnimationTracks[nAnimationTrack].SetEnable(bEnable);

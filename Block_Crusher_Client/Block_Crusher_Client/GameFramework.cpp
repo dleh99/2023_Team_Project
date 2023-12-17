@@ -457,6 +457,12 @@ void CGameFramework::FrameAdvance()
 
 #endif
 
+	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
+		if (m_pPlayer)
+			if (m_pPlayer->GetPlayerId() == i)
+				m_pPlayer->SetDeath(m_vEnemyPlayers[i]->GetDeath());
+	}
+
 	ProcessInput();
 
 	AnimateObjects();
@@ -503,8 +509,8 @@ void CGameFramework::FrameAdvance()
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList.Get(), m_pCamera);
 	
 	if (m_pPlayer)
-		if(true == m_pPlayer->GetIsActive())
-			m_pPlayer->Render(m_pd3dCommandList.Get(), m_pCamera);
+		m_pPlayer->Render(m_pd3dCommandList.Get(), m_pCamera);
+		//if(true == m_pPlayer->GetIsActive())
 
 	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
 		if (m_pPlayer)
@@ -512,8 +518,8 @@ void CGameFramework::FrameAdvance()
 				continue;
 
 		if (m_vEnemyPlayers[i])
-			if(true == m_vEnemyPlayers[i]->GetIsActive())
-				m_vEnemyPlayers[i]->Render(m_pd3dCommandList.Get(), m_pCamera);
+			m_vEnemyPlayers[i]->Render(m_pd3dCommandList.Get(), m_pCamera);
+			//if (true == m_vEnemyPlayers[i]->GetIsActive())
 	}
 
 
@@ -619,7 +625,7 @@ void CGameFramework::ReleaseObjects()
 
 void CGameFramework::ProcessInput()
 {
-	if (true == m_pPlayer->GetIsActive()) {
+	//if (true == m_pPlayer->GetIsActive()) {
 		static UCHAR pKeyBuffer[256];
 		DWORD dwDirection = 0;
 
@@ -685,19 +691,21 @@ void CGameFramework::ProcessInput()
 		z = m_pPlayer->GetPosition().z;
 		send_move_packet(x, y, z, cxDelta, cyDelta, frame_num);
 #endif
-
-		if (cxDelta || cyDelta)
+		if (!m_pPlayer->GetDeath())			// Alive
 		{
-			/*cxDelta는 y-축의 회전을 나타내고 cyDelta는 x-축의 회전을 나타낸다. 오른쪽 마우스 버튼이 눌려진 경우
-			cxDelta는 z-축의 회전을 나타낸다.*/
-			if (pKeyBuffer[VK_RBUTTON] & 0xF0)
-				m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-			else
-				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+			if (cxDelta || cyDelta)
+			{
+				/*cxDelta는 y-축의 회전을 나타내고 cyDelta는 x-축의 회전을 나타낸다. 오른쪽 마우스 버튼이 눌려진 경우
+				cxDelta는 z-축의 회전을 나타낸다.*/
+				if (pKeyBuffer[VK_RBUTTON] & 0xF0)
+					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+				else
+					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+			}
+			/*플레이어를 dwDirection 방향으로 이동한다(실제로는 속도 벡터를 변경한다).
+			이동 거리는 시간에 비례하도록 한다. 플레이어의 이동 속력은 (50/초)로 가정한다.*/
+			if (dwDirection) m_pPlayer->Move(dwDirection, 300.0f * m_GameTimer.GetTimeElapsed(), true);
 		}
-		/*플레이어를 dwDirection 방향으로 이동한다(실제로는 속도 벡터를 변경한다).
-		이동 거리는 시간에 비례하도록 한다. 플레이어의 이동 속력은 (50/초)로 가정한다.*/
-		if (dwDirection) m_pPlayer->Move(dwDirection, 300.0f * m_GameTimer.GetTimeElapsed(), true);
 
 		//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다.
 		m_pPlayer->Update(m_GameTimer.GetTimeElapsed(), dwDirection);
@@ -712,7 +720,7 @@ void CGameFramework::ProcessInput()
 			if (m_vEnemyPlayers[i])
 				m_vEnemyPlayers[i]->OtherPlayerAnimationUpdate(dwDirection);
 		}
-	}
+	//}
 }
 
 void CGameFramework::AnimateObjects()
