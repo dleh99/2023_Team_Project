@@ -11,6 +11,8 @@
 #include "GameObject.h"
 #include "Scene.h"
 #include "Camera.h"
+#include "protocol.h"
+#include "protocol.h"
 
 enum Animation
 {
@@ -91,6 +93,8 @@ protected:
 	bool isRotate = false;
 
 	int bullet_id = 0;
+
+	Animation m_ani_state;
 
 public:
 	float m_fKeyDownTime = 9999;
@@ -198,6 +202,7 @@ public:
 
 	void SetBulletId(int x) { bullet_id = x; };
 	int GetBulletId() { return bullet_id; };
+	Animation GetAniState() { return m_ani_state; };
 };
 
 class CCubePlayer : public CPlayer
@@ -224,6 +229,6 @@ public:
 	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
 	virtual void Update(float fTimeElapsed, ULONG nDirection);
 
-	void OtherPlayerAnimationUpdate(DWORD dwOtherPlayerDirection);
 	void SetWalkAnimationSpeed(float fSpeed);
+	void OtherPlayerAnimationUpdate(Animation dwOtherPlayerDirection);
 };

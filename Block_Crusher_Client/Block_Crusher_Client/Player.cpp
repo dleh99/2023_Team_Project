@@ -36,6 +36,8 @@ CPlayer::CPlayer() : CGameObject()
 	m_playerNetworkId = GetNetworkPlayerId();
 
 	m_bActive = true;
+
+	m_ani_state = ANIMATION_IDLE;
 }
 
 CPlayer::~CPlayer()
@@ -629,63 +631,100 @@ void CMainPlayer::OnPrepareRender()
 	CPlayer::OnPrepareRender();
 }
 
-void CMainPlayer::OtherPlayerAnimationUpdate(DWORD dwOtherPlayerDirection)
+void CMainPlayer::OtherPlayerAnimationUpdate(Animation dwOtherPlayerDirection)
 {
-	if (!GetDeath())
-	{
-		if (dwOtherPlayerDirection)	// Move or Shoot
-		{
-			if (dwOtherPlayerDirection & KEY_SHOOT)	// Shoot
-			{
-				m_pSkinnedAnimationController->SetTracksEnable(5);
-			}
-			else if (dwOtherPlayerDirection & DIR_FORWARD)
-			{
-				m_pSkinnedAnimationController->SetTracksEnable(1);
-			}
-			else if (dwOtherPlayerDirection & DIR_LEFT)
-			{
-				m_pSkinnedAnimationController->SetTracksEnable(2);
-			}
-			else if (dwOtherPlayerDirection & DIR_RIGHT)
-			{
-				m_pSkinnedAnimationController->SetTracksEnable(3);
-			}
-			else if (dwOtherPlayerDirection & DIR_BACKWARD)
-			{
-				m_pSkinnedAnimationController->SetTracksEnable(4);
-			}
-			else			// Move & Don't Shoot
-			{
-				m_pSkinnedAnimationController->SetTracksEnable(0);
-			}
-		}
+	switch (dwOtherPlayerDirection) {
+	case ANIMATION_IDLE: {
+		m_pSkinnedAnimationController->SetTracksEnable(0);
+		//cout << "IDLE 출력중" << endl;
+		break;
 	}
-
-	// Move
-
-	if (m_pSkinnedAnimationController)
-	{
-		if (!GetDeath())		// Alive
-		{
-			float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-			if (::IsZero(fLength))
-			{
-				m_pSkinnedAnimationController->SetTracksEnable(0);
-
-				if (dwOtherPlayerDirection & KEY_SHOOT)
-				{
-					m_pSkinnedAnimationController->SetTrackEnable(0, false);
-					m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
-					m_pSkinnedAnimationController->SetTrackEnable(5, true);
-				}
-			}
-		}
-		else					// Death
-		{
-			m_pSkinnedAnimationController->SetTracksEnable(7);
-		}
+	case ANIMATION_WALK_FORAWRRD: {
+		m_pSkinnedAnimationController->SetTracksEnable(1);
+		//cout << "FORWORD 출력중" << endl;
+		break;
 	}
+	case ANIMATION_WALK_LEFT: {
+		m_pSkinnedAnimationController->SetTracksEnable(2);
+		break;
+	}
+	case ANIMATION_WALK_RIGHT: {
+		m_pSkinnedAnimationController->SetTracksEnable(3);
+		break;
+	}
+	case ANIMATION_WALK_BACKWARD: {
+		m_pSkinnedAnimationController->SetTracksEnable(4);
+		break;
+	}
+	case ANIMATION_SHOOT: {
+		m_pSkinnedAnimationController->SetTracksEnable(5);
+		break;
+	}
+	case ANIMATION_DAMAGED: {
+		m_pSkinnedAnimationController->SetTracksEnable(6);
+		break;
+	}
+	case ANIMATION_DEATH: {
+		m_pSkinnedAnimationController->SetTracksEnable(7);
+		break;
+	}
+	}
+	//if (!GetDeath())
+	//{
+	//	if (dwOtherPlayerDirection)	// Move or Shoot
+	//	{
+	//		if (dwOtherPlayerDirection & KEY_SHOOT)	// Shoot
+	//		{
+	//			m_pSkinnedAnimationController->SetTracksEnable(5);
+	//		}
+	//		else if (dwOtherPlayerDirection & DIR_FORWARD)
+	//		{
+	//			m_pSkinnedAnimationController->SetTracksEnable(1);
+	//			//cout << "들어감" << endl;
+	//		}
+	//		else if (dwOtherPlayerDirection & DIR_LEFT)
+	//		{
+	//			m_pSkinnedAnimationController->SetTracksEnable(2);
+	//		}
+	//		else if (dwOtherPlayerDirection & DIR_RIGHT)
+	//		{
+	//			m_pSkinnedAnimationController->SetTracksEnable(3);
+	//		}
+	//		else if (dwOtherPlayerDirection & DIR_BACKWARD)
+	//		{
+	//			m_pSkinnedAnimationController->SetTracksEnable(4);
+	//		}
+	//		else			// Move & Don't Shoot
+	//		{
+	//			m_pSkinnedAnimationController->SetTracksEnable(0);
+	//		}
+	//	}
+	//}
+
+	//// Move
+
+	//if (m_pSkinnedAnimationController)
+	//{
+	//	if (!GetDeath())		// Alive
+	//	{
+	//		float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+	//		if (::IsZero(fLength))
+	//		{
+	//			m_pSkinnedAnimationController->SetTracksEnable(0);
+
+	//			if (dwOtherPlayerDirection & KEY_SHOOT)
+	//			{
+	//				m_pSkinnedAnimationController->SetTrackEnable(0, false);
+	//				m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
+	//				m_pSkinnedAnimationController->SetTrackEnable(5, true);
+	//			}
+	//		}
+	//	}
+	//	else					// Death
+	//	{
+	//		m_pSkinnedAnimationController->SetTracksEnable(7);
+	//	}
+	//}
 }
 
 void CMainPlayer::SetWalkAnimationSpeed(float fSpeed)
@@ -711,19 +750,21 @@ void CMainPlayer::Update(float fTimeElapsed, DWORD dwDirection)
 			if (::IsZero(fLength))
 			{
 				m_pSkinnedAnimationController->SetTracksEnable(0);
+				m_ani_state = ANIMATION_IDLE;
 
 				if (dwDirection & KEY_SHOOT)
 				{
 					m_pSkinnedAnimationController->SetTrackEnable(0, false);
 					m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
 					m_pSkinnedAnimationController->SetTrackEnable(5, true);
+					m_ani_state = ANIMATION_SHOOT;
 				}
 			}
 		}
 		else		// Death
 		{
 			m_pSkinnedAnimationController->SetTracksEnable(7);
-
+			m_ani_state = ANIMATION_DEATH;
 		}
 	}
 
@@ -762,26 +803,32 @@ void CMainPlayer::Move(DWORD dwDirection, float fDistance, bool bVelocity)
 			if (dwDirection & KEY_SHOOT)	// Shoot
 			{
 				m_pSkinnedAnimationController->SetTracksEnable(5);
+				m_ani_state = ANIMATION_SHOOT;
 			}
 			else if (dwDirection & DIR_FORWARD)
 			{
 				m_pSkinnedAnimationController->SetTracksEnable(1);
+				m_ani_state = ANIMATION_WALK_FORAWRRD;
 			}
 			else if (dwDirection & DIR_LEFT)
 			{
 				m_pSkinnedAnimationController->SetTracksEnable(2);
+				m_ani_state = ANIMATION_WALK_LEFT;
 			}
 			else if (dwDirection & DIR_RIGHT)
 			{
 				m_pSkinnedAnimationController->SetTracksEnable(3);
+				m_ani_state = ANIMATION_WALK_RIGHT;
 			}
 			else if (dwDirection & DIR_BACKWARD)
 			{
 				m_pSkinnedAnimationController->SetTracksEnable(4);
+				m_ani_state = ANIMATION_WALK_BACKWARD;
 			}
 			else			// Move & Don't Shoot
 			{
 				m_pSkinnedAnimationController->SetTracksEnable(0);
+				m_ani_state = ANIMATION_IDLE;
 			}
 		}
 	}

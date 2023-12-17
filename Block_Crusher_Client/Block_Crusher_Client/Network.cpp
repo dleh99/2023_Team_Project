@@ -16,6 +16,7 @@ int id;
 float otherPlayer_x, otherPlayer_y, otherPlayer_z;
 Pos otherPlayerPos[3];
 Mouse otherPlayerMouse[3];
+Animation otherPlayerAni[3];
 CScene* NetScene = NULL;
 vector<CMainPlayer*> Netplayers;
 
@@ -83,7 +84,7 @@ void send_login_packet()
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
-void send_move_packet(float x, float y, float z, float cx, float cy, long long frame_num)
+void send_move_packet(float x, float y, float z, float cx, float cy, Animation animation_state)
 {
 	CS_MOVE_PACKET p{};
 	p.size = sizeof(CS_MOVE_PACKET);
@@ -93,7 +94,7 @@ void send_move_packet(float x, float y, float z, float cx, float cy, long long f
 	p.z = z;
 	p.cxDelta = cx;
 	p.cyDelta = cy;
-	p.frame_num = frame_num;
+	p.animation_state = animation_state;
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
@@ -109,6 +110,14 @@ void send_bullet_add_packet(XMFLOAT3 pos, XMFLOAT3 bullet_v, int bullet_id)
 	p.b_y = bullet_v.y;
 	p.b_z = bullet_v.z;
 	p.bullet_id = bullet_id;
+	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
+}
+
+void send_fall_packet()
+{
+	CS_FALL_PACKET p{};
+	p.size = sizeof(CS_FALL_PACKET);
+	p.type = CS_FALL;
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
@@ -164,7 +173,8 @@ void WINAPI do_recv()
 			otherPlayerPos[p_id].z = packet->z;
 			otherPlayerMouse[p_id].cx = packet->cxDelta;
 			otherPlayerMouse[p_id].cy = packet->cyDelta;
-			//cout << "[" << p_id << "] " << otherPlayerPos[p_id].x << ", " << otherPlayerPos[p_id].y << ", " << otherPlayerPos[p_id].z << endl;
+			otherPlayerAni[p_id] = packet->animation_state;
+			//cout << "[" << p_id << "] " << packet->animation_state << endl;
 			//cout << "[" << packet->id << "] 첫 명령 프레임 : " << packet->first_frame_num << ", 서버 시간 : " << packet->server_time << ", 현재 프레임 : " << game_frame << endl;
 			break;
 		}
@@ -223,6 +233,11 @@ void WINAPI do_recv()
 			Netplayers[packet->player_id]->SetPlayerHP(100);
 			break;
 		}
+		case SC_FALL: {
+			SC_FALL_PACKET* packet = reinterpret_cast<SC_FALL_PACKET*>(ptr);
+			Netplayers[packet->fall_id]->SetDeath(true);
+			break;
+		}
 		}
 		ptr += size;
 	}
@@ -264,6 +279,11 @@ int GetNetworkPlayerId()
 	int playerId = id;
 
 	return playerId;
+}
+
+Animation GetOtherAni(int id)
+{
+	return otherPlayerAni[id];
 }
 
 Pos GetOtherPlayerPos(int id)

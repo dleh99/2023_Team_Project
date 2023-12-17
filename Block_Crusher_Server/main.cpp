@@ -36,7 +36,7 @@ void disconnect(int c_id)
 {
 	closesocket(clients[c_id]._socket);
 	clients[c_id]._state = US_EMPTY;
-	cout << "탈퇴함" << endl;
+	cout << "[" << c_id << "] 탈퇴함" << endl;
 	user_number--;
 }
 
@@ -66,13 +66,15 @@ void packet_process(int c_id, char* packet)
 	case CS_LOGIN: {
 		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
 		cout << c_id << " 접속 완료" << endl;
-		clients[c_id]._state = US_INGAME;
+		//clients[c_id]._state = US_INGAME;
 		clients[c_id].send_login_info_packet();
 		user_number++;
 		if (user_number == 3)
 			for (auto& cl : clients)
-				if (cl._state == US_INGAME)
+				if (cl._state == US_CONNECTING) {
+					cl._state = US_INGAME;
 					cl.send_start_packet(Map_infromation.MapChar);
+				}
 		break;
 	}
 	case CS_MOVE: {
@@ -82,18 +84,19 @@ void packet_process(int c_id, char* packet)
 		clients[c_id].pos = accept_position;
 		clients[c_id].cx = p->cxDelta;
 		clients[c_id].cy = p->cyDelta;
+		//cout << "[" << c_id << "] " << p->animation_state << endl;
 
 		//cout << "[" << c_id << "] 클라이언트 받은 프레임 : " << p->frame_num << endl;
-		auto now_time = system_clock::now();
+		/*auto now_time = system_clock::now();
 		auto exec_time = now_time - start_time;
-		auto ms = duration_cast<milliseconds>(exec_time).count();
+		auto ms = duration_cast<milliseconds>(exec_time).count();*/
 		//cout << ms << endl;
 
 		// 다른 클라이언트들에게 뿌리기
 		for (auto& cl : clients) {
 			if (cl._state != US_INGAME) continue;
 			if (cl._id == c_id) continue;
-			cl.send_move_packet(clients.data(), c_id, p->frame_num, ms);
+			cl.send_move_packet(clients.data(), c_id, p->animation_state);
 		}
 		break;
 	}
@@ -118,6 +121,16 @@ void packet_process(int c_id, char* packet)
 		}
 		break;
 	}
+	case CS_FALL: {
+		CS_FALL_PACKET* p = reinterpret_cast<CS_FALL_PACKET*>(packet);
+		clients[c_id].isDeath = true;
+		for (auto& cl : clients) {
+			if (cl._state != US_INGAME) continue;
+			if (cl._id == c_id) continue;
+			cl.send_fall_packet(c_id);
+		}
+		break;
+	}
 	}
 }
 
@@ -135,7 +148,7 @@ void worker_thread(HANDLE iocp_h)
 		if (FALSE == ret) {
 			if (ex_over->_overlapped_type == OT_ACCEPT) std::cout << "Error of Accept";
 			else {
-				std::cout << "Error on client [" << key << "] in GQCS" << std::endl;
+				//std::cout << "Error on client [" << key << "] in GQCS" << std::endl;
 				disconnect(key);
 				if (ex_over->_overlapped_type == OT_SEND) delete ex_over;
 				continue;

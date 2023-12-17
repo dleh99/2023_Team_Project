@@ -1,6 +1,6 @@
 #pragma once
 
-//#define USE_SERVER
+#define USE_SERVER
 
 constexpr int SERVER_PORT = 4000;
 constexpr int BUF_SIZE = 1024;
@@ -24,6 +24,7 @@ constexpr int WORLD_HEIGHT = 3600;		// 블럭 = 60cm(px), 높이 = 아래 30개, 위 30�
 constexpr char CS_LOGIN = 0;
 constexpr char CS_MOVE = 1;
 constexpr char CS_BULLET_ADD = 5;
+constexpr char CS_FALL = 12;
 
 constexpr char SC_LOGIN = 2;
 constexpr char SC_START = 3;
@@ -34,6 +35,19 @@ constexpr char SC_BULLET_COLLISION = 8;
 constexpr char SC_HIT = 9;
 constexpr char SC_DEATH = 10;
 constexpr char SC_RESPAWN = 11;
+constexpr char SC_FALL = 13;
+
+enum Animation
+{
+	ANIMATION_IDLE,					// assigned 0
+	ANIMATION_WALK_FORAWRRD,		// assigned 1
+	ANIMATION_WALK_LEFT,			// assigned 2
+	ANIMATION_WALK_RIGHT,			// assigned 3
+	ANIMATION_WALK_BACKWARD,		// assigned 4
+	ANIMATION_SHOOT,				// assigned 5
+	ANIMATION_DAMAGED,				// assigned 6
+	ANIMATION_DEATH,				// assigned 7
+};
 
 #pragma pack(push, 1)
 
@@ -50,7 +64,7 @@ struct CS_MOVE_PACKET {
 	float				z;
 	float				cxDelta;
 	float				cyDelta;
-	long long			frame_num;
+	Animation			animation_state;
 };
 
 struct CS_BULLET_ADD_PACKET {
@@ -63,6 +77,11 @@ struct CS_BULLET_ADD_PACKET {
 	float				b_y;
 	float				b_z;
 	int					bullet_id;
+};
+
+struct CS_FALL_PACKET {
+	unsigned char		size;
+	char				type;
 };
 
 //===========================
@@ -92,8 +111,7 @@ struct SC_MOVE_PACKET {
 	float				z;
 	float				cxDelta;
 	float				cyDelta;
-	long long			first_frame_num;
-	long long			server_time;
+	Animation			animation_state;
 };
 
 struct SC_BULLET_ADD_PACKET {
@@ -148,6 +166,12 @@ struct SC_RESPAWN_PACKET {
 	float				respawn_x;
 	float				respawn_y;
 	float				respawn_z;
+};
+
+struct SC_FALL_PACKET {
+	unsigned char		size;
+	char				type;
+	int					fall_id;
 };
 
 #pragma pack(pop)

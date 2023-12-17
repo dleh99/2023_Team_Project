@@ -56,7 +56,7 @@ void User_Interface::send_start_packet(char mapkey)
 	do_send(&p);
 }
 
-void User_Interface::send_move_packet(User_Interface* clients, int c_id, long long first_frame, long long server_tim)
+void User_Interface::send_move_packet(User_Interface* clients, int c_id, Animation animation_state)
 {
 	SC_MOVE_PACKET p;
 	p.size = sizeof(SC_MOVE_PACKET);
@@ -67,8 +67,7 @@ void User_Interface::send_move_packet(User_Interface* clients, int c_id, long lo
 	p.z = clients[c_id].pos.z;
 	p.cxDelta = clients[c_id].cx;
 	p.cyDelta = clients[c_id].cy;
-	p.first_frame_num = first_frame;
-	p.server_time = server_tim;
+	p.animation_state = animation_state;
 	do_send(&p);
 }
 
@@ -141,5 +140,14 @@ void User_Interface::send_respawn_packet(float x, float y, float z, int player_i
 	p.respawn_x = x;
 	p.respawn_y = y;
 	p.respawn_z = z;
+	do_send(&p);
+}
+
+void User_Interface::send_fall_packet(int fall_id)
+{
+	SC_FALL_PACKET p;
+	p.size = sizeof(SC_FALL_PACKET);
+	p.type = SC_FALL;
+	p.fall_id = fall_id;
 	do_send(&p);
 }
