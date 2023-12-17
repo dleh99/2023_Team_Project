@@ -12,19 +12,6 @@
 #include "Scene.h"
 #include "Camera.h"
 #include "protocol.h"
-#include "protocol.h"
-
-enum Animation
-{
-	ANIMATION_IDLE, // assigned 0
-	ANIMATION_WALK_FORAWRRD,   // assigned 1
-	ANIMATION_WALK_LEFT,  // assigned 2
-	ANIMATION_WALK_RIGHT, // assigned 3
-	ANIMATION_WALK_BACKWARD, // assigned 4
-	ANIMATION_SHOOT,  // assigned 5
-	ANIMATION_DAMAGED,  // assigned 6
-	ANIMATION_DEATH,  // assigned 7
-};
 
 class CPlayer : public CGameObject
 {
@@ -178,8 +165,8 @@ public:
 	void SetPlayerUpdatedContext(LPVOID pContext) { m_pPlayerUpdatedContext = pContext; }
 
 	//카메라의 위치가 바뀔 때마다 호출되는 함수와 그 함수에서 사용하는 정보를 설정하는 함수이다.
-	virtual void OnCameraUpdateCallback(float fTimeElapsed) { }
-	void SetCameraUpdatedContext(LPVOID pContext) { m_pCameraUpdatedContext = pContext; }
+	virtual void OnCameraUpdateCallback(float fTimeElapsed) { };
+	void SetCameraUpdatedContext(LPVOID pContext) { m_pCameraUpdatedContext = pContext; };
 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
