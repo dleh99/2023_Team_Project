@@ -84,11 +84,16 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		if (dwDirection & DIR_UP) { 
 			//이미 공중에서 중력을 받는 상태
 			if (m_bPlayerGravity) {
-
+				//cout << m_fBoosterMount << endl;
 				m_fJumpTime += m_fEtime;
-				if (m_fJumpTime > 0.2f ) {
+
+				if (m_fJumpTime > 0.2f && m_fBoosterMount > 0) {
 					xmf3JumpShift.y += 400.0f * m_fEtime;
 					m_fPlayerGravityTime = 0;
+					m_fBoosterMount -= m_fEtime * 120;
+					if (m_fBoosterMount < 0) {
+						m_fBoosterMount -= 30.0f;
+					}
 				}
 
 				if (xmf3JumpShift.y > 50.f) {
@@ -337,6 +342,10 @@ void CPlayer::Update(float fTimeElapsed)
 		m_bReloading = false;
 		m_fKeyDownTime = 0.f;
 		m_nBullet = 30;
+	}
+
+	if (m_fBoosterMount < 100.0f) {
+		m_fBoosterMount += fTimeElapsed * 40;
 	}
 
 	/*플레이어의 속도 벡터를 중력 벡터와 더한다. 중력 벡터에 fTimeElapsed를 곱하는 것은 중력을 시간에 비례하도록
@@ -693,62 +702,6 @@ void CMainPlayer::OtherPlayerAnimationUpdate(Animation dwOtherPlayerDirection)
 		break;
 	}
 	}
-	//if (!GetDeath())
-	//{
-	//	if (dwOtherPlayerDirection)	// Move or Shoot
-	//	{
-	//		if (dwOtherPlayerDirection & KEY_SHOOT)	// Shoot
-	//		{
-	//			m_pSkinnedAnimationController->SetTracksEnable(5);
-	//		}
-	//		else if (dwOtherPlayerDirection & DIR_FORWARD)
-	//		{
-	//			m_pSkinnedAnimationController->SetTracksEnable(1);
-	//			//cout << "들어감" << endl;
-	//		}
-	//		else if (dwOtherPlayerDirection & DIR_LEFT)
-	//		{
-	//			m_pSkinnedAnimationController->SetTracksEnable(2);
-	//		}
-	//		else if (dwOtherPlayerDirection & DIR_RIGHT)
-	//		{
-	//			m_pSkinnedAnimationController->SetTracksEnable(3);
-	//		}
-	//		else if (dwOtherPlayerDirection & DIR_BACKWARD)
-	//		{
-	//			m_pSkinnedAnimationController->SetTracksEnable(4);
-	//		}
-	//		else			// Move & Don't Shoot
-	//		{
-	//			m_pSkinnedAnimationController->SetTracksEnable(0);
-	//		}
-	//	}
-	//}
-
-	//// Move
-
-	//if (m_pSkinnedAnimationController)
-	//{
-	//	if (!GetDeath())		// Alive
-	//	{
-	//		float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-	//		if (::IsZero(fLength))
-	//		{
-	//			m_pSkinnedAnimationController->SetTracksEnable(0);
-
-	//			if (dwOtherPlayerDirection & KEY_SHOOT)
-	//			{
-	//				m_pSkinnedAnimationController->SetTrackEnable(0, false);
-	//				m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
-	//				m_pSkinnedAnimationController->SetTrackEnable(5, true);
-	//			}
-	//		}
-	//	}
-	//	else					// Death
-	//	{
-	//		m_pSkinnedAnimationController->SetTracksEnable(7);
-	//	}
-	//}
 }
 
 void CMainPlayer::SetWalkAnimationSpeed(float fSpeed)

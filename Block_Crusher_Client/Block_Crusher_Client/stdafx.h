@@ -40,6 +40,7 @@
 #include <fstream>
 #include <string>
 #include <random>
+#include <cmath>
 
 
 // Direct3D 12
