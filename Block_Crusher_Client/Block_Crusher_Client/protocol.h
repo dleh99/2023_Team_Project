@@ -1,6 +1,6 @@
 #pragma once
 
-//#define USE_SERVER
+#define USE_SERVER
 
 constexpr int SERVER_PORT = 4000;
 constexpr int BUF_SIZE = 1024;
@@ -25,6 +25,7 @@ constexpr char CS_LOGIN = 0;
 constexpr char CS_MOVE = 1;
 constexpr char CS_BULLET_ADD = 5;
 constexpr char CS_FALL = 12;
+constexpr char CS_SCORE = 14;
 
 constexpr char SC_LOGIN = 2;
 constexpr char SC_START = 3;
@@ -36,6 +37,7 @@ constexpr char SC_HIT = 9;
 constexpr char SC_DEATH = 10;
 constexpr char SC_RESPAWN = 11;
 constexpr char SC_FALL = 13;
+constexpr char SC_RESULT = 15;
 
 enum Animation
 {
@@ -47,6 +49,10 @@ enum Animation
 	ANIMATION_SHOOT,				// assigned 5
 	ANIMATION_DAMAGED,				// assigned 6
 	ANIMATION_DEATH,				// assigned 7
+	ANIMATION_SHOOT_FORWARD,		// assigned 8
+	ANIMATION_SHOOT_LEFT,			// assigned 9
+	ANIMATION_SHOOT_RIGHT,			// assigned 10
+	ANIMATION_SHOOT_BACKWARD,		// assigned 11
 };
 
 #pragma pack(push, 1)
@@ -82,6 +88,12 @@ struct CS_BULLET_ADD_PACKET {
 struct CS_FALL_PACKET {
 	unsigned char		size;
 	char				type;
+};
+
+struct CS_SCORE_PACKET {
+	unsigned char		size;
+	char				type;
+	int					score;
 };
 
 //===========================
@@ -172,6 +184,12 @@ struct SC_FALL_PACKET {
 	unsigned char		size;
 	char				type;
 	int					fall_id;
+};
+
+struct SC_RESULT_PACKET {
+	unsigned char		size;
+	char				type;
+	bool				result;
 };
 
 #pragma pack(pop)

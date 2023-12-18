@@ -13,6 +13,8 @@ User_Interface::User_Interface()
 	invincible_time = 0.f;
 	isDeath = false;
 	Death_time = 0.f;
+	score = -1;
+	isWin = false;
 }
 
 User_Interface::~User_Interface()
@@ -52,7 +54,7 @@ void User_Interface::send_start_packet(char mapkey)
 	p.size = sizeof(SC_START_PACKET);
 	p.type = SC_START;
 	p.map_key = mapkey;
-	std::cout << mapkey << "¸¦ º¸³¿" << std::endl;
+	//std::cout << mapkey << "¸¦ º¸³¿" << std::endl;
 	do_send(&p);
 }
 
@@ -149,5 +151,14 @@ void User_Interface::send_fall_packet(int fall_id)
 	p.size = sizeof(SC_FALL_PACKET);
 	p.type = SC_FALL;
 	p.fall_id = fall_id;
+	do_send(&p);
+}
+
+void User_Interface::send_result_packet()
+{
+	SC_RESULT_PACKET p;
+	p.size = sizeof(SC_RESULT_PACKET);
+	p.type = SC_RESULT;
+	p.result = isWin;
 	do_send(&p);
 }

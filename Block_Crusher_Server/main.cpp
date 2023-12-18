@@ -60,6 +60,28 @@ bool CollisionCheck_objects(XMFLOAT3 p1, XMFLOAT3 p2, float r1, float r2)
 	return false;
 }
 
+bool scoreCalculation()
+{
+	int num = 0;
+	int max_score = 0;
+	for (auto& cl : clients) {
+		if (cl._state != US_INGAME) continue;
+		if (cl.score != -1) {
+			num++;
+			if (max_score < cl.score)
+				max_score = cl.score;
+		}
+	}
+	if (num == 3) {
+		for (auto& cl : clients) {
+			if (cl.score == max_score)
+				cl.isWin = true;
+		}
+		return true;
+	}
+	return false;
+}
+
 void packet_process(int c_id, char* packet)
 {
 	switch (packet[1]) {
@@ -128,6 +150,17 @@ void packet_process(int c_id, char* packet)
 			if (cl._state != US_INGAME) continue;
 			if (cl._id == c_id) continue;
 			cl.send_fall_packet(c_id);
+		}
+		break;
+	}
+	case CS_SCORE: {
+		CS_SCORE_PACKET* p = reinterpret_cast<CS_SCORE_PACKET*>(packet);
+		clients[c_id].score = p->score;
+		if (true == scoreCalculation()) {
+			for (auto& cl : clients) {
+				if (cl._state != US_INGAME) continue;
+				cl.send_result_packet();
+			}
 		}
 		break;
 	}

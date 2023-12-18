@@ -2,6 +2,7 @@
 #include "Timer.h"
 #include "Shader.h"
 #include "protocol.h"
+//#include "Network.h"
 
 #define MAX_OBJ_COUNT 3000
 
@@ -39,6 +40,8 @@ public:
 	int m_nBlock = 0;
 	CPlayer* m_pPlayer= NULL;
 
+	bool GetisEnd() { return isEnd; };
+
 protected:
 	/*CShader** m_ppShaders = NULL;
 	int m_nShaders = 0;*/
@@ -59,5 +62,6 @@ protected:
 
 	ComPtr<ID3D12RootSignature> m_pd3dGraphicsRootSignature = NULL;
 
+	bool isEnd = false;
 };
 

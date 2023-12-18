@@ -548,6 +548,11 @@ void CGameFramework::FrameAdvance()
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 
+	if(true == m_pScene->GetisEnd())
+		if (false == isEnd_framework) {
+			isEnd_framework = true;
+			send_score_packet(m_pPlayer->GetPlayerScore());
+		}
 	frame_num++;
 	SetFrame(frame_num);
 }
@@ -584,13 +589,13 @@ void CGameFramework::BuildObjects()
 	int id = GetNetworkPlayerId();
 	
 	CMainPlayer* pCubePlayer0 = new CMainPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, -30.0f, pPlayerShader, pSkinnedPlayerShader, pMat);
+		m_pScene->GetGraphicsRootSignature().Get(), -100.f, 250.f, -440.f, pPlayerShader, pSkinnedPlayerShader, pMat);
 
 	CMainPlayer* pCubePlayer1 = new CMainPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 0.0f, pPlayerShader, pSkinnedPlayerShader, pMat);
+		m_pScene->GetGraphicsRootSignature().Get(), -280.f, 250.f, -440.f, pPlayerShader, pSkinnedPlayerShader, pMat);
 
 	CMainPlayer* pCubePlayer2 = new CMainPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 30.0f, pPlayerShader, pSkinnedPlayerShader, pMat);
+		m_pScene->GetGraphicsRootSignature().Get(), -460.f, 250.f, -440.f, pPlayerShader, pSkinnedPlayerShader, pMat);
 
 	m_vEnemyPlayers.push_back(pCubePlayer0);
 	m_vEnemyPlayers.push_back(pCubePlayer1);

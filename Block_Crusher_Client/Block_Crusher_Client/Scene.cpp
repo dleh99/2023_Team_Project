@@ -376,7 +376,14 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 	std::wstring min = std::to_wstring(int(m_fPlayTime) / 60) + L":";
 	std::wstring sec = std::to_wstring(int(m_fPlayTime) % 60);
 	if (int(m_fPlayTime) % 60 < 10) sec = L"0" + std::to_wstring(int(m_fPlayTime) % 60);
-	if(int(m_fPlayTime) < 0) sec = L"00";
+	if (int(m_fPlayTime) < 0) {
+		min = L" 0:";
+		sec = L"00";
+		if (false == isEnd) {
+			
+			isEnd = true;
+		}
+	}
 	std::wstring str = min + sec;
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
 		pTextFormat[0].Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());

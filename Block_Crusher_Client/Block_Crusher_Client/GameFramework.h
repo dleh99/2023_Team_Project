@@ -74,6 +74,7 @@ private:
 	_TCHAR m_pszFrameRate[50];
 
 	long long frame_num = 0;
+	bool isEnd_framework = false;
 
 public:
 	CGameFramework();

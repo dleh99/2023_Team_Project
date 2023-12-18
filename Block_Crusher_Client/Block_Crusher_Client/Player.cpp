@@ -676,6 +676,22 @@ void CMainPlayer::OtherPlayerAnimationUpdate(Animation dwOtherPlayerDirection)
 		m_pSkinnedAnimationController->SetTracksEnable(7);
 		break;
 	}
+	case ANIMATION_SHOOT_FORWARD: {
+		m_pSkinnedAnimationController->SetTracksEnable(8);
+		break;
+	}
+	case ANIMATION_SHOOT_LEFT: {
+		m_pSkinnedAnimationController->SetTracksEnable(9);
+		break;
+	}
+	case ANIMATION_SHOOT_RIGHT: {
+		m_pSkinnedAnimationController->SetTracksEnable(10);
+		break;
+	}
+	case ANIMATION_SHOOT_BACKWARD: {
+		m_pSkinnedAnimationController->SetTracksEnable(11);
+		break;
+	}
 	}
 	//if (!GetDeath())
 	//{
@@ -821,22 +837,22 @@ void CMainPlayer::Move(DWORD dwDirection, float fDistance, bool bVelocity)
 				if (dwDirection & DIR_FORWARD)
 				{
 					m_pSkinnedAnimationController->SetTracksEnable(8);
-					//m_ani_state = ANIMATION_WALK_FORAWRRD;
+					m_ani_state = ANIMATION_SHOOT_FORWARD;
 				}
 				else if (dwDirection & DIR_LEFT)
 				{
 					m_pSkinnedAnimationController->SetTracksEnable(9);
-					//m_ani_state = ANIMATION_WALK_LEFT;
+					m_ani_state = ANIMATION_SHOOT_LEFT;
 				}
 				else if (dwDirection & DIR_RIGHT)
 				{
 					m_pSkinnedAnimationController->SetTracksEnable(10);
-					//m_ani_state = ANIMATION_WALK_RIGHT;
+					m_ani_state = ANIMATION_SHOOT_RIGHT;
 				}
 				else if (dwDirection & DIR_BACKWARD)
 				{
 					m_pSkinnedAnimationController->SetTracksEnable(11);
-					//m_ani_state = ANIMATION_WALK_BACKWARD;
+					m_ani_state = ANIMATION_SHOOT_BACKWARD;
 				}
 			}
 			else				// Don't Shoot

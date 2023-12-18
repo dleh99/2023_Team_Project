@@ -30,6 +30,9 @@ public:
 	bool			isDeath;					// 죽었나?
 	float			Death_time;					// 리스폰 시간
 
+	int				score;						
+	bool			isWin;
+
 public:
 	User_Interface();
 	~User_Interface();
@@ -47,4 +50,5 @@ public:
 	void send_dead_packet(int bullet_id, int player_id, int death_id);
 	void send_respawn_packet(float x, float y, float z, int player_id);
 	void send_fall_packet(int fall_id);
+	void send_result_packet();
 };

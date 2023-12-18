@@ -121,6 +121,15 @@ void send_fall_packet()
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
+void send_score_packet(int score)
+{
+	CS_SCORE_PACKET p{};
+	p.size = sizeof(CS_SCORE_PACKET);
+	p.type = CS_SCORE;
+	p.score = score;
+	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
+}
+
 void WINAPI do_recv()
 {
 	int ret;
@@ -146,6 +155,7 @@ void WINAPI do_recv()
 			//cout << "서버에서 클라로 위치를 보냄" << endl;
 			// int id = packet->id
 			id = packet->id;
+			cout << packet->id << endl;
 			start_x = packet->x;
 			start_y = packet->y;
 			start_z = packet->z;
@@ -168,6 +178,7 @@ void WINAPI do_recv()
 			otherPlayerMouse.cx = packet->cxDelta;
 			otherPlayerMouse.cy = packet->cyDelta;*/
 			int p_id = packet->id;
+			if (p_id > 2 || p_id < 0) break;
 			otherPlayerPos[p_id].x = packet->x;
 			otherPlayerPos[p_id].y = packet->y;
 			otherPlayerPos[p_id].z = packet->z;
@@ -195,7 +206,7 @@ void WINAPI do_recv()
 		}
 		case SC_BULLET_COLLISION: {
 			SC_BULLET_COLLISION_PACKET* packet = reinterpret_cast<SC_BULLET_COLLISION_PACKET*>(ptr);
-			cout << "총알 번호 : " << packet->bullet_id << ", 블록 번호 : " << packet->block_id << ", 총알 주인 : " << packet->player_id << endl;;
+			//cout << "총알 번호 : " << packet->bullet_id << ", 블록 번호 : " << packet->block_id << ", 총알 주인 : " << packet->player_id << endl;;
 			NetScene->DisableObject(packet->bullet_id, packet->block_id, packet->player_id);
 	
 			if (id == packet->player_id) {
@@ -220,13 +231,17 @@ void WINAPI do_recv()
 			SC_DEATH_PACKET* packet = reinterpret_cast<SC_DEATH_PACKET*>(ptr);
 			cout << "플레이어 [" << packet->death_id << "]가 사망하였습니다." << endl;
 			NetScene->DisableBullet(packet->bullet_id, packet->player_id);
+			if (id == packet->death_id) {
+				int UpdatedHP = Netplayers[id]->GetPlayerHP() - 10;
+				Netplayers[id]->SetPlayerHP(UpdatedHP);
+			}
 			Netplayers[packet->death_id]->SetIsActive(false);
 			Netplayers[packet->death_id]->SetDeath(true);
 			break;
 		}
 		case SC_RESPAWN: {
 			SC_RESPAWN_PACKET* packet = reinterpret_cast<SC_RESPAWN_PACKET*>(ptr);
-			cout << "플레이어 [" << packet->player_id << "] 부활." << endl;
+			//cout << "플레이어 [" << packet->player_id << "] 부활." << endl;
 			Netplayers[packet->player_id]->SetIsActive(true);
 			Netplayers[packet->player_id]->SetDeath(false);
 			Netplayers[packet->player_id]->SetPosition(XMFLOAT3(packet->respawn_x, packet->respawn_y, packet->respawn_z));
@@ -236,6 +251,12 @@ void WINAPI do_recv()
 		case SC_FALL: {
 			SC_FALL_PACKET* packet = reinterpret_cast<SC_FALL_PACKET*>(ptr);
 			Netplayers[packet->fall_id]->SetDeath(true);
+			break;
+		}
+		case SC_RESULT: {
+			SC_RESULT_PACKET* packet = reinterpret_cast<SC_RESULT_PACKET*>(ptr);
+			if (true == packet->result) cout << "이겼다" << endl;
+			else cout << "졌다" << endl;
 			break;
 		}
 		}
