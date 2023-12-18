@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "Scene.h"
 #include "Player.h"
+#include "Network.h"
 
 //#include "Network.h"
 
@@ -382,7 +383,7 @@ void CScene::BuildText(ComPtr<ID2D1DeviceContext2> const m_d2dDeviceContext, Com
 
 void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, ComPtr<ID2D1Factory3> m_d2dFactory, ComPtr<IDWriteFactory> m_dWriteFactory,
 	float fTimeElapsed)
-{	
+{
 	// 제한시간
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(410, 0));
 	m_fPlayTime -= fTimeElapsed;
@@ -393,14 +394,14 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 		min = L" 0:";
 		sec = L"00";
 		if (false == isEnd) {
-			
+
 			isEnd = true;
 		}
 	}
 	std::wstring str = min + sec;
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
 		pTextFormat[0].Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
-	
+
 	// 점수
 	str = std::to_wstring(m_pPlayer->GetPlayerScore());
 
@@ -410,14 +411,14 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 
 	// 체력
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(50, 675));
-	if (m_pPlayer->GetDeath()) {
+	if (!m_pPlayer->GetDeath()) {
 		float portion = float(m_pPlayer->GetPlayerHP()) / 100.0f;
 		m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 300.0f * portion, 40), SolidColorBrush[6].Get());
-		m_d2dDeviceContext->DrawRectangle(D2D1::RectF(0, 0, 300.0f, 40), SolidColorBrush[0].Get(),2.0f);
+		m_d2dDeviceContext->DrawRectangle(D2D1::RectF(0, 0, 300.0f, 40), SolidColorBrush[0].Get(), 2.0f);
 	}
-	else{
+	else {
 		m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 0, 40), SolidColorBrush[6].Get());
-		m_d2dDeviceContext->DrawRectangle(D2D1::RectF(0, 0, 300.0f, 40), SolidColorBrush[0].Get());
+		m_d2dDeviceContext->DrawRectangle(D2D1::RectF(0, 0, 300.0f, 40), SolidColorBrush[0].Get(), 2.0f);
 	}
 
 	// 총알
@@ -431,7 +432,7 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 
 	//장전 UI
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(830, 650));
-	if(m_pPlayer->GetPlayerReloading()) {
+	if (m_pPlayer->GetPlayerReloading()) {
 		float portion = m_pPlayer->m_fKeyDownTime / 2.0f;
 		m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 135.0f * portion, 15), SolidColorBrush[6].Get());
 	}
@@ -442,8 +443,8 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 	float portion = m_pPlayer->m_fBoosterMount / 100.0f;
 	for (int i = 0; i < 50; i++) {
 		D2D1_POINT_2F p1 = { 100 * cos(deg), 100 * sin(deg) };
-		D2D1_POINT_2F p2 = { 100 * cos(deg + 0.03), 100 * sin(deg + 0.03)};
-		m_d2dDeviceContext->DrawLine(p1, p2, SolidColorBrush[8].Get(),7.0f);
+		D2D1_POINT_2F p2 = { 100 * cos(deg + 0.03), 100 * sin(deg + 0.03) };
+		m_d2dDeviceContext->DrawLine(p1, p2, SolidColorBrush[8].Get(), 7.0f);
 		int limit = 50.0f * m_pPlayer->m_fBoosterMount / 100.0f;
 		if (limit > 50 - i) {
 			m_d2dDeviceContext->DrawLine(p1, p2, SolidColorBrush[0].Get(), 7.0f);
@@ -454,20 +455,25 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 	str = L"연료";
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
 		pTextFormat[2].Get(), D2D1::RectF(0, 0, 50, 50), SolidColorBrush[6].Get());
-	// 승리 패배 알림
-	//if (0) {
-	//	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(400, 200));
-	//	str = L"승리";
-	//	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
-	//		pTextFormat[1].Get(), D2D1::RectF(0, 0, 200, 300), SolidColorBrush[0].Get());
-	//}
-	//else {
-	//	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(400, 200));
-	//	str = L"패배";
-	//	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
-	//		pTextFormat[1].Get(), D2D1::RectF(0, 0, 200, 300), SolidColorBrush[0].Get());
-	//}
+	//승리 패배 알림
+
+	if (m_fPlayTime <= 0.0f) {
+		if (GetGameResult()) {
+			m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(400, 200));
+			str = L"승리";
+			m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+				pTextFormat[1].Get(), D2D1::RectF(0, 0, 200, 300), SolidColorBrush[0].Get());
+		}
+		else {
+			m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(400, 200));
+			str = L"패배";
+			m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+				pTextFormat[1].Get(), D2D1::RectF(0, 0, 200, 300), SolidColorBrush[0].Get());
+		}
+	}
+
 }
+
 
 
 int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMaterial, int nindex, char mapkey)

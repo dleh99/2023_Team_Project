@@ -37,6 +37,7 @@ void WINAPI do_recv();
 
 char GetMapKey();
 bool GetGameState();
+bool GetGameResult();
 Pos GetStartPos();
 int GetNetworkPlayerId();
 

@@ -24,6 +24,7 @@ long long game_frame;
 
 // 게임 시작 변수
 bool m_gameStart = false;
+bool gameResult = false;
 char m_mapKey;
 
 int NetworkInit()
@@ -255,6 +256,7 @@ void WINAPI do_recv()
 		}
 		case SC_RESULT: {
 			SC_RESULT_PACKET* packet = reinterpret_cast<SC_RESULT_PACKET*>(ptr);
+			gameResult = packet->result;
 			if (true == packet->result) cout << "이겼다" << endl;
 			else cout << "졌다" << endl;
 			break;
@@ -268,6 +270,10 @@ void WINAPI do_recv()
 bool GetGameState()
 {
 	return m_gameStart;
+}
+
+bool GetGameResult() {
+	return gameResult;
 }
 
 char GetMapKey()

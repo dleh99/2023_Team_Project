@@ -50,7 +50,7 @@ protected:
 	int m_nObjects = 0;
 	int m_nRandObject = 0;
 
-	float m_fPlayTime = 180.0f;
+	float m_fPlayTime = 10.0f;
 
 	CShader* m_pSceneShader;
 	CCubeMeshDiffused* pBulletMesh = NULL;
