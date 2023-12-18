@@ -354,6 +354,19 @@ void CScene::BuildText(ComPtr<ID2D1DeviceContext2> const m_d2dDeviceContext, Com
 	pTextFormat[1]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 	pTextFormat[1]->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
+	m_dWriteFactory->CreateTextFormat(
+		L"Verdana",
+		NULL,
+		DWRITE_FONT_WEIGHT_NORMAL,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_CONDENSED,
+		13,
+		L"",
+		&pTextFormat[2]
+	);
+	pTextFormat[2]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	pTextFormat[2]->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
 	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), SolidColorBrush[0].GetAddressOf());
 	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Red), SolidColorBrush[1].GetAddressOf());
 	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Green), SolidColorBrush[2].GetAddressOf());
@@ -362,7 +375,7 @@ void CScene::BuildText(ComPtr<ID2D1DeviceContext2> const m_d2dDeviceContext, Com
 	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Yellow), SolidColorBrush[5].GetAddressOf());
 	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::DeepSkyBlue), SolidColorBrush[6].GetAddressOf());
 	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), SolidColorBrush[7].GetAddressOf());
-	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::LightPink), SolidColorBrush[8].GetAddressOf());
+	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Gray,0.6f), SolidColorBrush[8].GetAddressOf());
 	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::LightGreen), SolidColorBrush[9].GetAddressOf());
 
 }
@@ -390,12 +403,12 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 
 	// 체력
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(50, 675));
-	if (m_pPlayer->GetPlayerHP() > 0) {
+	if (m_pPlayer->GetDeath()) {
 		float portion = float(m_pPlayer->GetPlayerHP()) / 100.0f;
 		m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 300.0f * portion, 40), SolidColorBrush[6].Get());
-		m_d2dDeviceContext->DrawRectangle(D2D1::RectF(0, 0, 300.0f, 40), SolidColorBrush[0].Get());
+		m_d2dDeviceContext->DrawRectangle(D2D1::RectF(0, 0, 300.0f, 40), SolidColorBrush[0].Get(),2.0f);
 	}
-	else {
+	else{
 		m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 0, 40), SolidColorBrush[6].Get());
 		m_d2dDeviceContext->DrawRectangle(D2D1::RectF(0, 0, 300.0f, 40), SolidColorBrush[0].Get());
 	}
@@ -415,13 +428,38 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 		float portion = m_pPlayer->m_fKeyDownTime / 2.0f;
 		m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 135.0f * portion, 15), SolidColorBrush[6].Get());
 	}
+	//부스터 UI
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(525, 275));
 
-	// 승리 패배 알림
-	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(400, 200));
-
-	str = L"승리";
+	float deg = 5.5;
+	float portion = m_pPlayer->m_fBoosterMount / 100.0f;
+	for (int i = 0; i < 50; i++) {
+		D2D1_POINT_2F p1 = { 100 * cos(deg), 100 * sin(deg) };
+		D2D1_POINT_2F p2 = { 100 * cos(deg + 0.03), 100 * sin(deg + 0.03)};
+		m_d2dDeviceContext->DrawLine(p1, p2, SolidColorBrush[8].Get(),7.0f);
+		int limit = 50.0f * m_pPlayer->m_fBoosterMount / 100.0f;
+		if (limit > 50 - i) {
+			m_d2dDeviceContext->DrawLine(p1, p2, SolidColorBrush[0].Get(), 7.0f);
+		}
+		deg += 0.03;
+	}
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(560, 300));
+	str = L"연료";
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
-		pTextFormat[1].Get(), D2D1::RectF(0, 0, 200, 300), SolidColorBrush[0].Get());
+		pTextFormat[2].Get(), D2D1::RectF(0, 0, 50, 50), SolidColorBrush[6].Get());
+	// 승리 패배 알림
+	//if (0) {
+	//	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(400, 200));
+	//	str = L"승리";
+	//	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+	//		pTextFormat[1].Get(), D2D1::RectF(0, 0, 200, 300), SolidColorBrush[0].Get());
+	//}
+	//else {
+	//	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(400, 200));
+	//	str = L"패배";
+	//	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+	//		pTextFormat[1].Get(), D2D1::RectF(0, 0, 200, 300), SolidColorBrush[0].Get());
+	//}
 }
 
 
@@ -479,7 +517,7 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 	}
 	
 	m_nObjects = 50 * 50 * 10 + m_nblock;
-	m_ppObjects = new CGameObject * [m_nObjects + 2000];
+	m_ppObjects = new CGameObject * [m_nObjects + 4000];
 
 	int cnt = nindex;
 

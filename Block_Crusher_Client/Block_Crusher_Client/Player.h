@@ -32,6 +32,7 @@ protected:
 	int m_iPlayerScore = 0;
 	int m_nBullet = 30;
 	float m_fEtime = 0;
+	float m_fBoosterCoolDownTime = 0;
 	bool m_bReloading = false;
 	bool m_bDeath = false;
 	bool m_bOnAir = false;
@@ -85,6 +86,7 @@ protected:
 
 public:
 	float m_fKeyDownTime = 9999;
+	float m_fBoosterMount = 100.0f;
 	CGameObject** m_ppObjects = NULL;
 	CScene* m_pScene = NULL;
 
