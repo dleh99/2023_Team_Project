@@ -5,11 +5,11 @@
 #include "Block_Crusher_Client.h"
 #include "GameFramework.h"
 
-#ifdef UNICODE
-#pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console")
-#else
-#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
-#endif
+//#ifdef UNICODE
+//#pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console")
+//#else
+//#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
+//#endif
 
 #define MAX_LOADSTRING 100
 
@@ -69,8 +69,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     g_GameFramework.OnDestroy();
     return (int) msg.wParam;
 }
-
-
 
 //
 //  함수: MyRegisterClass()

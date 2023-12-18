@@ -457,7 +457,7 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 		pTextFormat[2].Get(), D2D1::RectF(0, 0, 50, 50), SolidColorBrush[6].Get());
 	//승리 패배 알림
 
-	if (m_fPlayTime <= 0.0f) {
+	if (m_fPlayTime <= -1.5f) {
 		if (GetGameResult()) {
 			m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(400, 200));
 			str = L"승리";
