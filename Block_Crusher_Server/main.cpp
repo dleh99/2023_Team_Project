@@ -26,8 +26,11 @@ auto start_time = system_clock::now();
 int set_client_id()
 {
 	for (int i{}; i < MAX_USER; ++i) {
-		if (clients[i]._state == US_EMPTY)
+		lock_guard<mutex> ll{ clients[i]._s_lock };
+		if (clients[i]._state == US_EMPTY) {
+			clients[i]._state = US_CONNECTING;
 			return i;
+		}
 	}
 	return -1;
 }
@@ -35,9 +38,10 @@ int set_client_id()
 void disconnect(int c_id)
 {
 	closesocket(clients[c_id]._socket);
-	clients[c_id]._state = US_EMPTY;
 	cout << "[" << c_id << "] 탈퇴함" << endl;
 	user_number--;
+	lock_guard<mutex> ll{ clients[c_id]._s_lock };
+	clients[c_id]._state = US_EMPTY;
 }
 
 bool CollisionCheck_Person(XMFLOAT3 bullet, XMFLOAT3 player, float bullet_r, float player_r)
@@ -65,7 +69,10 @@ bool scoreCalculation()
 	int num = 0;
 	int max_score = 0;
 	for (auto& cl : clients) {
-		if (cl._state != US_INGAME) continue;
+		{
+			lock_guard<mutex> ll{ cl._s_lock };
+			if (cl._state != US_INGAME) continue;
+		}
 		if (cl.score != -1) {
 			num++;
 			if (max_score < cl.score)
@@ -89,14 +96,25 @@ void packet_process(int c_id, char* packet)
 		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
 		cout << c_id << " 접속 완료" << endl;
 		//clients[c_id]._state = US_INGAME;
+		
+		// 비어 있는 맵을 찾아서 들어가는 코드 작성 해야 함
+		/*if (false == Map_infromation.isActive) Map_infromation.isActive = true;
+		if (Map_infromation.player_num < 6) {
+			Map_infromation.player_num++;
+			if (Map_infromation.player_num == 6) {
+
+			}
+		}*/
 		clients[c_id].send_login_info_packet();
 		user_number++;
 		if (user_number == 3)
-			for (auto& cl : clients)
+			for (auto& cl : clients) {
+				lock_guard<mutex> ll{ cl._s_lock };
 				if (cl._state == US_CONNECTING) {
 					cl._state = US_INGAME;
 					cl.send_start_packet(Map_infromation.MapChar);
 				}
+			}
 		break;
 	}
 	case CS_MOVE: {
@@ -106,6 +124,7 @@ void packet_process(int c_id, char* packet)
 		clients[c_id].pos = accept_position;
 		clients[c_id].cx = p->cxDelta;
 		clients[c_id].cy = p->cyDelta;
+		if (c_id != 0 && c_id != 1 && c_id != 2) cout << c_id << endl;
 		//cout << "[" << c_id << "] " << p->animation_state << endl;
 
 		//cout << "[" << c_id << "] 클라이언트 받은 프레임 : " << p->frame_num << endl;
@@ -116,7 +135,10 @@ void packet_process(int c_id, char* packet)
 
 		// 다른 클라이언트들에게 뿌리기
 		for (auto& cl : clients) {
-			if (cl._state != US_INGAME) continue;
+			{
+				lock_guard<mutex> ll{ cl._s_lock };
+				if (cl._state != US_INGAME) continue;
+			}
 			if (cl._id == c_id) continue;
 			cl.send_move_packet(clients.data(), c_id, p->animation_state);
 		}
@@ -203,15 +225,15 @@ void worker_thread(HANDLE iocp_h)
 				int client_id = set_client_id();
 				if (client_id != -1)
 				{
-					// 상태 변환(접속중)
-					clients[client_id]._state = US_CONNECTING;
-
 					// 초기값 지정
 					clients[client_id].pos.x = 0;
 					clients[client_id].pos.y = 0;
 					clients[client_id]._id = client_id;
 					clients[client_id]._prev_remain = 0;
 					clients[client_id]._socket = g_c_socket;
+
+					// 상태 변환(접속중)
+					//clients[client_id]._state = US_CONNECTING;
 
 					CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_c_socket), iocp_h, client_id, 0);
 					clients[client_id].do_recv();
@@ -371,6 +393,11 @@ void Physics_Calculation_thread()
 	}
 }
 
+void InitDB()
+{
+
+}
+
 void do_timer()
 {
 	while (true) {
@@ -398,6 +425,8 @@ int main()
 	g_c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	g_over._overlapped_type = OT_ACCEPT;
 	AcceptEx(g_s_socket, g_c_socket, g_over._send_buf, 0, addr_size + 16, addr_size + 16, 0, &g_over._over);
+
+	InitDB();
 
 	vector<thread> worker_threads;
 	int thread_num = thread::hardware_concurrency();

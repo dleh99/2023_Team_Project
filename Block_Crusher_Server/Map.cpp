@@ -85,6 +85,9 @@ Map::Map()
 				cnt++;
 			}
 		}
+
+	player_num = 0;
+	isActive = false;
 }
 
 Map::~Map()

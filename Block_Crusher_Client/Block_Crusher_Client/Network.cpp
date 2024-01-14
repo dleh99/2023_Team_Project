@@ -153,7 +153,7 @@ void WINAPI do_recv()
 		switch (type) {
 		case SC_LOGIN: {	// 처음 로그인 했을 때 받는 패킷. 아이디를 서버는 클라에게 아이디를 부여한다
 			SC_LOGININFO_PACKET* packet = reinterpret_cast<SC_LOGININFO_PACKET*>(ptr);
-			//cout << "서버에서 클라로 위치를 보냄" << endl;
+			cout << "Login 패킷" << endl;
 			// int id = packet->id
 			id = packet->id;
 			cout << packet->id << endl;
@@ -166,7 +166,7 @@ void WINAPI do_recv()
 			SC_START_PACKET* packet = reinterpret_cast<SC_START_PACKET*>(ptr);
 			m_gameStart = true;
 			m_mapKey = packet->map_key;
-			//cout << "시작 패킷 받음" << endl;
+			cout << "시작 패킷 받음" << endl;
 			break;
 		}
 		case SC_MOVE_PLAYER: {
@@ -179,7 +179,10 @@ void WINAPI do_recv()
 			otherPlayerMouse.cx = packet->cxDelta;
 			otherPlayerMouse.cy = packet->cyDelta;*/
 			int p_id = packet->id;
-			if (p_id > 2 || p_id < 0) break;
+			if (p_id > 2 || p_id < 0) {
+				cout << "이상한 id가 들어왔습니다 : " << p_id << endl;
+				break;
+			}
 			otherPlayerPos[p_id].x = packet->x;
 			otherPlayerPos[p_id].y = packet->y;
 			otherPlayerPos[p_id].z = packet->z;
@@ -242,7 +245,7 @@ void WINAPI do_recv()
 		}
 		case SC_RESPAWN: {
 			SC_RESPAWN_PACKET* packet = reinterpret_cast<SC_RESPAWN_PACKET*>(ptr);
-			//cout << "플레이어 [" << packet->player_id << "] 부활." << endl;
+			cout << "플레이어 [" << packet->player_id << "] 부활." << endl;
 			Netplayers[packet->player_id]->SetIsActive(true);
 			Netplayers[packet->player_id]->SetDeath(false);
 			Netplayers[packet->player_id]->SetPosition(XMFLOAT3(packet->respawn_x, packet->respawn_y, packet->respawn_z));

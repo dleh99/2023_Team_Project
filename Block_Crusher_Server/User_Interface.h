@@ -33,6 +33,8 @@ public:
 	int				score;						
 	bool			isWin;
 
+	std::mutex			_s_lock;					// state lock
+
 public:
 	User_Interface();
 	~User_Interface();

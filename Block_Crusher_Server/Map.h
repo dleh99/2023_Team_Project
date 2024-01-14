@@ -4,8 +4,10 @@
 class Map
 {
 public:
-	char	MapChar;
-	int		block_num;
+	char				MapChar;
+	int					block_num;
+	std::atomic_int		player_num;
+	bool				isActive;
 public:
 	std::vector<Block> Map_Block;
 

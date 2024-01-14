@@ -8,6 +8,9 @@
 #include <array>
 #include <chrono>
 #include <fstream>
+#include <atomic>
+#include <mutex>
+#include <sqlext.h>
 
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "MSWSock.lib")
