@@ -141,7 +141,7 @@ void packet_process(int c_id, char* packet)
 			}
 			if (cl._id == c_id) continue;
 			cl.send_move_packet(clients.data(), c_id, p->animation_state);
-		}
+	}
 		break;
 	}
 	case CS_BULLET_ADD: {

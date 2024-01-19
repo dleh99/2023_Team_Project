@@ -131,6 +131,127 @@ void send_score_packet(int score)
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
+void ProcessPacket(char* ptr)
+{
+	switch (ptr[1]) {
+	case SC_LOGIN: {	// 처음 로그인 했을 때 받는 패킷. 아이디를 서버는 클라에게 아이디를 부여한다
+		SC_LOGININFO_PACKET* packet = reinterpret_cast<SC_LOGININFO_PACKET*>(ptr);
+		cout << "Login 패킷" << endl;
+		// int id = packet->id
+		id = packet->id;
+		cout << packet->id << endl;
+		start_x = packet->x;
+		start_y = packet->y;
+		start_z = packet->z;
+		break;
+	}
+	case SC_START: {	// 게임 시작 조건이 달성되면(6명) 게임을 시작함. 초기 지형 위치 보냄
+		SC_START_PACKET* packet = reinterpret_cast<SC_START_PACKET*>(ptr);
+		m_gameStart = true;
+		m_mapKey = packet->map_key;
+		cout << "시작 패킷 받음" << endl;
+		break;
+	}
+	case SC_MOVE_PLAYER: {
+		SC_MOVE_PACKET* packet = reinterpret_cast<SC_MOVE_PACKET*>(ptr);
+		//cout << packet->id << "의 위치를 받아왔습니다." << packet->x << ", " << packet->y << ", " << packet->z << endl;
+		/*otherPlayer_id = packet->id;
+		otherPlayerPos.x = packet->x;
+		otherPlayerPos.y = packet->y;
+		otherPlayerPos.z = packet->z;
+		otherPlayerMouse.cx = packet->cxDelta;
+		otherPlayerMouse.cy = packet->cyDelta;*/
+		int p_id = packet->id;
+		if (p_id > 2 || p_id < 0) {
+			cout << "이상한 id가 들어왔습니다 : " << p_id << ", x : " << packet->x << ", y : " << packet->y << ", z : " << packet->z << endl;
+			break;
+		}
+		otherPlayerPos[p_id].x = packet->x;
+		otherPlayerPos[p_id].y = packet->y;
+		otherPlayerPos[p_id].z = packet->z;
+		otherPlayerMouse[p_id].cx = packet->cxDelta;
+		otherPlayerMouse[p_id].cy = packet->cyDelta;
+		otherPlayerAni[p_id] = packet->animation_state;
+		//cout << "[" << p_id << "] " << packet->animation_state << endl;
+		//cout << "[" << packet->id << "] 첫 명령 프레임 : " << packet->first_frame_num << ", 서버 시간 : " << packet->server_time << ", 현재 프레임 : " << game_frame << endl;
+		break;
+	}
+	case SC_BULLET_ADD: {
+		SC_BULLET_ADD_PACKET* packet = reinterpret_cast<SC_BULLET_ADD_PACKET*>(ptr);
+		XMFLOAT3 BPos = { packet->s_x ,packet->s_y ,packet->s_z };
+		XMFLOAT3 BVec = { packet->b_x ,packet->b_y ,packet->b_z };
+
+		NetScene->AddObjects(0, BPos, BVec, packet->player_id, packet->bullet_id);
+		//cout << "총알을 받아 왔습니다. 위치 :" << packet->s_x << ", " << packet->s_y << ", " << packet->s_z << ", 발사 벡터 : " << packet->b_x << ", " << packet->b_y << ", " << packet->b_z << endl;
+		//cout << packet->player_id << "의 총알을 받아왔습니다" << endl;
+		break;
+	}
+	case SC_COLLISION: {
+		SC_COLLISION_PACKET* packet = reinterpret_cast<SC_COLLISION_PACKET*>(ptr);
+
+		break;
+	}
+	case SC_BULLET_COLLISION: {
+		SC_BULLET_COLLISION_PACKET* packet = reinterpret_cast<SC_BULLET_COLLISION_PACKET*>(ptr);
+		//cout << "총알 번호 : " << packet->bullet_id << ", 블록 번호 : " << packet->block_id << ", 총알 주인 : " << packet->player_id << endl;;
+		NetScene->DisableObject(packet->bullet_id, packet->block_id, packet->player_id);
+
+		if (id == packet->player_id) {
+			int UpdatedSocre = Netplayers[id]->GetPlayerScore() + 100;
+			Netplayers[id]->SetPlayerScore(UpdatedSocre);
+		}
+		break;
+	}
+	case SC_HIT: {
+		SC_HIT_PACKET* packet = reinterpret_cast<SC_HIT_PACKET*>(ptr);
+		// 맞았을 때 처리
+		//cout << packet->bullet_id << ", " << packet->player_id << endl;
+		NetScene->DisableBullet(packet->bullet_id, packet->player_id);
+
+		if (id == packet->enemy_id) {
+			int UpdatedHP = Netplayers[id]->GetPlayerHP() - 10;
+			Netplayers[id]->SetPlayerHP(UpdatedHP);
+		}
+		break;
+	}
+	case SC_DEATH: {
+		SC_DEATH_PACKET* packet = reinterpret_cast<SC_DEATH_PACKET*>(ptr);
+		cout << "플레이어 [" << packet->death_id << "]가 사망하였습니다." << endl;
+		NetScene->DisableBullet(packet->bullet_id, packet->player_id);
+		if (id == packet->death_id) {
+			int UpdatedHP = Netplayers[id]->GetPlayerHP() - 10;
+			Netplayers[id]->SetPlayerHP(UpdatedHP);
+		}
+		Netplayers[packet->death_id]->SetIsActive(false);
+		Netplayers[packet->death_id]->SetDeath(true);
+		break;
+	}
+	case SC_RESPAWN: {
+		SC_RESPAWN_PACKET* packet = reinterpret_cast<SC_RESPAWN_PACKET*>(ptr);
+		cout << "플레이어 [" << packet->player_id << "] 부활." << endl;
+		Netplayers[packet->player_id]->SetIsActive(true);
+		Netplayers[packet->player_id]->SetDeath(false);
+		Netplayers[packet->player_id]->SetPosition(XMFLOAT3(packet->respawn_x, packet->respawn_y, packet->respawn_z));
+		Netplayers[packet->player_id]->SetPlayerHP(100);
+		break;
+	}
+	case SC_FALL: {
+		SC_FALL_PACKET* packet = reinterpret_cast<SC_FALL_PACKET*>(ptr);
+		Netplayers[packet->fall_id]->SetDeath(true);
+		break;
+	}
+	case SC_RESULT: {
+		SC_RESULT_PACKET* packet = reinterpret_cast<SC_RESULT_PACKET*>(ptr);
+		gameResult = packet->result;
+		if (true == packet->result) cout << "이겼다" << endl;
+		else cout << "졌다" << endl;
+		break;
+	}
+	default:
+		cout << "Unknown Packet type " << ptr[1] << endl;
+	}
+}
+
 void WINAPI do_recv()
 {
 	int ret;
@@ -139,135 +260,162 @@ void WINAPI do_recv()
 	ret = recv(g_socket, recvBuf, BUF_SIZE, 0);
 	//if (ret == SOCKET_ERROR) err_display("RECV()");
 	char* ptr = recvBuf;
+	unsigned char size = *ptr;
+	//size_t num_size = size;
+	static size_t in_packet_size = 0;
+	static size_t saved_packet_size = 0;
+	static char packet_buffer[BUF_SIZE];
 
-	while (ptr != NULL) {
-		unsigned char size = *ptr;
-		if (size <= 0) {
-			break;
-		}
-		char type = *(ptr + 1);
-
-		// 패킷의 종류에 따라 어떻게 처리할 것인가?
-		// ex) bool start를 true로 바꿔서 게임이 작동되게 한다 
-
-		switch (type) {
-		case SC_LOGIN: {	// 처음 로그인 했을 때 받는 패킷. 아이디를 서버는 클라에게 아이디를 부여한다
-			SC_LOGININFO_PACKET* packet = reinterpret_cast<SC_LOGININFO_PACKET*>(ptr);
-			cout << "Login 패킷" << endl;
-			// int id = packet->id
-			id = packet->id;
-			cout << packet->id << endl;
-			start_x = packet->x;
-			start_y = packet->y;
-			start_z = packet->z;
-			break;
-		}
-		case SC_START: {	// 게임 시작 조건이 달성되면(6명) 게임을 시작함. 초기 지형 위치 보냄
-			SC_START_PACKET* packet = reinterpret_cast<SC_START_PACKET*>(ptr);
-			m_gameStart = true;
-			m_mapKey = packet->map_key;
-			cout << "시작 패킷 받음" << endl;
-			break;
-		}
-		case SC_MOVE_PLAYER: {
-			SC_MOVE_PACKET* packet = reinterpret_cast<SC_MOVE_PACKET*>(ptr);
-			//cout << packet->id << "의 위치를 받아왔습니다." << packet->x << ", " << packet->y << ", " << packet->z << endl;
-			/*otherPlayer_id = packet->id;
-			otherPlayerPos.x = packet->x;
-			otherPlayerPos.y = packet->y;
-			otherPlayerPos.z = packet->z;
-			otherPlayerMouse.cx = packet->cxDelta;
-			otherPlayerMouse.cy = packet->cyDelta;*/
-			int p_id = packet->id;
-			if (p_id > 2 || p_id < 0) {
-				cout << "이상한 id가 들어왔습니다 : " << p_id << endl;
-				break;
+	if (size > 0)
+	{
+		while (0 != ret) {
+			if (0 == in_packet_size) in_packet_size = ptr[0];
+			if (ret + saved_packet_size >= in_packet_size) {
+				memcpy(packet_buffer + saved_packet_size, ptr, in_packet_size - saved_packet_size);
+				ProcessPacket(packet_buffer);
+				ptr += in_packet_size - saved_packet_size;
+				ret -= in_packet_size - saved_packet_size;
+				in_packet_size = 0;
+				saved_packet_size = 0;
 			}
-			otherPlayerPos[p_id].x = packet->x;
-			otherPlayerPos[p_id].y = packet->y;
-			otherPlayerPos[p_id].z = packet->z;
-			otherPlayerMouse[p_id].cx = packet->cxDelta;
-			otherPlayerMouse[p_id].cy = packet->cyDelta;
-			otherPlayerAni[p_id] = packet->animation_state;
-			//cout << "[" << p_id << "] " << packet->animation_state << endl;
-			//cout << "[" << packet->id << "] 첫 명령 프레임 : " << packet->first_frame_num << ", 서버 시간 : " << packet->server_time << ", 현재 프레임 : " << game_frame << endl;
-			break;
-		}
-		case SC_BULLET_ADD: {
-			SC_BULLET_ADD_PACKET* packet = reinterpret_cast<SC_BULLET_ADD_PACKET*>(ptr);
-			XMFLOAT3 BPos = { packet->s_x ,packet->s_y ,packet->s_z };
-			XMFLOAT3 BVec = { packet->b_x ,packet->b_y ,packet->b_z };
-
-			NetScene->AddObjects(0, BPos, BVec, packet->player_id, packet->bullet_id);
-			//cout << "총알을 받아 왔습니다. 위치 :" << packet->s_x << ", " << packet->s_y << ", " << packet->s_z << ", 발사 벡터 : " << packet->b_x << ", " << packet->b_y << ", " << packet->b_z << endl;
-			//cout << packet->player_id << "의 총알을 받아왔습니다" << endl;
-			break;
-		}
-		case SC_COLLISION: {
-			SC_COLLISION_PACKET* packet = reinterpret_cast<SC_COLLISION_PACKET*>(ptr);
-
-			break;
-		}
-		case SC_BULLET_COLLISION: {
-			SC_BULLET_COLLISION_PACKET* packet = reinterpret_cast<SC_BULLET_COLLISION_PACKET*>(ptr);
-			//cout << "총알 번호 : " << packet->bullet_id << ", 블록 번호 : " << packet->block_id << ", 총알 주인 : " << packet->player_id << endl;;
-			NetScene->DisableObject(packet->bullet_id, packet->block_id, packet->player_id);
-	
-			if (id == packet->player_id) {
-				int UpdatedSocre = Netplayers[id]->GetPlayerScore() + 100;
-				Netplayers[id]->SetPlayerScore(UpdatedSocre);
+			else {
+				memcpy(packet_buffer + saved_packet_size, ptr, ret);
+				saved_packet_size += ret;
+				ret = 0;
 			}
-			break;
 		}
-		case SC_HIT: {
-			SC_HIT_PACKET* packet = reinterpret_cast<SC_HIT_PACKET*>(ptr);
-			// 맞았을 때 처리
-			//cout << packet->bullet_id << ", " << packet->player_id << endl;
-			NetScene->DisableBullet(packet->bullet_id, packet->player_id);
-
-			if (id == packet->enemy_id) {
-				int UpdatedHP = Netplayers[id]->GetPlayerHP() - 10;
-				Netplayers[id]->SetPlayerHP(UpdatedHP);
-			} 
-			break;
-		}
-		case SC_DEATH: {
-			SC_DEATH_PACKET* packet = reinterpret_cast<SC_DEATH_PACKET*>(ptr);
-			cout << "플레이어 [" << packet->death_id << "]가 사망하였습니다." << endl;
-			NetScene->DisableBullet(packet->bullet_id, packet->player_id);
-			if (id == packet->death_id) {
-				int UpdatedHP = Netplayers[id]->GetPlayerHP() - 10;
-				Netplayers[id]->SetPlayerHP(UpdatedHP);
-			}
-			Netplayers[packet->death_id]->SetIsActive(false);
-			Netplayers[packet->death_id]->SetDeath(true);
-			break;
-		}
-		case SC_RESPAWN: {
-			SC_RESPAWN_PACKET* packet = reinterpret_cast<SC_RESPAWN_PACKET*>(ptr);
-			cout << "플레이어 [" << packet->player_id << "] 부활." << endl;
-			Netplayers[packet->player_id]->SetIsActive(true);
-			Netplayers[packet->player_id]->SetDeath(false);
-			Netplayers[packet->player_id]->SetPosition(XMFLOAT3(packet->respawn_x, packet->respawn_y, packet->respawn_z));
-			Netplayers[packet->player_id]->SetPlayerHP(100);
-			break;
-		}
-		case SC_FALL: {
-			SC_FALL_PACKET* packet = reinterpret_cast<SC_FALL_PACKET*>(ptr);
-			Netplayers[packet->fall_id]->SetDeath(true);
-			break;
-		}
-		case SC_RESULT: {
-			SC_RESULT_PACKET* packet = reinterpret_cast<SC_RESULT_PACKET*>(ptr);
-			gameResult = packet->result;
-			if (true == packet->result) cout << "이겼다" << endl;
-			else cout << "졌다" << endl;
-			break;
-		}
-		}
-		ptr += size;
 	}
+	{
+		//while (ptr != NULL) {
+		//	unsigned char size = *ptr;
+		//	if (size <= 0) {
+		//		break;
+		//	}
+		//	char type = *(ptr + 1);
 
+		//	 //패킷의 종류에 따라 어떻게 처리할 것인가?
+		//	 //ex) bool start를 true로 바꿔서 게임이 작동되게 한다 
+
+
+		//		switch (type) {
+		//		case SC_LOGIN: {	// 처음 로그인 했을 때 받는 패킷. 아이디를 서버는 클라에게 아이디를 부여한다
+		//			SC_LOGININFO_PACKET* packet = reinterpret_cast<SC_LOGININFO_PACKET*>(ptr);
+		//			cout << "Login 패킷" << endl;
+		//			// int id = packet->id
+		//			id = packet->id;
+		//			cout << packet->id << endl;
+		//			start_x = packet->x;
+		//			start_y = packet->y;
+		//			start_z = packet->z;
+		//			break;
+		//		}
+		//		case SC_START: {	// 게임 시작 조건이 달성되면(6명) 게임을 시작함. 초기 지형 위치 보냄
+		//			SC_START_PACKET* packet = reinterpret_cast<SC_START_PACKET*>(ptr);
+		//			m_gameStart = true;
+		//			m_mapKey = packet->map_key;
+		//			cout << "시작 패킷 받음" << endl;
+		//			break;
+		//		}
+		//		case SC_MOVE_PLAYER: {
+		//			SC_MOVE_PACKET* packet = reinterpret_cast<SC_MOVE_PACKET*>(ptr);
+		//			//cout << packet->id << "의 위치를 받아왔습니다." << packet->x << ", " << packet->y << ", " << packet->z << endl;
+		//			/*otherPlayer_id = packet->id;
+		//			otherPlayerPos.x = packet->x;
+		//			otherPlayerPos.y = packet->y;
+		//			otherPlayerPos.z = packet->z;
+		//			otherPlayerMouse.cx = packet->cxDelta;
+		//			otherPlayerMouse.cy = packet->cyDelta;*/
+		//			int p_id = packet->id;
+		//			if (p_id > 2 || p_id < 0) {
+		//				cout << "이상한 id가 들어왔습니다 : " << p_id << ", x : " << packet->x << ", y : " << packet->y << ", z : " << packet->z << endl;
+		//				break;
+		//			}
+		//			otherPlayerPos[p_id].x = packet->x;
+		//			otherPlayerPos[p_id].y = packet->y;
+		//			otherPlayerPos[p_id].z = packet->z;
+		//			otherPlayerMouse[p_id].cx = packet->cxDelta;
+		//			otherPlayerMouse[p_id].cy = packet->cyDelta;
+		//			otherPlayerAni[p_id] = packet->animation_state;
+		//			//cout << "[" << p_id << "] " << packet->animation_state << endl;
+		//			//cout << "[" << packet->id << "] 첫 명령 프레임 : " << packet->first_frame_num << ", 서버 시간 : " << packet->server_time << ", 현재 프레임 : " << game_frame << endl;
+		//			break;
+		//		}
+		//		case SC_BULLET_ADD: {
+		//			SC_BULLET_ADD_PACKET* packet = reinterpret_cast<SC_BULLET_ADD_PACKET*>(ptr);
+		//			XMFLOAT3 BPos = { packet->s_x ,packet->s_y ,packet->s_z };
+		//			XMFLOAT3 BVec = { packet->b_x ,packet->b_y ,packet->b_z };
+
+		//			NetScene->AddObjects(0, BPos, BVec, packet->player_id, packet->bullet_id);
+		//			//cout << "총알을 받아 왔습니다. 위치 :" << packet->s_x << ", " << packet->s_y << ", " << packet->s_z << ", 발사 벡터 : " << packet->b_x << ", " << packet->b_y << ", " << packet->b_z << endl;
+		//			//cout << packet->player_id << "의 총알을 받아왔습니다" << endl;
+		//			break;
+		//		}
+		//		case SC_COLLISION: {
+		//			SC_COLLISION_PACKET* packet = reinterpret_cast<SC_COLLISION_PACKET*>(ptr);
+
+		//			break;
+		//		}
+		//		case SC_BULLET_COLLISION: {
+		//			SC_BULLET_COLLISION_PACKET* packet = reinterpret_cast<SC_BULLET_COLLISION_PACKET*>(ptr);
+		//			//cout << "총알 번호 : " << packet->bullet_id << ", 블록 번호 : " << packet->block_id << ", 총알 주인 : " << packet->player_id << endl;;
+		//			NetScene->DisableObject(packet->bullet_id, packet->block_id, packet->player_id);
+
+		//			if (id == packet->player_id) {
+		//				int UpdatedSocre = Netplayers[id]->GetPlayerScore() + 100;
+		//				Netplayers[id]->SetPlayerScore(UpdatedSocre);
+		//			}
+		//			break;
+		//		}
+		//		case SC_HIT: {
+		//			SC_HIT_PACKET* packet = reinterpret_cast<SC_HIT_PACKET*>(ptr);
+		//			// 맞았을 때 처리
+		//			//cout << packet->bullet_id << ", " << packet->player_id << endl;
+		//			NetScene->DisableBullet(packet->bullet_id, packet->player_id);
+
+		//			if (id == packet->enemy_id) {
+		//				int UpdatedHP = Netplayers[id]->GetPlayerHP() - 10;
+		//				Netplayers[id]->SetPlayerHP(UpdatedHP);
+		//			} 
+		//			break;
+		//		}
+		//		case SC_DEATH: {
+		//			SC_DEATH_PACKET* packet = reinterpret_cast<SC_DEATH_PACKET*>(ptr);
+		//			cout << "플레이어 [" << packet->death_id << "]가 사망하였습니다." << endl;
+		//			NetScene->DisableBullet(packet->bullet_id, packet->player_id);
+		//			if (id == packet->death_id) {
+		//				int UpdatedHP = Netplayers[id]->GetPlayerHP() - 10;
+		//				Netplayers[id]->SetPlayerHP(UpdatedHP);
+		//			}
+		//			Netplayers[packet->death_id]->SetIsActive(false);
+		//			Netplayers[packet->death_id]->SetDeath(true);
+		//			break;
+		//		}
+		//		case SC_RESPAWN: {
+		//			SC_RESPAWN_PACKET* packet = reinterpret_cast<SC_RESPAWN_PACKET*>(ptr);
+		//			cout << "플레이어 [" << packet->player_id << "] 부활." << endl;
+		//			Netplayers[packet->player_id]->SetIsActive(true);
+		//			Netplayers[packet->player_id]->SetDeath(false);
+		//			Netplayers[packet->player_id]->SetPosition(XMFLOAT3(packet->respawn_x, packet->respawn_y, packet->respawn_z));
+		//			Netplayers[packet->player_id]->SetPlayerHP(100);
+		//			break;
+		//		}
+		//		case SC_FALL: {
+		//			SC_FALL_PACKET* packet = reinterpret_cast<SC_FALL_PACKET*>(ptr);
+		//			Netplayers[packet->fall_id]->SetDeath(true);
+		//			break;
+		//		}
+		//		case SC_RESULT: {
+		//			SC_RESULT_PACKET* packet = reinterpret_cast<SC_RESULT_PACKET*>(ptr);
+		//			gameResult = packet->result;
+		//			if (true == packet->result) cout << "이겼다" << endl;
+		//			else cout << "졌다" << endl;
+		//			break;
+		//		}
+		//		}
+		//		ptr += size;
+
+		//}
+	}
 }
 
 bool GetGameState()
