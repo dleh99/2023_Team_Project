@@ -4,7 +4,7 @@
 WSADATA wsa;
 SOCKET g_socket;
 SOCKADDR_IN serveraddr;
-char recvBuf[BUF_SIZE];
+//char recvBuf[BUF_SIZE];
 
 //string SERVER_IP = "127.0.0.1";
 //string SERVER_IP = "14.51.115.70";
@@ -255,18 +255,19 @@ void ProcessPacket(char* ptr)
 void WINAPI do_recv()
 {
 	int ret;
+	char recvBuf[BUF_SIZE];
 
-	ZeroMemory(recvBuf, BUF_SIZE);
+	//ZeroMemory(recvBuf, BUF_SIZE);
 	ret = recv(g_socket, recvBuf, BUF_SIZE, 0);
 	//if (ret == SOCKET_ERROR) err_display("RECV()");
 	char* ptr = recvBuf;
-	unsigned char size = *ptr;
+	//unsigned char size = *ptr;
 	//size_t num_size = size;
 	static size_t in_packet_size = 0;
 	static size_t saved_packet_size = 0;
 	static char packet_buffer[BUF_SIZE];
 
-	if (size > 0)
+	if (ret > 0)
 	{
 		while (0 != ret) {
 			if (0 == in_packet_size) in_packet_size = ptr[0];
