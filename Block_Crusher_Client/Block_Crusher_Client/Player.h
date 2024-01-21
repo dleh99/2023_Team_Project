@@ -91,6 +91,9 @@ public:
 	CGameObject** m_ppObjects = NULL;
 	CScene* m_pScene = NULL;
 
+	int m_nCurrentAnimationSetIndex = 0;
+	XMFLOAT4X4* m_pXmf4x4oldAnimationMatrix;
+
 	CPlayer();
 	virtual ~CPlayer();
 

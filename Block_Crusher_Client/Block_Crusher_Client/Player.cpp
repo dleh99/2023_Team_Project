@@ -38,6 +38,7 @@ CPlayer::CPlayer() : CGameObject()
 	m_bActive = true;
 
 	m_ani_state = ANIMATION_IDLE;
+	m_pXmf4x4oldAnimationMatrix = new XMFLOAT4X4();
 }
 
 CPlayer::~CPlayer()
@@ -733,6 +734,7 @@ void CMainPlayer::Update(float fTimeElapsed, DWORD dwDirection)
 			{
 				m_pSkinnedAnimationController->SetTracksEnable(0);
 				m_ani_state = ANIMATION_IDLE;
+				m_nCurrentAnimationSetIndex = 0;
 
 				if (GetIsShoot())//dwDirection& KEY_SHOOT
 				{
@@ -740,12 +742,14 @@ void CMainPlayer::Update(float fTimeElapsed, DWORD dwDirection)
 					m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
 					m_pSkinnedAnimationController->SetTrackEnable(5, true);
 					m_ani_state = ANIMATION_SHOOT;
+					m_nCurrentAnimationSetIndex = 5;
 				}
 			}
 		}
 		else		// Death
 		{
 			m_pSkinnedAnimationController->SetTracksEnable(7);
+			m_nCurrentAnimationSetIndex = 7;
 			m_ani_state = ANIMATION_DEATH;
 		}
 	}
@@ -791,21 +795,25 @@ void CMainPlayer::Move(DWORD dwDirection, float fDistance, bool bVelocity)
 				{
 					m_pSkinnedAnimationController->SetTracksEnable(8);
 					m_ani_state = ANIMATION_SHOOT_FORWARD;
+					m_nCurrentAnimationSetIndex = 8;
 				}
 				else if (dwDirection & DIR_LEFT)
 				{
 					m_pSkinnedAnimationController->SetTracksEnable(9);
 					m_ani_state = ANIMATION_SHOOT_LEFT;
+					m_nCurrentAnimationSetIndex = 9;
 				}
 				else if (dwDirection & DIR_RIGHT)
 				{
 					m_pSkinnedAnimationController->SetTracksEnable(10);
 					m_ani_state = ANIMATION_SHOOT_RIGHT;
+					m_nCurrentAnimationSetIndex = 10;
 				}
 				else if (dwDirection & DIR_BACKWARD)
 				{
 					m_pSkinnedAnimationController->SetTracksEnable(11);
 					m_ani_state = ANIMATION_SHOOT_BACKWARD;
+					m_nCurrentAnimationSetIndex = 11;
 				}
 			}
 			else				// Don't Shoot
@@ -815,29 +823,40 @@ void CMainPlayer::Move(DWORD dwDirection, float fDistance, bool bVelocity)
 				{
 					m_pSkinnedAnimationController->SetTracksEnable(1);
 					m_ani_state = ANIMATION_WALK_FORAWRRD;
+					m_nCurrentAnimationSetIndex = 1;
 				}
 				else if (dwDirection & DIR_LEFT)
 				{
 					m_pSkinnedAnimationController->SetTracksEnable(2);
 					m_ani_state = ANIMATION_WALK_LEFT;
+					m_nCurrentAnimationSetIndex = 2;
 				}
 				else if (dwDirection & DIR_RIGHT)
 				{
 					m_pSkinnedAnimationController->SetTracksEnable(3);
 					m_ani_state = ANIMATION_WALK_RIGHT;
+					m_nCurrentAnimationSetIndex = 3;
 				}
 				else if (dwDirection & DIR_BACKWARD)
 				{
 					m_pSkinnedAnimationController->SetTracksEnable(4);
 					m_ani_state = ANIMATION_WALK_BACKWARD;
+					m_nCurrentAnimationSetIndex = 4;
 				}
 				else			// Move & Don't Shoot
 				{
 					m_pSkinnedAnimationController->SetTracksEnable(0);
 					m_ani_state = ANIMATION_IDLE;
+					m_nCurrentAnimationSetIndex = 0;
 				}
 			}
 		}
+
+		/*for (int i = 0; i < m_pSkinnedAnimationController->m_pAnimationSets->m_nBoneFrames; ++i)
+		{
+			m_pXmf4x4oldAnimationMatrix[i] =
+				m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[m_nCurrentAnimationSetIndex]->GetSRT(i, 0);
+		}*/
 	}
 
 	CPlayer::Move(dwDirection, fDistance, bVelocity);
