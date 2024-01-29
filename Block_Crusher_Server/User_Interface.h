@@ -27,7 +27,7 @@ public:
 	bool			isinvincible;				// 맞아서 무적 타임인가?
 	float			invincible_time;			// 무적 시간
 
-	bool			isDeath;					// 죽었나?
+	std::atomic_bool	isDeath;					// 죽었나?
 	float			Death_time;					// 리스폰 시간
 
 	int				score;						

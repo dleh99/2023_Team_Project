@@ -2,7 +2,7 @@
 #include "header.h"
 #include "protocol.h"
 
-enum COMP_TYPE { OT_ACCEPT, OT_RECV, OT_SEND };
+enum COMP_TYPE { OT_ACCEPT, OT_RECV, OT_SEND, OT_RESPAWN };
 class Overlapped
 {
 public:

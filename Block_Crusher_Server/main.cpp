@@ -18,6 +18,7 @@ array<User_Interface, MAX_USER> clients;
 
 Map Map_infromation;
 Physics physics_engine;
+concurrency::concurrent_priority_queue<TIMER_EVENT> timer_queue;
 
 atomic_int user_number = 0;
 
@@ -275,6 +276,23 @@ void worker_thread(HANDLE iocp_h)
 				delete ex_over;
 				break;
 			}
+			case OT_RESPAWN:
+			{
+				// 타이머 큐에서 리스폰 하라는 메시지를 보낸다면 
+				clients[key].hp = 10;
+
+				XMFLOAT3 random_pos = physics_engine.PickPos();
+
+				for (auto& send_cl : clients) {
+					{
+						lock_guard<mutex> ll{ send_cl._s_lock };
+						if (send_cl._state != US_INGAME) continue;
+					}
+					cout << "[" << send_cl._id << "] 에게 " << cl._id << "가 부활했다고 보냄" << endl;
+					send_cl.send_respawn_packet(random_pos.x, random_pos.y, random_pos.z, cl._id);
+				}
+				break;
+			}
 		}
 	}
 }
@@ -328,7 +346,7 @@ void Physics_Calculation_thread()
 				for (auto& other_player : clients) {
 					if (other_player._state != US_INGAME) continue;
 					if (other_player._id == cl._id) continue;
-					if (true == other_player.isDeath) continue;
+					//if (true == other_player.isDeath) continue;
 					if (CollisionCheck_Person(cl.bullet[i].GetPosition(), other_player.pos,
 						cl.bullet[i].GetRadius(), other_player._player_radius)) {
 						cl.bullet[i].SetisActive(false);
@@ -350,7 +368,10 @@ void Physics_Calculation_thread()
 							else
 							{
 								// 죽었을 때 처리 어떻게?
-								other_player.isDeath = true;
+								// 타이머 스레드에게 일감을 줘서 5초 리스폰 하라 해
+								TIMER_EVENT ev{ other_player._id, chrono::system_clock::now() + 5s, EV_RESPAWN, 0 };
+								timer_queue.push(ev);
+								//other_player.isDeath = true;
 								for (auto& send_cl : clients) {
 									if (send_cl._state != US_INGAME) continue;
 									send_cl.send_dead_packet(cl.bullet[i].GetbulletId(), cl._id, other_player._id);
@@ -363,33 +384,38 @@ void Physics_Calculation_thread()
 		}
 		// 무적이 적용되어 있는 클라이언트들 시간 더하기, 일단 무적시간 3초
 		// 죽은 플레이어가 있다면 타이머 돌리기. 리스폰 시간 5초
-		for (auto& cl : clients) {
-			if (cl._state != US_INGAME) continue;
-			if (false == cl.isinvincible && false == cl.isDeath) continue;
-			else if (true == cl.isinvincible) {
-				cl.invincible_time += server_timer.GetTimeElapsed();
-				if (cl.invincible_time >= 3.f) {
-					cl.isinvincible = false;
-					cl.invincible_time = 0.f;
-				}
-			}
-			else if (true == cl.isDeath) {
-			cl.Death_time += server_timer.GetTimeElapsed();
-				if (cl.Death_time >= 5.f) {
-					cl.isDeath = false;
-					cl.Death_time = 0.f;
-					cl.hp = 10;
+		//for (auto& cl : clients) {
+		//	{
+		//		lock_guard<mutex> ll{ cl._s_lock };
+		//		if (cl._state != US_INGAME) continue;
+		//	}
+		//	bool exp = true;
+		//	if (false == cl.isinvincible && false == cl.isDeath) continue;
+		//	/*else if (true == cl.isinvincible) {
+		//		cl.invincible_time += server_timer.GetTimeElapsed();
+		//		if (cl.invincible_time >= 3.f) {
+		//			cl.isinvincible = false;
+		//			cl.invincible_time = 0.f;
+		//		}
+		//	}*/
+		//	else if (true == cl.isDeath) {
+		//	cl.Death_time += server_timer.GetTimeElapsed();
+		//		if (cl.Death_time >= 5.f) {
+		//			cl.isDeath = false;
+		//			cl.Death_time = 0.f;
+		//			cl.hp = 10;
 
-					XMFLOAT3 random_pos = physics_engine.PickPos();
+		//			XMFLOAT3 random_pos = physics_engine.PickPos();
 
-					//cout << "플레이어 [" << cl._id << "] 부활" << endl;
-					for (auto& send_cl : clients) {
-						if (send_cl._state != US_INGAME)continue;
-						send_cl.send_respawn_packet(random_pos.x, random_pos.y, random_pos.z, cl._id);
-					}
-				}
-			}
-		}
+		//			//cout << "플레이어 [" << cl._id << "] 부활" << endl;
+		//			for (auto& send_cl : clients) {
+		//				if (send_cl._state != US_INGAME)continue;
+		//				cout << "[" << send_cl._id << "] 에게 " << cl._id << "가 부활했다고 보냄" << endl;
+		//				send_cl.send_respawn_packet(random_pos.x, random_pos.y, random_pos.z, cl._id);
+		//			}
+		//		}
+		//	}
+		//}
 	}
 }
 
@@ -401,7 +427,26 @@ void InitDB()
 void do_timer()
 {
 	while (true) {
-		
+		TIMER_EVENT ev;
+		auto current_time = chrono::system_clock::now();
+		if (true == timer_queue.try_pop(ev)) {
+			if (ev.wakeup_time > current_time) {
+				timer_queue.push(ev);			// 이 부분은 최적화가 필요함
+				// 넣고 빼는 작업 없이 할 수 있는 방법은 없나?
+				this_thread::sleep_for(1ms);
+				continue;
+			}
+			switch (ev.event_id) {
+			case EV_RESPAWN: {
+				Overlapped* ov = new Overlapped;
+				ov->_overlapped_type = OT_RESPAWN;
+				PostQueuedCompletionStatus(iocp_h, 1, ev.obj_id, &ov->_over);
+				break;
+			}
+			}
+			continue;
+		}
+		this_thread::sleep_for(1ms);		// 큐에 작업이 없으니 잠시 대기했다가 다시 시작
 	}
 }
 
@@ -430,17 +475,17 @@ int main()
 
 	vector<thread> worker_threads;
 	int thread_num = thread::hardware_concurrency();
-	for (int i{}; i < thread_num - 1; ++i)
+	for (int i{}; i < thread_num - 2; ++i)
 		worker_threads.emplace_back(worker_thread, iocp_h);
 	
 	// 계산 스레드
 	thread physics_thread{ Physics_Calculation_thread };
 	physics_thread.join();
 
-	// 타이머로 처리할 것들 처리
-	/*thread timer_thread{ do_timer };
+	// 타이머 스레드
+	thread timer_thread{ do_timer };
+	timer_thread.join();
 
-	timer_thread.join();*/
 	for (auto& thread : worker_threads) 
 		thread.join();
 

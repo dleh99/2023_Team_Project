@@ -11,6 +11,7 @@
 #include <atomic>
 #include <mutex>
 #include <sqlext.h>
+#include <concurrent_priority_queue.h>
 
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "MSWSock.lib")
