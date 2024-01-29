@@ -30,6 +30,9 @@ public:
 	std::chrono::system_clock::time_point		wakeup_time;
 	EVENT_TYPE event_id;
 	int target_id;
+public:
+	TIMER_EVENT();
+	TIMER_EVENT(int ob_id, std::chrono::system_clock::time_point time, EVENT_TYPE et, int t_id);
 	constexpr bool operator < (const TIMER_EVENT& L) const
 	{
 		return (wakeup_time > L.wakeup_time);

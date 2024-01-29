@@ -56,3 +56,17 @@ float Timer::GetTimeElapsed()
 {
     return m_TimeElapsed;
 }
+
+//===================================
+
+TIMER_EVENT::TIMER_EVENT()
+{
+}
+
+TIMER_EVENT::TIMER_EVENT(int ob_id, std::chrono::system_clock::time_point time, EVENT_TYPE et, int t_id)
+{
+    obj_id = ob_id;
+    wakeup_time = time;
+    event_id = et;
+    target_id = t_id;
+}

@@ -167,12 +167,17 @@ void packet_process(int c_id, char* packet)
 		break;
 	}
 	case CS_FALL: {
-		CS_FALL_PACKET* p = reinterpret_cast<CS_FALL_PACKET*>(packet);
-		clients[c_id].isDeath = true;
-		for (auto& cl : clients) {
-			if (cl._state != US_INGAME) continue;
-			if (cl._id == c_id) continue;
-			cl.send_fall_packet(c_id);
+		if (false == clients[c_id].isDeath) {
+			CS_FALL_PACKET* p = reinterpret_cast<CS_FALL_PACKET*>(packet);
+			clients[c_id].isDeath = true;
+			cout << "떨어졌다는 패킷이 들어옴" << endl;
+			TIMER_EVENT ev{ c_id, chrono::system_clock::now() + 5s, EV_RESPAWN, 0 };
+			timer_queue.push(ev);
+			for (auto& cl : clients) {
+				if (cl._state != US_INGAME) continue;
+				if (cl._id == c_id) continue;
+				cl.send_fall_packet(c_id);
+			}
 		}
 		break;
 	}
@@ -280,6 +285,7 @@ void worker_thread(HANDLE iocp_h)
 			{
 				// 타이머 큐에서 리스폰 하라는 메시지를 보낸다면 
 				clients[key].hp = 10;
+				clients[key].isDeath = false;
 
 				XMFLOAT3 random_pos = physics_engine.PickPos();
 
@@ -288,8 +294,8 @@ void worker_thread(HANDLE iocp_h)
 						lock_guard<mutex> ll{ send_cl._s_lock };
 						if (send_cl._state != US_INGAME) continue;
 					}
-					cout << "[" << send_cl._id << "] 에게 " << cl._id << "가 부활했다고 보냄" << endl;
-					send_cl.send_respawn_packet(random_pos.x, random_pos.y, random_pos.z, cl._id);
+					cout << "[" << send_cl._id << "] 에게 " << key << "가 부활했다고 보냄" << endl;
+					send_cl.send_respawn_packet(random_pos.x, random_pos.y, random_pos.z, key);
 				}
 				break;
 			}
@@ -346,7 +352,7 @@ void Physics_Calculation_thread()
 				for (auto& other_player : clients) {
 					if (other_player._state != US_INGAME) continue;
 					if (other_player._id == cl._id) continue;
-					//if (true == other_player.isDeath) continue;
+					if (true == other_player.isDeath) continue;
 					if (CollisionCheck_Person(cl.bullet[i].GetPosition(), other_player.pos,
 						cl.bullet[i].GetRadius(), other_player._player_radius)) {
 						cl.bullet[i].SetisActive(false);
@@ -371,7 +377,7 @@ void Physics_Calculation_thread()
 								// 타이머 스레드에게 일감을 줘서 5초 리스폰 하라 해
 								TIMER_EVENT ev{ other_player._id, chrono::system_clock::now() + 5s, EV_RESPAWN, 0 };
 								timer_queue.push(ev);
-								//other_player.isDeath = true;
+								other_player.isDeath = true;
 								for (auto& send_cl : clients) {
 									if (send_cl._state != US_INGAME) continue;
 									send_cl.send_dead_packet(cl.bullet[i].GetbulletId(), cl._id, other_player._id);
@@ -429,15 +435,18 @@ void do_timer()
 	while (true) {
 		TIMER_EVENT ev;
 		auto current_time = chrono::system_clock::now();
+		//cout << "타이머 스레드 도는 중~" << endl;
 		if (true == timer_queue.try_pop(ev)) {
 			if (ev.wakeup_time > current_time) {
 				timer_queue.push(ev);			// 이 부분은 최적화가 필요함
 				// 넣고 빼는 작업 없이 할 수 있는 방법은 없나?
+				//cout << "넣고 빼는 중" << endl;
 				this_thread::sleep_for(1ms);
 				continue;
 			}
 			switch (ev.event_id) {
 			case EV_RESPAWN: {
+				cout << "타이머 스레드 시간 다 됨" << endl;
 				Overlapped* ov = new Overlapped;
 				ov->_overlapped_type = OT_RESPAWN;
 				PostQueuedCompletionStatus(iocp_h, 1, ev.obj_id, &ov->_over);
@@ -480,12 +489,12 @@ int main()
 	
 	// 계산 스레드
 	thread physics_thread{ Physics_Calculation_thread };
-	physics_thread.join();
-
+	
 	// 타이머 스레드
 	thread timer_thread{ do_timer };
-	timer_thread.join();
 
+	timer_thread.join();
+	physics_thread.join();
 	for (auto& thread : worker_threads) 
 		thread.join();
 
