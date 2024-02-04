@@ -1,8 +1,17 @@
 
+struct MATERIAL
+{
+	float4 m_cAmbient;
+	float4 m_cDiffuse;
+	float4 m_cSpecular;
+	float4 m_cEmissive;
+};
+
 // 게임 객체의 정보를 위한 상수 버퍼를 선언한다.
 cbuffer cbGameObjectInfo : register(b0)
 {
 	matrix gmtxWorld : packoffset(c0);
+	MATERIAL gMaterial : packoffset(c4);
 }
 
 // 카메라의 정보를 위한 상수 버퍼를 선언한다.
@@ -10,8 +19,10 @@ cbuffer cbCameraInfo : register(b1)
 {
 	matrix gmtxView : packoffset(c0);
 	matrix gmtxProjection : packoffset(c4);
+	float3 gvCameraPosition : packoffset(c8);
 }
 
+#include "Light.hlsl"
 
 // 정점 셰이더의 입력을 위한 구조체를 선언한다.
 struct VS_INPUT
@@ -70,6 +81,7 @@ struct VS_PLAYER_OUTPUT
 	float2 uv : TEXCOORD;
 };
 
+////////// Player Mesh
 VS_PLAYER_OUTPUT VSPlayerDiffused(VS_PLAYER_INPUT input)
 {
 	VS_PLAYER_OUTPUT output;
@@ -85,13 +97,21 @@ VS_PLAYER_OUTPUT VSPlayerDiffused(VS_PLAYER_INPUT input)
 float4 PSPlayerDiffused(VS_PLAYER_OUTPUT input) : SV_TARGET
 {
 	float4 cColor = gtxtAlbedoTexture.Sample(gSamplerState, input.uv);
-	return cColor;
+	float3 normalW = normalize(input.normal);
+	float3 positionW = float3(input.position.x, input.position.y, input.position.z);
 
-	//return float4(1,0,0,1);
+	float4 cIllumination = Lighting(positionW, normalW);
+
+	//return cColor;
+	return cIllumination;
+	//return lerp(cColor, cIllumination, 0.5f);
 }
 
 /// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+// Block
+/// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 struct VS_TEXTURED_INPUT
 {
 	float3 position : POSITION;
@@ -117,11 +137,16 @@ VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
 	float4 cColor = gtxtTexture.Sample(gSamplerState, input.uv);
-	//float4 aColor = { 1,1,1,1 };
+	//float4 cIllumination = Lighting(input.positionW, 0.5f);
+
+	//return lerp(cColor, cIllumination, 0.5f);
 
 	return(cColor);
+	//return float4(1.0f, 0.0f, 0.0f, 1.0f);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 #define MAX_VERTEX_INFLUENCES			4
 #define SKINNED_ANIMATION_BONES			256
 
@@ -177,8 +202,13 @@ VS_SKINNED_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT 
 float4 PSSkinnedAnimationStandard(VS_SKINNED_STANDARD_OUTPUT input) : SV_TARGET
 {
 	float4 cColor = gtxtAlbedoTexture.Sample(gSamplerState, input.uv);
+	float3 normalW = normalize(input.normalW);
 
-	return cColor;
+	float4 cIllumination = Lighting(input.positionW, normalW);
+
+	//return cColor;
+	return cIllumination;
+	//return lerp(cColor, cIllumination, 0.5f);	
 }
 
 

@@ -609,8 +609,9 @@ void CGameFramework::BuildObjects()
 		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 0.0f, pPlayerShader, pSkinnedPlayerShader, pMat);
 
 	m_pPlayer = pCubePlayer;
+	CMaterial* pMaterial = new CMaterial;
+	m_pPlayer->SetMaterial(pMaterial);
 #endif
-
 	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
 	m_pScene->m_pPlayer = m_pPlayer;
 	m_pPlayer->m_pScene = m_pScene;

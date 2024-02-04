@@ -19,6 +19,11 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
+	// 조명
+	BuildLightsAndMaterials();
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	//
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
 
@@ -59,6 +64,9 @@ void CScene::ReleaseObjects()
 			if (m_ppObjects[j]) delete m_ppObjects[j];
 		delete[] m_ppObjects;
 	}
+
+	if (m_pLights) delete m_pLights;
+	if (m_pMaterials) delete m_pMaterials;
 }
 
 void CScene::ReleaseUploadBuffers()
@@ -102,6 +110,90 @@ ComPtr<ID3D12RootSignature> CScene::GetGraphicsRootSignature()
 	return m_pd3dGraphicsRootSignature;
 }
 
+void CScene::BuildLightsAndMaterials()
+{
+	m_nLights = 2;
+	m_pLights = new LIGHTS[m_nLights];
+	::ZeroMemory(m_pLights, sizeof(LIGHTS) * m_nLights);
+
+	m_xmf4GlobalAmbient = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
+
+	m_pLights->m_pLights[0].m_bEnable = true;
+	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
+	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	
+	m_pLights->m_pLights[1].m_bEnable = true;
+	m_pLights->m_pLights[1].m_nType = POINT_LIGHT;
+	m_pLights->m_pLights[1].m_fRange = 1000.0f;
+	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
+	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 30.0f);
+	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
+
+	m_pMaterials = new MATERIALS;
+	::ZeroMemory(m_pMaterials, sizeof(MATERIALS));
+
+	m_pMaterials->m_pReflections[0] = { XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 5.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[1] = { XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 10.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[2] = { XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 15.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[3] = { XMFLOAT4(0.5f, 0.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 0.5f, 1.0f, 1.0f),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 20.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[4] = { XMFLOAT4(0.0f, 0.5f, 1.0f, 1.0f), XMFLOAT4(0.5f, 0.0f, 1.0f, 1.0f),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 25.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[5] = { XMFLOAT4(0.0f, 0.5f, 0.5f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 30.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[6] = { XMFLOAT4(0.5f, 0.5f, 1.0f, 1.0f), XMFLOAT4(0.5f, 0.5f, 1.0f, 1.0f),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 35.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[7] = { XMFLOAT4(1.0f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 40.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+}
+
+void CScene::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256의 배수
+	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes,
+		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
+
+	UINT ncbMaterialBytes = ((sizeof(MATERIALS) + 255) & ~255); //256의 배수
+	m_pd3dcbMaterials = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbMaterialBytes,
+		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcbMaterials->Map(0, NULL, (void**)&m_pcbMappedMaterials);
+}
+
+void CScene::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	::memcpy(m_pcbMappedLights->m_pLights, m_pLights, sizeof(LIGHTS) * m_nLights);
+	::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
+	::memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
+	
+	int n = 0;
+	::memcpy(m_pcbMappedMaterials, &n, sizeof(int));
+}
+
+void CScene::ReleaseShaderVariables()
+{
+	if (m_pd3dcbLights)
+	{
+		m_pd3dcbLights->Unmap(0, NULL);
+		m_pd3dcbLights->Release();
+	}
+
+	if (m_pd3dcbMaterials)
+	{
+		m_pd3dcbMaterials->Unmap(0, NULL);
+		m_pd3dcbMaterials->Release();
+	}
+}
+
 ComPtr<ID3D12RootSignature> CScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 {
 	ComPtr<ID3D12RootSignature> pd3dGraphicsRootSignature = NULL;
@@ -125,19 +217,19 @@ ComPtr<ID3D12RootSignature> CScene::CreateGraphicsRootSignature(ID3D12Device* pd
 	pd3dDescriptorRange[2].RegisterSpace = 0;
 	pd3dDescriptorRange[2].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameter[7];
+	D3D12_ROOT_PARAMETER pd3dRootParameter[9];
 	::ZeroMemory(&pd3dRootParameter, sizeof(pd3dRootParameter));
-	pd3dRootParameter[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameter[0].Constants.Num32BitValues = 16;
-	pd3dRootParameter[0].Constants.ShaderRegister = 0;
-	pd3dRootParameter[0].Constants.RegisterSpace = 0;
-	pd3dRootParameter[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 
-	pd3dRootParameter[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameter[1].Constants.Num32BitValues = 32;
-	pd3dRootParameter[1].Constants.ShaderRegister = 1;
-	pd3dRootParameter[1].Constants.RegisterSpace = 0;
-	pd3dRootParameter[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	pd3dRootParameter[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	pd3dRootParameter[0].Constants.Num32BitValues = 32;
+	pd3dRootParameter[0].Constants.ShaderRegister = 0;		// GameObject
+	pd3dRootParameter[0].Constants.RegisterSpace = 0;
+	pd3dRootParameter[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameter[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameter[1].Descriptor.ShaderRegister = 1;		// Camera
+	pd3dRootParameter[1].Descriptor.RegisterSpace = 0;
+	pd3dRootParameter[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameter[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameter[2].DescriptorTable.NumDescriptorRanges = 1;
@@ -163,6 +255,16 @@ ComPtr<ID3D12RootSignature> CScene::CreateGraphicsRootSignature(ID3D12Device* pd
 	pd3dRootParameter[6].Descriptor.ShaderRegister = 3; //Skinned Bone Transforms
 	pd3dRootParameter[6].Descriptor.RegisterSpace = 0;
 	pd3dRootParameter[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+	pd3dRootParameter[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameter[7].Descriptor.ShaderRegister = 4; //Materials
+	pd3dRootParameter[7].Descriptor.RegisterSpace = 0;
+	pd3dRootParameter[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameter[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameter[8].Descriptor.ShaderRegister = 5; //Lights
+	pd3dRootParameter[8].Descriptor.RegisterSpace = 0;
+	pd3dRootParameter[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
@@ -245,6 +347,22 @@ void CScene::AnimateObjects(float fTimeElapsed)
 			m_ppObjects[j]->Animate(fTimeElapsed);
 	}
 
+	// 조명 위치를 플레이어 위치와 방향에 맞게 조정
+	//if (m_pLights)
+	//{
+	//	// 플레이어
+	//	m_pLights->m_pLights[0].m_xmf3Position = m_pPlayer->GetPosition();
+	//	m_pLights->m_pLights[0].m_xmf3Direction = m_pPlayer->GetLookVector();
+
+	//	// 타 플레이어 1
+	//	m_pLights->m_pLights[0].m_xmf3Position = m_pPlayer->GetPosition();
+	//	m_pLights->m_pLights[0].m_xmf3Direction = m_pPlayer->GetLookVector();
+
+	//	// 타 플레이어 2
+	//	m_pLights->m_pLights[0].m_xmf3Position = m_pPlayer->GetPosition();
+	//	m_pLights->m_pLights[0].m_xmf3Direction = m_pPlayer->GetLookVector();
+	//}
+
 	//for (int i = 0; i < m_nObjects; i++)
 	//	for (int j = 0; j < m_nObjects; j++) {
 	//		if (m_ppObjects[i]->GetIsActive()&& m_ppObjects[j]->GetIsActive()) {
@@ -268,6 +386,23 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	if (pCamera)
 		pCamera->UpdateShaderVariables(pd3dCommandList);
+
+	// 조명
+	UpdateShaderVariables(pd3dCommandList);
+
+	// 조명 리소스의 상수 버퍼 뷰를 쉐이더 변수에 연결(바인딩)
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(8, d3dcbLightsGpuVirtualAddress);
+
+	// 재질 리소스의 상수 버퍼 뷰를 쉐이더 변수에 연결
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dcbMaterialsGpuVirtualAddress);
+	//
+
+	/*for (int i = 0; i < m_nShaders; i++)
+	{
+		m_pShaders[i].Render(pd3dCommandList, pCamera);
+	}*/
 
 	if (m_pSkyBox)
 		m_pSkyBox->Render(pd3dCommandList, pCamera);
