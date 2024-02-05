@@ -168,7 +168,11 @@ CMaterial::CMaterial()
 CMaterial::~CMaterial()
 {
 	if (m_pTexture) m_pTexture->Release();
-	if (m_pShader) m_pShader->Release();
+	if (m_pShader)
+	{
+		m_pShader->ReleaseShaderVariables();
+		m_pShader->Release();
+	}
 }
 
 void CMaterial::SetTexture(CTexture* pTexture)
@@ -183,6 +187,20 @@ void CMaterial::SetShader(CShader* pShader)
 	if (m_pShader) m_pShader->Release();
 	m_pShader = pShader;
 	if (m_pShader) m_pShader->AddRef();
+}
+
+void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	/*std::cout << this << std::endl;
+	std::cout << m_xmf4Ambient.x << " " << m_xmf4Ambient.y << " " << m_xmf4Ambient.z << std::endl;
+	std::cout << m_xmf4Albedo.x << " " << m_xmf4Albedo.y << " " << m_xmf4Albedo.z << std::endl;
+	std::cout << m_xmf4Specular.x << " " << m_xmf4Specular.y << " " << m_xmf4Specular.z << std::endl;
+	std::cout << m_xmf4Emissive.x << " " << m_xmf4Emissive.y << " " << m_xmf4Emissive.z << std::endl << std::endl;*/
+
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 4, &m_xmf4Ambient, 16);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 4, &m_xmf4Albedo, 20);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 4, &m_xmf4Specular, 24);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 4, &m_xmf4Emissive, 28);
 }
 
 void CMaterial::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -219,6 +237,8 @@ CGameObject::~CGameObject()
 		m_pShader->ReleaseShaderVariables();
 		m_pShader->Release();
 	}
+
+	if (m_pMaterial) m_pMaterial->Release();
 
 	if (m_pChild) delete m_pChild;
 	if (m_pSibling) delete m_pSibling;
@@ -295,6 +315,15 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 		{
 			m_pMaterial->m_pTexture->UpdateShaderVariables(pd3dCommandList);
 		}
+
+		if (m_pMaterial->m_pShader)
+		{
+			m_pMaterial->m_pShader->Render(pd3dCommandList, pCamera);
+			m_pMaterial->m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+		}
+
+		// 재질 업데이트
+		m_pMaterial->UpdateShaderVariable(pd3dCommandList);
 	}
 
 	if (m_pMesh)
@@ -321,6 +350,8 @@ void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandLis
 	XMFLOAT4X4 xmf4x4World;
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &xmf4x4World, 0);
+
+	//m_pMaterial.
 }
 
 void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -668,11 +699,18 @@ CGameObject* CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, I
 		}
 		else if ('m' == token)
 		{
-			pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, fileStream, pGameObject, pPlayerMeshShader);
-			pGameObject->SetMaterial(pMaterial);
+			CMaterial* pPlayerMaterial = new CMaterial;
+			pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, fileStream, pGameObject, pPlayerMeshShader, pPlayerMaterial);
+			pGameObject->SetMaterial(pPlayerMaterial);
 		}
 		else if ('E' == token)
 		{
+			if (!pGameObject->m_pMaterial)
+			{
+				CMaterial* pMaterial = new CMaterial;
+				pGameObject->SetMaterial(pMaterial);
+			}
+
 			break;
 		}
 	}
@@ -792,7 +830,8 @@ CMeshLoadInfo* CGameObject::LoadMeshInfoFromFile(std::ifstream& fileStream, floa
 	return pMeshInfo;
 }
 
-void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, std::ifstream& fileStream, CGameObject* pObj,CShader* pShader)
+void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	std::ifstream& fileStream, CGameObject* pObj,CShader* pShader, CMaterial* pMaterial)
 {
 	int nMaterial = 0;
 	char c;
@@ -801,7 +840,7 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 	fileStream.read((char*)&nMaterial, sizeof(int));
 	fileStream.read((char*)&c, sizeof(char));
 
-	CMaterial* pMaterial = new CMaterial;
+	//CMaterial* pMaterial = new CMaterial;
 	CTexture* pTexture= new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	//pMaterial->SetTexture(pTexture);
 

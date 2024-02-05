@@ -80,6 +80,14 @@ public:
 	void ReleaseUploadBuffers();
 };
 
+struct MATERIAL
+{
+	XMFLOAT4		m_xmf4Ambient;
+	XMFLOAT4		m_xmf4Diffuse;
+	XMFLOAT4		m_xmf4Specular;
+	XMFLOAT4		m_xmf4Emissive;
+};
+
 class CMaterial
 {
 public:
@@ -93,7 +101,7 @@ public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
-	XMFLOAT4						m_xmf4Albedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	XMFLOAT4						m_xmf4Albedo = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	XMFLOAT4						m_xmf4Emissive = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	XMFLOAT4						m_xmf4Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	XMFLOAT4						m_xmf4Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -112,6 +120,7 @@ public:
 	void SetTexture(CTexture* pTexture);
 	void SetShader(CShader* pShader);
 
+	void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList);
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	void ReleaseShaderVariables();
 
@@ -396,7 +405,8 @@ public:
 	static void LoadAnimationFromFile(std::ifstream& fileStream, CLoadedModelInfo* pLoadedModel);
 
 	static CMeshLoadInfo* LoadMeshInfoFromFile(std::ifstream& fileStream, float modelScaleFactor);
-	static void LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, std::ifstream& fileStream, CGameObject* pObj, CShader* pShader);
+	static void LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		std::ifstream& fileStream,CGameObject* pObj, CShader* pShader, CMaterial* pMaterial);
 };
 
 class CRotatingObject : public CGameObject
