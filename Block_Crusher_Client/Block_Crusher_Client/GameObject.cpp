@@ -701,7 +701,7 @@ CGameObject* CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, I
 		{
 			CMaterial* pPlayerMaterial = new CMaterial;
 			pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, fileStream, pGameObject, pPlayerMeshShader, pPlayerMaterial);
-			//pGameObject->SetMaterial(pPlayerMaterial);
+			pGameObject->SetMaterial(pPlayerMaterial);
 		}
 		else if ('E' == token)
 		{

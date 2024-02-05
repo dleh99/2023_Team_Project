@@ -102,8 +102,8 @@ float4 PSPlayerDiffused(VS_PLAYER_OUTPUT input) : SV_TARGET
 
 	float4 cIllumination = Lighting(positionW, normalW);
 
-	//return cColor;
-	return cIllumination;
+	return cColor;
+	//return cIllumination;
 	//return lerp(cColor, cIllumination, 0.5f);
 }
 
@@ -206,8 +206,8 @@ float4 PSSkinnedAnimationStandard(VS_SKINNED_STANDARD_OUTPUT input) : SV_TARGET
 
 	float4 cIllumination = Lighting(input.positionW, normalW);
 
-	//return cColor;
-	return cIllumination;
+	return cColor;
+	//return cIllumination;
 	//return lerp(cColor, cIllumination, 0.5f);	
 }
 
