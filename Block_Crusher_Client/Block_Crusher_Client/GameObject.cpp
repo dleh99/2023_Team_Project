@@ -700,8 +700,7 @@ CGameObject* CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, I
 		else if ('m' == token)
 		{
 			CMaterial* pPlayerMaterial = new CMaterial;
-			pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, fileStream, pGameObject, pPlayerMeshShader, pPlayerMaterial);
-			pGameObject->SetMaterial(pPlayerMaterial);
+			pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, fileStream, pGameObject, pPlayerMeshShader, pMaterial);
 		}
 		else if ('E' == token)
 		{
@@ -840,9 +839,9 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 	fileStream.read((char*)&nMaterial, sizeof(int));
 	fileStream.read((char*)&c, sizeof(char));
 
-	//CMaterial* pMaterial = new CMaterial;
-	CTexture* pTexture= new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	//pMaterial->SetTexture(pTexture);
+	CMaterial* pGameObjectMaterial = new CMaterial;
+	//CTexture* pTexture= new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pGameObjectMaterial->SetTexture(pMaterial->m_pTexture);
 
 	while (true)
 	{
@@ -854,42 +853,42 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 
 		if (!token.compare("albedo"))				 // Color
 		{
-			fileStream.read((char*)&pMaterial->m_xmf4Albedo, sizeof(XMFLOAT4));
+			fileStream.read((char*)&pGameObjectMaterial->m_xmf4Albedo, sizeof(XMFLOAT4));
 		}
 		else if (!token.compare("emissive"))
 		{
-			fileStream.read((char*)&pMaterial->m_xmf4Emissive, sizeof(XMFLOAT4));
+			fileStream.read((char*)&pGameObjectMaterial->m_xmf4Emissive, sizeof(XMFLOAT4));
 		}
 		else if (!token.compare("specular"))
 		{
-			fileStream.read((char*)&pMaterial->m_xmf4Specular, sizeof(XMFLOAT4));
+			fileStream.read((char*)&pGameObjectMaterial->m_xmf4Specular, sizeof(XMFLOAT4));
 		}
 		else if (!token.compare("glossiness"))		// Float
 		{
-			fileStream.read((char*)&pMaterial->m_fGlossiness, sizeof(float));
+			fileStream.read((char*)&pGameObjectMaterial->m_fGlossiness, sizeof(float));
 		}
 		else if (!token.compare("smoothness"))
 		{
-			fileStream.read((char*)&pMaterial->m_fSmoothness, sizeof(float));
+			fileStream.read((char*)&pGameObjectMaterial->m_fSmoothness, sizeof(float));
 		}
 		else if (!token.compare("metalic"))
 		{
-			fileStream.read((char*)&pMaterial->m_fMetallic, sizeof(float));
+			fileStream.read((char*)&pGameObjectMaterial->m_fMetallic, sizeof(float));
 		}
 		else if (!token.compare("specularHighlights"))
 		{
-			fileStream.read((char*)&pMaterial->m_fSpecularHighlight, sizeof(float));
+			fileStream.read((char*)&pGameObjectMaterial->m_fSpecularHighlight, sizeof(float));
 		}
 		else if (!token.compare("glossyReflections"))
 		{
-			fileStream.read((char*)&pMaterial->m_fGlossyReflection, sizeof(float));
+			fileStream.read((char*)&pGameObjectMaterial->m_fGlossyReflection, sizeof(float));
 		}
 		else if (!token.compare("<AlbedoMap>"))			// Texture
 		{
 			char c;
 			fileStream.read((char*)&c, sizeof(char));
 
-			fileStream >> pMaterial->m_strTextureName;
+			fileStream >> pGameObjectMaterial->m_strTextureName;
 			
 			//std::string tmp = pMaterial->m_strTextureName;
 			//tmp = "Textures/" + tmp + ".dds";
@@ -907,7 +906,7 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 		}
 		else if (!token.compare("</Material>"))
 		{
-			//pObj->SetMaterial(pMaterial);
+			pObj->SetMaterial(pGameObjectMaterial);
 			break;
 		}
 	}
