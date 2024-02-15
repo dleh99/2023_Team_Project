@@ -103,6 +103,7 @@ public:
 
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, const D3D12_VERTEX_BUFFER_VIEW& instanceBufferView);
 };
 
 class CMeshLoadInfo

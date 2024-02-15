@@ -96,6 +96,10 @@ extern ID3D12Resource* CreateBufferResource(ID3D12Device* pd3dDevice,
 
 extern ID3D12Resource* CreateTextureResourceFromDDSFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,const wchar_t* pszFileName, ID3D12Resource** ppd3dUploadBuffer, D3D12_RESOURCE_STATES d3dResourceStates = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
+struct Instance
+{
+	XMFLOAT4X4 worldMatrix;
+};
 
 namespace Vector3
 {

@@ -364,6 +364,11 @@ bool CGameObject::GetIsActive()
 	return m_bActive;
 }
 
+XMFLOAT4X4 CGameObject::GetWorldMatrix()
+{
+	return m_xmf4x4World;
+}
+
 void CGameObject::SetPosition(float x, float y, float z)
 {
 	m_xmf4x4Transform._41 = x;

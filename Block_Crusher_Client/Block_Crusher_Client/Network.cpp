@@ -238,7 +238,6 @@ void ProcessPacket(char* ptr)
 	case SC_FALL: {
 		SC_FALL_PACKET* packet = reinterpret_cast<SC_FALL_PACKET*>(ptr);
 		Netplayers[packet->fall_id]->SetDeath(true);
-		Netplayers[packet->fall_id]->SetIsActive(false);
 		break;
 	}
 	case SC_RESULT: {

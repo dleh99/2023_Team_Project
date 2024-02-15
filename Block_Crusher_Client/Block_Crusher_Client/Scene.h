@@ -62,6 +62,9 @@ protected:
 
 	ComPtr<ID3D12RootSignature> m_pd3dGraphicsRootSignature = NULL;
 
+	Instance* m_pInstance = NULL;
+	CInstancingShader* m_pInstanceShader = NULL;
+
 	bool isEnd = false;
 };
 

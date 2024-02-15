@@ -211,3 +211,33 @@ float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
 
 	return(cColor);
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+struct VS_OUTPUT_INSTANCE
+{
+	float4 position : SV_POSITION;
+	float2 uv : TEXCOORD;
+};
+
+struct VS_INPUT_INSTANCE
+{
+	float3 position : POSITION;
+	float2 uv : TEXCOORD;
+	matrix worldMatrix : INSTANCE;
+};
+
+VS_OUTPUT_INSTANCE VSInstancing(VS_INPUT_INSTANCE input)
+{
+	VS_OUTPUT_INSTANCE output;
+
+	output.position = mul(mul(mul(float4(input.position, 1.0f), input.worldMatrix), gmtxView), gmtxProjection);
+	output.uv = input.uv;
+	return output;
+}
+
+float4 PSInstancing(VS_OUTPUT_INSTANCE input) : SV_TARGET
+{
+		float4 cColor = gtxtTexture.Sample(gSamplerState, input.uv);
+		//float4 cColor = { 1,1,1,1 };
+
+		return(cColor);
+}

@@ -189,6 +189,8 @@ void CShader::CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTex
 {
 	m_d3dSrvCPUDescriptorNextHandle.ptr += (::gnCbvSrvDescriptorIncrementSize * nDescriptorHeapIndex);
 	m_d3dSrvGPUDescriptorNextHandle.ptr += (::gnCbvSrvDescriptorIncrementSize * nDescriptorHeapIndex);
+ 
+	m_ptexture = pTexture;
 
 	int nTextures = pTexture->GetTextures();
 	for (int i = 0; i < nTextures; i++)
@@ -469,7 +471,7 @@ void CSkyBoxShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* 
 	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, m_ppd3dPipelineStates);
 
 }
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 CSkinnedAnimationPlayerShader::CSkinnedAnimationPlayerShader()
 {
 }
@@ -531,4 +533,99 @@ void CSkinnedAnimationPlayerShader::OnPrepareRender(ID3D12GraphicsCommandList* p
 void CSkinnedAnimationPlayerShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	OnPrepareRender(pd3dCommandList);
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+CInstancingShader::CInstancingShader(ID3D12Device* device,ID3D12RootSignature* rootSignature, CMesh* mesh, UINT sizeofData, UINT count)
+	: m_instanceBufferView{}, m_instanceBufferPointer{}, m_sizeInBytes{ sizeofData * count }, m_strideInBytes{ sizeofData }
+{
+	CreateInstanceBuffer(device);
+	m_mesh = mesh;
+}
+
+CInstancingShader::~CInstancingShader()
+{
+	m_instanceBuffer->Unmap(0, NULL);
+}
+
+D3D12_INPUT_LAYOUT_DESC CInstancingShader::CreateInputLayout()
+{
+	UINT nInputElementDescs = 6;
+	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
+		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12,
+		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	pd3dInputElementDescs[2] = { "INSTANCE", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+	pd3dInputElementDescs[3] = { "INSTANCE", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+	pd3dInputElementDescs[4] = { "INSTANCE", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1,32, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+	pd3dInputElementDescs[5] = { "INSTANCE", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+	::ZeroMemory(&d3dInputLayoutDesc, sizeof(D3D12_INPUT_LAYOUT_DESC));
+	d3dInputLayoutDesc.NumElements = nInputElementDescs;
+	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+
+	return d3dInputLayoutDesc;
+}
+
+
+D3D12_SHADER_BYTECODE CInstancingShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
+{
+	return CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSInstancing", "vs_5_1", ppd3dShaderBlob);
+}
+
+D3D12_SHADER_BYTECODE CInstancingShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
+{
+	return CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSInstancing", "ps_5_1", ppd3dShaderBlob);
+}
+
+void CInstancingShader::CreateInstanceBuffer(ID3D12Device* device)
+{
+	// 인스턴스 버퍼 생성
+	auto a = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	auto b = CD3DX12_RESOURCE_DESC::Buffer(m_sizeInBytes);
+
+	device->CreateCommittedResource(
+		&a,
+		D3D12_HEAP_FLAG_NONE,
+		&b,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		NULL,
+		IID_PPV_ARGS(&m_instanceBuffer));
+
+	// 인스턴스 버퍼 포인터
+	m_instanceBuffer->Map(0, NULL, reinterpret_cast<void**>(&m_instanceBufferPointer));
+
+	// 인스턴스 버퍼 뷰 생성
+	m_instanceBufferView.BufferLocation = m_instanceBuffer->GetGPUVirtualAddress();
+	m_instanceBufferView.StrideInBytes = m_strideInBytes;
+	m_instanceBufferView.SizeInBytes = m_sizeInBytes;
+}
+
+void CInstancingShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	if (m_ppd3dPipelineStates) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[0]);
+	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
+}
+
+void CInstancingShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	OnPrepareRender(pd3dCommandList);
+
+	if (m_ptexture) 
+		m_ptexture->UpdateShaderVariables(pd3dCommandList);
+	
+	if(m_mesh)
+		m_mesh->Render(pd3dCommandList, m_instanceBufferView);
+}
+
+void CInstancingShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	m_nPipelineStates = 1;
+	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
+
+	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, m_ppd3dPipelineStates);
+
 }

@@ -351,7 +351,7 @@ public:
 	XMFLOAT3 GetRight();
 	int GetObjectType();
 	bool GetIsActive();
-
+	XMFLOAT4X4 GetWorldMatrix();
 	float GetBoundingRadius() { return m_fBlockBoundingRadius; };
 
 	// 게임 객체의 워치를 설정한다.

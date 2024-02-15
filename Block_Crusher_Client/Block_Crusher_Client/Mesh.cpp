@@ -39,6 +39,17 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
 }
 
+void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, const D3D12_VERTEX_BUFFER_VIEW& instanceBufferView)
+{
+	//UpdateShaderVariables(pd3dCommandList);
+
+	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+	pd3dCommandList->IASetVertexBuffers(0, 1, &m_d3dVertexBufferView);
+	pd3dCommandList->IASetVertexBuffers(1, 1, &instanceBufferView);
+	pd3dCommandList->IASetIndexBuffer(&m_d3dIndexBufferView);
+	pd3dCommandList->DrawIndexedInstanced(m_nIndices, instanceBufferView.SizeInBytes / instanceBufferView.StrideInBytes, 0, 0, 0);
+}
+
 CTriangleMesh::CTriangleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 	:CMesh(pd3dDevice, pd3dCommandList)
 {
@@ -223,6 +234,145 @@ CMeshLoadInfo::~CMeshLoadInfo()
 }
 
 //===========================================================================================================
+
+//CCubeMeshTextured::CCubeMeshTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth) : CMesh(pd3dDevice, pd3dCommandList)
+//{
+//	m_nStride = sizeof(CTexturedVertex);
+//	m_nOffset = 0;
+//	m_nSlot = 0;
+//	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+//	m_nVertices = 24;
+//	const UINT vertexBufferSize = sizeof(CTexturedVertex) * m_nVertices;
+//
+//	auto a = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+//	auto b = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
+//	auto c = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+//
+//	pd3dDevice->CreateCommittedResource(
+//		&a,
+//		D3D12_HEAP_FLAG_NONE,
+//		&b,
+//		D3D12_RESOURCE_STATE_COPY_DEST,
+//		NULL,
+//		IID_PPV_ARGS(&m_pd3dVertexBuffer));
+//
+//	pd3dDevice->CreateCommittedResource(
+//		&c,
+//		D3D12_HEAP_FLAG_NONE,
+//		&b,
+//		D3D12_RESOURCE_STATE_GENERIC_READ,
+//		NULL,
+//		IID_PPV_ARGS(&m_pd3dVertexUploadBuffer));
+//
+//	float fx = fWidth * 0.5f, fy = fHeight * 0.5f, fz = fDepth * 0.5f;
+//
+//	CTexturedVertex pVertices[24];
+//
+//	//Back
+//	pVertices[0] = CTexturedVertex(XMFLOAT3(+fx, -fy, +fz), XMFLOAT2(0.0f, 1.0f));
+//	pVertices[1] = CTexturedVertex(XMFLOAT3(+fx, +fy, +fz), XMFLOAT2(0.0f, 0.0f));
+//	pVertices[2] = CTexturedVertex(XMFLOAT3(-fx, +fy, +fz), XMFLOAT2(1.0f, 0.0f));
+//	pVertices[3] = CTexturedVertex(XMFLOAT3(-fx, -fy, +fz), XMFLOAT2(1.0f, 1.0f));
+//	//Front
+//	pVertices[4] = CTexturedVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT2(0.0f, 0.0f));
+//	pVertices[5] = CTexturedVertex(XMFLOAT3(+fx, +fy, -fz), XMFLOAT2(1.0f, 0.0f));
+//	pVertices[6] = CTexturedVertex(XMFLOAT3(+fx, -fy, -fz), XMFLOAT2(1.0f, 1.0f));
+//	pVertices[7] = CTexturedVertex(XMFLOAT3(-fx, -fy, -fz), XMFLOAT2(0.0f, 1.0f));
+//	//Top
+//	pVertices[8] = CTexturedVertex(XMFLOAT3(-fx, +fy, +fz), XMFLOAT2(0.0f, 0.0f));
+//	pVertices[9] = CTexturedVertex(XMFLOAT3(+fx, +fy, +fz), XMFLOAT2(1.0f, 0.0f));
+//	pVertices[10] = CTexturedVertex(XMFLOAT3(+fx, +fy, -fz), XMFLOAT2(1.0f, 1.0f));
+//	pVertices[11] = CTexturedVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT2(0.0f, 1.0f));
+//
+//	//Bottom
+//	pVertices[12] = CTexturedVertex(XMFLOAT3(+fx, -fy, -fz), XMFLOAT2(0.0f, 0.0f));
+//	pVertices[13] = CTexturedVertex(XMFLOAT3(+fx, -fy, +fz), XMFLOAT2(0.0f, 1.0f));
+//	pVertices[14] = CTexturedVertex(XMFLOAT3(-fx, -fy, +fz), XMFLOAT2(1.0f, 1.0f));
+//	pVertices[15] = CTexturedVertex(XMFLOAT3(-fx, -fy, -fz), XMFLOAT2(1.0f, 0.0f));
+//	//Left
+//	pVertices[16] = CTexturedVertex(XMFLOAT3(-fx, +fy, +fz), XMFLOAT2(0.0f, 0.0f));
+//	pVertices[17] = CTexturedVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT2(1.0f, 0.0f));
+//	pVertices[18] = CTexturedVertex(XMFLOAT3(-fx, -fy, -fz), XMFLOAT2(1.0f, 1.0f));
+//	pVertices[19] = CTexturedVertex(XMFLOAT3(-fx, -fy, +fz), XMFLOAT2(0.0f, 1.0f));
+//	//Right
+//	pVertices[20] = CTexturedVertex(XMFLOAT3(+fx, +fy, -fz), XMFLOAT2(0.0f, 0.0f));
+//	pVertices[21] = CTexturedVertex(XMFLOAT3(+fx, +fy, +fz), XMFLOAT2(1.0f, 0.0f));
+//	pVertices[22] = CTexturedVertex(XMFLOAT3(+fx, -fy, +fz), XMFLOAT2(1.0f, 1.0f));
+//	pVertices[23] = CTexturedVertex(XMFLOAT3(+fx, -fy, -fz), XMFLOAT2(0.0f, 1.0f));
+//
+//	// DEFAULT 버퍼에 데이터 복사
+//	D3D12_SUBRESOURCE_DATA vertextData{};
+//	vertextData.pData = pVertices;
+//	vertextData.RowPitch = vertexBufferSize;
+//	vertextData.SlicePitch = vertextData.RowPitch;
+//	UpdateSubresources<1>(pd3dCommandList, m_pd3dVertexBuffer.Get(), m_pd3dVertexUploadBuffer.Get(), 0, 0, 1, &vertextData);
+//
+//	// 정점 버퍼 상태 변경
+//	auto rb = CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dVertexBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+//
+//	pd3dCommandList->ResourceBarrier(1, &rb);
+//
+//	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+//	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+//	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+//
+//	m_nIndices = 36;
+//	const UINT indexBufferSize = sizeof(UINT) * m_nIndices;
+//
+//	b = CD3DX12_RESOURCE_DESC::Buffer(indexBufferSize);
+//
+//	pd3dDevice->CreateCommittedResource(
+//		&a,
+//		D3D12_HEAP_FLAG_NONE,
+//		&b,
+//		D3D12_RESOURCE_STATE_COPY_DEST,
+//		NULL,
+//		IID_PPV_ARGS(&m_pd3dIndexBuffer));
+//
+//	pd3dDevice->CreateCommittedResource(
+//		&c,
+//		D3D12_HEAP_FLAG_NONE,
+//		&b,
+//		D3D12_RESOURCE_STATE_GENERIC_READ,
+//		NULL,
+//		IID_PPV_ARGS(&m_pd3dIndexUploadBuffer));
+//
+//	UINT pnIndices[36];
+//
+//	//Back
+//	pnIndices[0] = 0; pnIndices[1] = 1; pnIndices[2] = 2;
+//	pnIndices[3] = 0; pnIndices[4] = 2; pnIndices[5] = 3;
+//	//Front
+//	pnIndices[6] = 4; pnIndices[7] = 5; pnIndices[8] = 6;
+//	pnIndices[9] = 4; pnIndices[10] = 6; pnIndices[11] = 7;
+//	//Top
+//	pnIndices[12] = 8; pnIndices[13] = 9; pnIndices[14] = 10;
+//	pnIndices[15] = 8; pnIndices[16] = 10; pnIndices[17] = 11;
+//	//Bottom
+//	pnIndices[18] = 12; pnIndices[19] = 13; pnIndices[20] = 14;
+//	pnIndices[21] = 12; pnIndices[22] = 14; pnIndices[23] = 15;
+//	//Left
+//	pnIndices[24] = 16; pnIndices[25] = 17; pnIndices[26] = 18;
+//	pnIndices[27] = 16; pnIndices[28] = 18; pnIndices[29] = 19;
+//	//Right
+//	pnIndices[30] = 20; pnIndices[31] = 21; pnIndices[32] = 22;
+//	pnIndices[33] = 20; pnIndices[34] = 22; pnIndices[35] = 23;
+//
+//	D3D12_SUBRESOURCE_DATA indexData{};
+//	indexData.pData = pnIndices;
+//	indexData.RowPitch = indexBufferSize;
+//	indexData.SlicePitch = indexData.RowPitch;
+//	UpdateSubresources<1>(pd3dCommandList, m_pd3dIndexBuffer.Get(), m_pd3dIndexUploadBuffer.Get(), 0, 0, 1, &indexData);
+//
+//	rb = CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dIndexBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_INDEX_BUFFER);
+//
+//	pd3dCommandList->ResourceBarrier(1, &rb);
+//
+//	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+//	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+//	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+//
+//}
 
 CCubeMeshTextured::CCubeMeshTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth) : CMesh(pd3dDevice, pd3dCommandList)
 {

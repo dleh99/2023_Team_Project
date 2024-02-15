@@ -53,6 +53,7 @@ protected:
 	int m_nPlayerPipelineStates = 0;
 
 	ID3D12DescriptorHeap* m_pd3dCbvSrvDescriptorHeap = NULL;
+	CTexture* m_ptexture;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE			m_d3dCbvCPUDescriptorStartHandle;
 	D3D12_GPU_DESCRIPTOR_HANDLE			m_d3dCbvGPUDescriptorStartHandle;
@@ -138,4 +139,32 @@ public:
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
 	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
+};
+
+class CInstancingShader : public CShader
+{
+public:
+	CInstancingShader(ID3D12Device* device, ID3D12RootSignature* rootSignature,CMesh* mesh, UINT sizeofData, UINT count);
+	virtual ~CInstancingShader();
+
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+
+	void CreateInstanceBuffer(ID3D12Device* device);
+	Instance* GetInstancePointer() const { return m_instanceBufferPointer; }
+
+private:
+	CMesh*			m_mesh;
+	ComPtr<ID3D12PipelineState>	m_pipelineState;
+
+	UINT						m_sizeInBytes;
+	UINT						m_strideInBytes;
+	ComPtr<ID3D12Resource>		m_instanceBuffer;
+	D3D12_VERTEX_BUFFER_VIEW	m_instanceBufferView;
+	Instance* m_instanceBufferPointer;
 };

@@ -33,11 +33,19 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	CMaterial* pMaterial = new CMaterial();
 	pMaterial->SetTexture(pTexture);
 
-	CTexturedShader* pTShader = new CTexturedShader();
-	pTShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
-	pTShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	pTShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-	pTShader->CreateShaderResourceViews(pd3dDevice, pTexture, 0, 2);
+	AddBlocksByMapData(pCubeMesh, m_pInstanceShader, pMaterial, 0, mapkey);
+
+	m_pInstanceShader = new CInstancingShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get(), pCubeMesh, sizeof(Instance), m_nBlock);
+	m_pInstanceShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
+	m_pInstanceShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	m_pInstanceShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+	m_pInstanceShader->CreateShaderResourceViews(pd3dDevice, pTexture, 0, 2);
+
+	//CTexturedShader* pTShader = new CTexturedShader();
+	//pTShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
+	//pTShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	//pTShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+	//pTShader->CreateShaderResourceViews(pd3dDevice, pTexture, 0, 2);
 
 	CDiffusedShader* pShader = new CDiffusedShader();
 	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
@@ -46,7 +54,14 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	pBulletMesh = BulletMesh;
 
-	AddBlocksByMapData(pCubeMesh, pTShader, pMaterial, 0, mapkey);
+	m_pInstance = m_pInstanceShader->GetInstancePointer();
+	
+	for (int i = 0; i < m_nBlock; ++i) {
+		auto tmp = m_ppObjects[i]->GetWorldMatrix();
+		XMFLOAT4X4 result;
+		XMStoreFloat4x4(&result, XMMatrixTranspose(XMLoadFloat4x4(&tmp)));
+		m_pInstance[i].worldMatrix = result;
+	}
 }
 
 void CScene::ReleaseObjects()
@@ -272,7 +287,10 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	if (m_pSkyBox)
 		m_pSkyBox->Render(pd3dCommandList, pCamera);
 
-	for (int j = 0; j < m_nObjects; j++)
+	if (m_pInstanceShader)
+		m_pInstanceShader->Render(pd3dCommandList, pCamera);
+
+	for (int j = m_nBlock; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j] && m_ppObjects[j]->GetIsActive()) {
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
@@ -540,9 +558,9 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 				XMFLOAT3 position = { -(float)i * 12.0f + 20.0f,
 				 -(float)j * 12.0f , -(float)k * 12.0f + 40.0f };
 				CBlockObject* pBlockObject = new CBlockObject();
-				pBlockObject->SetMesh(pMesh);
-				pBlockObject->SetShader(pShader);
-				pBlockObject->SetMaterial(pMaterial);
+				//pBlockObject->SetMesh(pMesh);
+				//pBlockObject->SetShader(pShader);
+				//pBlockObject->SetMaterial(pMaterial);
 				pBlockObject->SetIsActive(true);
 
 				m_ppObjects[cnt] = pBlockObject;
@@ -560,9 +578,9 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 				//std::cout << position.x << " " << position.y << " " << position.z << std::endl;
 
 				CBlockObject* pBlockObject = new CBlockObject();
-				pBlockObject->SetMesh(pMesh);
-				pBlockObject->SetShader(pShader);
-				pBlockObject->SetMaterial(pMaterial);
+				//pBlockObject->SetMesh(pMesh);
+				//pBlockObject->SetShader(pShader);
+				//pBlockObject->SetMaterial(pMaterial);
 				pBlockObject->SetIsActive(true);
 
 				m_ppObjects[cnt] = pBlockObject;
