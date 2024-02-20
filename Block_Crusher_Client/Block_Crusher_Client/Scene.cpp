@@ -7,7 +7,9 @@
 
 CScene::CScene()
 {
-
+	TitleUI[ID] = {700, 575, 700 + 250, 575 + 30};
+	TitleUI[PW] = {700, 625, 700 + 250, 625 + 30};
+	TitleUI[ServerIP] = { 700, 675, 700 + 250, 675 + 30};
 }
 
 CScene::~CScene()
@@ -386,6 +388,32 @@ void CScene::BuildText(ComPtr<ID2D1DeviceContext2> const m_d2dDeviceContext, Com
 	pTextFormat[2]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 	pTextFormat[2]->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
+	m_dWriteFactory->CreateTextFormat(
+		L"Verdana",
+		NULL,
+		DWRITE_FONT_WEIGHT_MEDIUM,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_CONDENSED,
+		20,
+		L"",
+		&pTextFormat[3]
+	);
+	pTextFormat[3]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	pTextFormat[3]->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+	m_dWriteFactory->CreateTextFormat(
+		L"Verdana",
+		NULL,
+		DWRITE_FONT_WEIGHT_MEDIUM,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_CONDENSED,
+		20,
+		L"",
+		&pTextFormat[4]
+	);
+	pTextFormat[4]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
+	pTextFormat[4]->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
 	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), SolidColorBrush[0].GetAddressOf());
 	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Red), SolidColorBrush[1].GetAddressOf());
 	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Green), SolidColorBrush[2].GetAddressOf());
@@ -489,16 +517,115 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 				pTextFormat[1].Get(), D2D1::RectF(0, 0, 200, 300), SolidColorBrush[0].Get());
 		}
 	}
-
 }
 
+void CScene::RenderTitle(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, ComPtr<ID2D1Factory3> m_d2dFactory, ComPtr<IDWriteFactory> m_dWriteFactory,
+	float fTimeElapsed)
+{
+	m_fBlinkTime += fTimeElapsed * 2.0f;
 
+	std::wstring karrotstr = *m_sTitleTexts[m_flag];
+	wchar_t lastChar = karrotstr.back();
+	if ((int)m_fBlinkTime % 2 && lastChar != '|') {
+		karrotstr += '|';
+	}
+	else {
+		if (!karrotstr.empty()) {
+			if (lastChar == '|') {
+				karrotstr.pop_back();
+			}
+		}
+	}
+
+	// BackGround
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(0, 0));
+	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT), SolidColorBrush[9].Get());
+
+	// IP 입력란
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(590, 665));
+	std::wstring str = L"Server IP";
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat[3].Get(), D2D1::RectF(0, 0, 100, 50), SolidColorBrush[0].Get());
+
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(700, 675));
+	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 250, 30), SolidColorBrush[0].Get());
+
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(705, 665));
+	str = *m_sTitleTexts[ServerIP];
+	if (m_flag == ServerIP) {
+		m_d2dDeviceContext->DrawText(karrotstr.c_str(), static_cast<UINT32>(karrotstr.size()),
+			pTextFormat[4].Get(), D2D1::RectF(0, 0, 300, 50), SolidColorBrush[7].Get());
+	}
+	else {
+		m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+			pTextFormat[4].Get(), D2D1::RectF(0, 0, 300, 50), SolidColorBrush[7].Get());
+	}
+
+	// ID 입력란
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(590, 565));
+	str = L"ID";
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat[3].Get(), D2D1::RectF(0, 0, 100, 50), SolidColorBrush[0].Get());
+
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(700, 575));
+	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 250, 30), SolidColorBrush[0].Get());
+
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(705, 565));
+	str = *m_sTitleTexts[ID];
+	if (m_flag == ID) {
+		m_d2dDeviceContext->DrawText(karrotstr.c_str(), static_cast<UINT32>(karrotstr.size()),
+			pTextFormat[4].Get(), D2D1::RectF(0, 0, 300, 50), SolidColorBrush[7].Get());
+	}
+	else {
+		m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+			pTextFormat[4].Get(), D2D1::RectF(0, 0, 300, 50), SolidColorBrush[7].Get());
+	}
+
+	// PW 입력란
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(590, 615));
+	str = L"PW";
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat[3].Get(), D2D1::RectF(0, 0, 100, 50), SolidColorBrush[0].Get());
+
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(700, 625));
+	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 250, 30), SolidColorBrush[0].Get());
+
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(705, 615));
+	str = *m_sTitleTexts[PW];
+	if (m_flag == PW) {
+		m_d2dDeviceContext->DrawText(karrotstr.c_str(), static_cast<UINT32>(karrotstr.size()),
+			pTextFormat[4].Get(), D2D1::RectF(0, 0, 300, 50), SolidColorBrush[7].Get());
+	}
+	else {
+		m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+			pTextFormat[4].Get(), D2D1::RectF(0, 0, 300, 50), SolidColorBrush[7].Get());
+	}
+
+	//타이틀
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(300, 150));
+	str = L"Block Crusher";
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat[1].Get(), D2D1::RectF(0, 0, 450, 300), SolidColorBrush[0].Get());
+}
+
+int CScene::CCTitleUI()
+{
+	//cout << m_ptWinCursorMouse.x << " ";
+	//cout << m_ptWinCursorMouse.y << endl;
+
+	for (int i = 0; i < 3; i++) {
+		if (IsPointInRectangle(m_ptWinCursorMouse, TitleUI[i])) {
+			m_flag = i;
+			m_fBlinkTime = 1;
+			return i;
+		}
+	}
+	return m_flag;
+}
 
 int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMaterial, int nindex, char mapkey)
 {
 	std::ifstream in{ "Map/MapData3.bin", std::ios::binary };
-
-	//if (!in) std::cout << "뭐임 ㅅㅂ" << std::endl;
 
 	int** mapdata = new int* [50];
 	for (int i = 0; i < 50; i++) {

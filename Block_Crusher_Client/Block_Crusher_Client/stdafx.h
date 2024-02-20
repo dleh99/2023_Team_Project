@@ -65,6 +65,10 @@ using Microsoft::WRL::ComPtr;			// ComPtr
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 
+enum Title_Text {
+	ID, PW, ServerIP
+};
+
 // 클라이언트 영역 크기 정의
 #define FRAME_BUFFER_WIDTH 1024
 #define FRAME_BUFFER_HEIGHT 768

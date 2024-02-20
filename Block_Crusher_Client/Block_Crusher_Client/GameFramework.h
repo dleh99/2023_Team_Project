@@ -75,6 +75,8 @@ private:
 
 	long long frame_num = 0;
 	bool isEnd_framework = false;
+	int m_SceneState = 0; // 0 - tile, 1 - playing
+	int m_flag = ID;
 
 public:
 	CGameFramework();
@@ -102,6 +104,7 @@ public:
 	void AnimateObjects();
 	void FrameAdvance();
 	void Render2D();
+	void UpdateTitleText(int index);
 
 	void WaitForGpuComplete();
 
@@ -120,6 +123,9 @@ public:
 	CCamera* m_pCamera = NULL;
 	CMainPlayer* m_pPlayer = NULL;
 	vector<CMainPlayer*> m_vEnemyPlayers;
+	wstring* m_sTitleTexts[3];
 	POINT m_ptOldCursorPos; 
+	POINT m_ptWinCursorMouse; 
+
 };
 

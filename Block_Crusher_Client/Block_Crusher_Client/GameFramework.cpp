@@ -14,11 +14,19 @@ CGameFramework::CGameFramework()
 	m_hFenceEvent = NULL;
 	m_nFenceValue = 0;
 
-	_tcscpy_s(m_pszFrameRate, _T("Block Crusher (("));
+	_tcscpy_s(m_pszFrameRate, _T("Block Crusher ("));
 
 	for (int i = 0; i < m_nSwapChainBuffers; ++i)
 		m_nFenceValues[i] = 0;
 	m_pScene = NULL;
+
+	wstring* id = new wstring(L"");
+	wstring* pw = new wstring(L"");
+	wstring* serverip = new wstring(L"127.0.0.1");
+
+	m_sTitleTexts[ID] = id;
+	m_sTitleTexts[PW] = pw;
+	m_sTitleTexts[ServerIP] = serverip;
 }
 
 CGameFramework::~CGameFramework()
@@ -124,6 +132,7 @@ void CGameFramework::CreateD2DDevice()
 	ComPtr<IDXGIDevice> dxgiDevice;
 	m_d3d11On12Device.As(&dxgiDevice);
 	m_d2dFactory->CreateDevice(dxgiDevice.Get(), &m_d2dDevice);
+
 	m_d2dDevice->CreateDeviceContext(deviceOptions, &m_d2dDeviceContext);
 	DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), &m_dWriteFactory);
 }
@@ -424,8 +433,13 @@ void CGameFramework::Render2D()
 	m_d2dDeviceContext->BeginDraw();
 
 	// 2D 객체 랜더링
-	if (m_pScene) m_pScene->Render2D(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory, m_GameTimer.GetTimeElapsed());
-
+	if (m_pScene) {
+		if(m_SceneState == 0)
+			m_pScene->RenderTitle(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory, m_GameTimer.GetTimeElapsed());
+		else
+			m_pScene->Render2D(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory, m_GameTimer.GetTimeElapsed());
+	}
+		
 	m_d2dDeviceContext->EndDraw();
 
 	// Release our wrapped render target resource. Releasing 
@@ -564,6 +578,8 @@ void CGameFramework::BuildObjects()
 	m_pScene = new CScene();
 	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), GetMapKey());
 	m_pScene->BuildText(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory);
+	for (int i = 0; i < 3; i++)
+		m_pScene->m_sTitleTexts[i] = m_sTitleTexts[i];
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	pTexture->LoadTextureFromDDSFile(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), L"Textures/SpaceMan_Rank_01_Black.dds", RESOURCE_TEXTURE2D, 0);
@@ -651,13 +667,16 @@ void CGameFramework::ProcessInput()
 
 		if (::GetKeyboardState(pKeyBuffer))
 		{
+			//cout << pKeyBuffer << endl;
+
 			if (pKeyBuffer[0x57] & 0xF0) dwDirection |= DIR_FORWARD;			// W
 			if (pKeyBuffer[0x53] & 0xF0) dwDirection |= DIR_BACKWARD;			// S
 			if (pKeyBuffer[0x41] & 0xF0) dwDirection |= DIR_LEFT;				// A
 			if (pKeyBuffer[0x44] & 0xF0) dwDirection |= DIR_RIGHT;				// D
 			if (pKeyBuffer[VK_SPACE] & 0xF0) dwDirection |= DIR_UP;
-			if (pKeyBuffer[0x43] & 0xF0)
-			{
+			//if (pKeyBuffer[VK_RETURN] & 0xF0) m_SceneState = 1;
+			//if (pKeyBuffer[VK_ESCAPE] & 0xF0) m_SceneState = 0;
+			if (pKeyBuffer[0x43] & 0xF0){
 				dwDirection |= KEY_SHOOT;
 				m_pPlayer->SetIsShoot(true);
 			}
@@ -776,6 +795,13 @@ void CGameFramework::AnimateObjects()
 	}
 }
 
+void CGameFramework::UpdateTitleText(int index)
+{
+
+
+		
+}
+
 void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)
@@ -787,6 +813,11 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 		::GetCursorPos(&m_ptOldCursorPos);
 		break;
 	case WM_LBUTTONUP:
+		if (m_pScene) {
+			m_pScene->m_ptWinCursorMouse.x = LOWORD(lParam);
+			m_pScene->m_ptWinCursorMouse.y = HIWORD(lParam);
+			m_flag = m_pScene->CCTitleUI();
+		}
 	case WM_RBUTTONUP:
 		//마우스 캡쳐를 해제한다.
 		::ReleaseCapture();
@@ -802,24 +833,53 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 {
 	switch (nMessageID)
 	{
+	case WM_CHAR:
+		if (wParam == 32) {  //입력한 문자에 따른 메세지 처리
+				
+		}
+		if (wParam == VK_RETURN) {
+
+		}
+		else {
+			char c = wParam;
+			*m_sTitleTexts[m_flag] += c;
+		}
+		break;
 	case WM_KEYUP:
 		switch (wParam)
 		{
+			
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
+			m_SceneState = 0;
 			break;
 		case VK_RETURN:
+			m_SceneState = 1;
 			break;
 		case VK_F8:
+			//m_flag += 1;
 			break;
 		case VK_F9:
 			//“F9” 키가 눌려지면 윈도우 모드와 전체화면 모드의 전환을 처리한다. 
 			ChangeSwapChainState();
 			break;
+		case VK_BACK:
+			if (!m_sTitleTexts[m_flag]->empty()) {
+				m_sTitleTexts[m_flag]->pop_back();
+				if (!m_sTitleTexts[m_flag]->empty())
+					m_sTitleTexts[m_flag]->pop_back();
+			}
+			break;
 		default:
 			break;
 		}
 		break;
+	//case WM_KEYDOWN:
+	//	switch(wParam)
+	//	{
+
+	//	}
+	//	break;
 	default:
 		break;
 	}
@@ -844,6 +904,9 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 		break;
 	case WM_KEYDOWN:
 	case WM_KEYUP:
+		OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+		break;
+	case WM_CHAR:
 		OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 		break;
 	}
