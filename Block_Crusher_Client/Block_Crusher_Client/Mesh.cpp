@@ -233,6 +233,7 @@ CCubeMeshTextured::CCubeMeshTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 	float fx = fWidth * 0.5f, fy = fHeight * 0.5f, fz = fDepth * 0.5f;
 
+	// Vertex
 	m_nVertices = 24;
 
 	CTexturedVertex pVertices[24];
@@ -269,12 +270,7 @@ CCubeMeshTextured::CCubeMeshTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	pVertices[22] = CTexturedVertex(XMFLOAT3(+fx, -fy, +fz), XMFLOAT2(1.0f, 1.0f));
 	pVertices[23] = CTexturedVertex(XMFLOAT3(+fx, -fy, -fz), XMFLOAT2(0.0f, 1.0f));
 
-	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
-
-	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
-	m_d3dVertexBufferView.StrideInBytes = m_nStride;
-	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
-
+	// Index
 	m_nIndices = 36;
 	UINT pnIndices[36];
 
@@ -303,6 +299,23 @@ CCubeMeshTextured::CCubeMeshTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
 
+	// Normal
+	XMFLOAT3 pxmf3Positions[24];
+	XMFLOAT3 pxmf3Normals[24];
+
+	for (int i = 0; i < m_nVertices; ++i)
+		pxmf3Positions[i] = pVertices[i].GetPosition();
+
+	CalculateVertexNormals(pxmf3Normals, pxmf3Positions, m_nVertices, pnIndices, m_nIndices);
+
+	for (int i = 0; i < m_nVertices; ++i)
+		pVertices[i] = CTexturedVertex(pxmf3Positions[i], pxmf3Normals[i], pVertices[i].m_xmf2TexCoord);
+
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 }
 
 //===========================================================================================================
@@ -520,7 +533,7 @@ void CSkinnedMesh::LoadSkinInfoFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 	}
 }
 
-void CSkinnedMesh::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, int nVertices)
+void CCubeMeshTextured::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, int nVertices)
 {
 	int nPrimitives = nVertices / 3;
 	UINT nIndex0, nIndex1, nIndex2;
@@ -537,7 +550,7 @@ void CSkinnedMesh::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XM
 	}
 }
 
-void CSkinnedMesh::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, UINT nVertices, UINT* pnIndices, UINT nIndices)
+void CCubeMeshTextured::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, UINT nVertices, UINT* pnIndices, UINT nIndices)
 {
 	UINT nPrimitives = (pnIndices) ? (nIndices / 3) : (nVertices / 3);
 	XMFLOAT3 xmf3SumOfNormal, xmf3Edge01, xmf3Edge02, xmf3Normal;
@@ -565,7 +578,7 @@ void CSkinnedMesh::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XM
 	}
 }
 
-void CSkinnedMesh::CalculateTriangleStripVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, UINT nVertices, UINT* pnIndices, UINT nIndices)
+void CCubeMeshTextured::CalculateTriangleStripVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, UINT nVertices, UINT* pnIndices, UINT nIndices)
 {
 	UINT nPrimitives = (pnIndices) ? (nIndices - 2) : (nVertices - 2);
 	XMFLOAT3 xmf3SumOfNormal(0.0f, 0.0f, 0.0f);
@@ -595,7 +608,7 @@ void CSkinnedMesh::CalculateTriangleStripVertexNormals(XMFLOAT3* pxmf3Normals, X
 	}
 }
 
-void CSkinnedMesh::CalculateVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, int nVertices, UINT* pnIndices, int nIndices)
+void CCubeMeshTextured::CalculateVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, int nVertices, UINT* pnIndices, int nIndices)
 {
 	switch (m_d3dPrimitiveTopology)
 	{

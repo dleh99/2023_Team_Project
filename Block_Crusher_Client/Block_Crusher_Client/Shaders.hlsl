@@ -87,7 +87,7 @@ VS_PLAYER_OUTPUT VSPlayerDiffused(VS_PLAYER_INPUT input)
 	VS_PLAYER_OUTPUT output;
 
 	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
-	output.normal = input.normal;
+	output.normal = mul(input.normal, (float3x3)gmtxWorld);
 	output.tangent = input.tangent;
 	output.uv = input.uv;
 
@@ -103,7 +103,7 @@ float4 PSPlayerDiffused(VS_PLAYER_OUTPUT input) : SV_TARGET
 	float4 cIllumination = Lighting(positionW, normalW);
 
 	//return cColor;
-	return lerp(cColor, cIllumination, 0.5f);
+	return lerp(cColor, cIllumination, 0.4f);
 }
 
 /// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -113,22 +113,25 @@ float4 PSPlayerDiffused(VS_PLAYER_OUTPUT input) : SV_TARGET
 /// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 struct VS_TEXTURED_INPUT
 {
-	float3 position : POSITION;
+	float3 position : POSITION;	
 	float2 uv : TEXCOORD;
+	float3 normal : NORMAL;
 };
 
 struct VS_TEXTURED_OUTPUT
 {
 	float4 position : SV_POSITION;
 	float2 uv : TEXCOORD;
+	float3 normal : NORMAL;
 };
 
 VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 {
 	VS_TEXTURED_OUTPUT output;
 
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);	
 	output.uv = input.uv;
+	output.normal = mul(input.normal, (float3x3)gmtxWorld);
 
 	return(output);
 }
@@ -136,11 +139,13 @@ VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
 	float4 cColor = gtxtTexture.Sample(gSamplerState, input.uv);
-	//float4 cIllumination = Lighting(input.positionW, 0.5f);
+	float3 normalW = normalize(input.normal);
 
-	//return lerp(cColor, cIllumination, 0.5f);
+	float4 cIllumination = Lighting(input.position.xyz, normalW);
 
-	return(cColor);
+	return lerp(cColor, cIllumination, 0.5f);
+
+	//return(cColor);
 	//return float4(1.0f, 0.0f, 0.0f, 1.0f);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -190,7 +195,7 @@ VS_SKINNED_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT 
 	}
 
 	output.positionW = mul(float4(input.position, 1.0f), mtxVertexToBoneWorld).xyz;
-	output.normalW = input.normal;
+	output.normalW = mul(input.normal, (float3x3)gmtxWorld);
 	output.tangentW = input.tangent;
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
@@ -206,7 +211,7 @@ float4 PSSkinnedAnimationStandard(VS_SKINNED_STANDARD_OUTPUT input) : SV_TARGET
 	float4 cIllumination = Lighting(input.positionW, normalW);
 
 	//return cColor;
-	return lerp(cColor, cIllumination, 0.5f);
+	return lerp(cColor, cIllumination, 0.4f);
 }
 
 
