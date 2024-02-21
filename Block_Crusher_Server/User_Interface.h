@@ -4,7 +4,7 @@
 #include "GameObject.h"
 #include "protocol.h"
 
-constexpr int MAX_BULLET_NUM = 1000;
+constexpr int MAX_BULLET_NUM = 100;
 
 enum USER_STATE { US_EMPTY, US_CONNECTING, US_INGAME };
 class User_Interface{

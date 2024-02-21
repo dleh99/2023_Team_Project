@@ -145,6 +145,7 @@
     <ClInclude Include="Overlapped.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="protocol.h" />
+    <ClInclude Include="Room.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="User_Interface.h" />
   </ItemGroup>
@@ -154,6 +155,7 @@
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Overlapped.cpp" />
     <ClCompile Include="Physics.cpp" />
+    <ClCompile Include="Room.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="User_Interface.cpp" />
   </ItemGroup>
