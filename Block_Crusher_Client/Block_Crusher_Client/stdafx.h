@@ -84,12 +84,16 @@ inline void Swap(float* pfS, float* pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT
 #define ANIMATION_TYPE_LOOP				1
 #define ANIMATION_TYPE_PINGPONG			2
 
-#define MAX_LIGHTS 8
+#define MAX_LIGHTS 2
 #define MAX_MATERIALS 8
 
 #define POINT_LIGHT 1
 #define SPOT_LIGHT 2
 #define DIRECTIONAL_LIGHT 3
+
+#define MAX_DEPTH_TEXTURES		MAX_LIGHTS
+#define _DEPTH_BUFFER_WIDTH		(FRAME_BUFFER_WIDTH * 4)
+#define _DEPTH_BUFFER_HEIGHT	(FRAME_BUFFER_HEIGHT * 4)
 
 // 정의하면 처음 실행할 때 전체화면 모드로 실행
 // #define _WITH_SWAPCHAIN_FULLSCREEN_STATE
