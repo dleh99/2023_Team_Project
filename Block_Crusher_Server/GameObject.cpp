@@ -99,6 +99,7 @@ Block::Block(int input_id, XMFLOAT3 input_pos)
 	float rad = sqrt(144.f * 3.f) / 2.f;
 	SetRadius(rad);
 	SetisActive(true);
+	type = TYPE_NORMAL;
 }
 
 Block::~Block()

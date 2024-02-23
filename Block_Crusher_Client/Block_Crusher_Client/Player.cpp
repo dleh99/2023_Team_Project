@@ -120,7 +120,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 					BP.z += LockVec.z * 10.0f + RightVec.z * 3.0f;
 
 					m_pScene->AddObjects(0, BP, LockVec, GetPlayerId(), b_id);
-					//cout << GetPlayerId() << "가 총을 쏴서 서버에 보냈습니다" << endl;
+					//cout << GetPlayerId() << "가 " << b_id <<  "를 쏴서 서버에 보내고, 저장했습니다." << endl;
 					XMFLOAT3 send_p = BP;
 					XMFLOAT3 send_v = LockVec;
 

@@ -96,7 +96,8 @@ void CScene::DisableObject(int bullet_id, int block_id, int p_id)
 		if (m_ppObjects[i]->GetObjectType() != TYPE_BULLET) continue;
 		if (((CBulletObject*)m_ppObjects[i])->GetPlayerId() == p_id && ((CBulletObject*)m_ppObjects[i])->GetBulletId() == bullet_id) {
 			//std::cout << "충돌 처리 및 삭제 완료" << std::endl;
-			m_ppObjects[i]->SetIsActive(false);
+			if(m_ppObjects[i])
+				m_ppObjects[i]->SetIsActive(false);
 			break;
 		}
 	}
@@ -108,7 +109,9 @@ void CScene::DisableBullet(int bullet_id, int p_id)
 		if (m_ppObjects[i]->GetObjectType() != TYPE_BULLET) continue;
 		if (((CBulletObject*)m_ppObjects[i])->GetPlayerId() == p_id && ((CBulletObject*)m_ppObjects[i])->GetBulletId() == bullet_id) {
 			//std::cout << "찾았다" << std::endl;
-			m_ppObjects[i]->SetIsActive(false);
+			if (m_ppObjects[i])
+				m_ppObjects[i]->SetIsActive(false);
+			//if (m_ppObjects[i]->GetIsActive() == false) std::cout << bullet_id << " 번 총알 삭제함" << endl;
 			break;
 		}
 	}

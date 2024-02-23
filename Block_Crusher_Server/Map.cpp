@@ -24,7 +24,16 @@ Map::Map()
 				Map_Block[cnt].SetId(cnt);
 				cnt++;
 			}*/
+	CreateMap();
+}
 
+Map::~Map()
+{
+	ClearMap();
+}
+
+void Map::CreateMap()
+{
 	std::ifstream in{ "Map/MapData3.bin", std::ios::binary };
 
 	srand(static_cast<unsigned int>(time(nullptr)));
@@ -85,11 +94,9 @@ Map::Map()
 				cnt++;
 			}
 		}
-
-	player_num = 0;
-	isActive = false;
 }
 
-Map::~Map()
+void Map::ClearMap()
 {
+	Map_Block.clear();
 }
