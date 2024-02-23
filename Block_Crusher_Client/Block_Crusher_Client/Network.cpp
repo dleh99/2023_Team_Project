@@ -183,7 +183,7 @@ void ProcessPacket(char* ptr)
 
 		NetScene->AddObjects(0, BPos, BVec, packet->player_id, packet->bullet_id);
 		//cout << "총알을 받아 왔습니다. 위치 :" << packet->s_x << ", " << packet->s_y << ", " << packet->s_z << ", 발사 벡터 : " << packet->b_x << ", " << packet->b_y << ", " << packet->b_z << endl;
-		//cout << packet->player_id << "의 총알을 받아왔습니다" << endl;
+		//cout << packet->player_id << "의 " << packet->bullet_id << "번 총알을 받아왔습니다" << endl;
 		break;
 	}
 	case SC_COLLISION: {
@@ -208,6 +208,7 @@ void ProcessPacket(char* ptr)
 		//cout << packet->bullet_id << ", " << packet->player_id << endl;
 		NetScene->DisableBullet(packet->bullet_id, packet->player_id);
 
+		//cout << packet->player_id << "가 " << packet->enemy_id << "를 " << packet->bullet_id << "번 총알로 맞춤" << endl;
 		if (id == packet->enemy_id) {
 			int UpdatedHP = Netplayers[id]->GetPlayerHP() - 10;
 			Netplayers[id]->SetPlayerHP(UpdatedHP);

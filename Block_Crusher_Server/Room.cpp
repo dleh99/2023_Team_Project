@@ -7,6 +7,8 @@ Room::Room()
 	clients_number = 0;
 	room_state = RS_WAITING;
 	room_num = -1;
+	max_score = -1;
+	score_person = 0;
 }
 
 Room::~Room()
@@ -18,6 +20,8 @@ void Room::SettingRoom()
 	for (int i{}; i < MAX_PLAYER; ++i)
 		clients_id[i] = -1;
 	clients_number = 0;
+	max_score = -1;
+	score_person = 0;
 	room_state = RS_WAITING;
 	map_information.ClearMap();
 	map_information.CreateMap();
@@ -99,4 +103,12 @@ void Room::SetRoomState(ROOM_STATE rs)
 	_r_lock.lock();
 	room_state = rs;
 	_r_lock.unlock();
+}
+
+int Room::scoreCalculate(int i_score)
+{
+	if (i_score > max_score) max_score = i_score;
+	score_person++;
+	if (score_person == clients_number) return max_score;
+	return -1;
 }

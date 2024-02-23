@@ -28,6 +28,9 @@ concurrency::concurrent_priority_queue<TIMER_EVENT> timer_queue;
 
 auto start_time = system_clock::now();
 
+SQLHENV henv;
+SQLHDBC hdbc;       // connect 할 떄 필요한 핸들
+
 int set_client_id()
 {
 	for (int i{}; i < MAX_USER; ++i) {
@@ -77,30 +80,30 @@ bool CollisionCheck_objects(XMFLOAT3 p1, XMFLOAT3 p2, float r1, float r2)
 	return false;
 }
 
-bool scoreCalculation()
-{
-	int num = 0;
-	int max_score = 0;
-	for (auto& cl : clients) {
-		{
-			lock_guard<mutex> ll{ cl._s_lock };
-			if (cl._state != US_INGAME) continue;
-		}
-		if (cl.score != -1) {
-			num++;
-			if (max_score < cl.score)
-				max_score = cl.score;
-		}
-	}
-	if (num == 3) {
-		for (auto& cl : clients) {
-			if (cl.score == max_score)
-				cl.isWin = true;
-		}
-		return true;
-	}
-	return false;
-}
+//bool scoreCalculation()
+//{
+//	int num = 0;
+//	int max_score = 0;
+//	for (auto& cl : clients) {
+//		{
+//			lock_guard<mutex> ll{ cl._s_lock };
+//			if (cl._state != US_INGAME) continue;
+//		}
+//		if (cl.score != -1) {
+//			num++;
+//			if (max_score < cl.score)
+//				max_score = cl.score;
+//		}
+//	}
+//	if (num == 3) {
+//		for (auto& cl : clients) {
+//			if (cl.score == max_score)
+//				cl.isWin = true;
+//		}
+//		return true;
+//	}
+//	return false;
+//}
 
 void packet_process(int c_id, char* packet)
 {
@@ -221,7 +224,7 @@ void packet_process(int c_id, char* packet)
 				clients[c_id].bullet[i].SetBulletVec(p->b_x, p->b_y, p->b_z);
 				clients[c_id].bullet[i].SetBulletId(p->bullet_id);
 
-				if (true == clients[c_id].bullet[i].GetisActive()) cout << i << "를 움직이게 했는데?" << endl;
+				//if (true == clients[c_id].bullet[i].GetisActive()) cout << i << "를 움직이게 했는데?" << endl;
 				// 같은 룸에 있는 플레이어에게만 총알 정보를 보내야 한다
 				//for (auto& cl : clients) {
 				//	if (cl._state != US_INGAME) continue;
@@ -236,6 +239,7 @@ void packet_process(int c_id, char* packet)
 				for (int round{}; round < MAX_PLAYER; ++round) {
 					int player_id = *same_room_player;
 					if (player_id == -1) continue;
+					if (player_id == c_id) continue;
 					clients[player_id].send_bullet_add_packet(clients.data(), c_id, i);
 					same_room_player += 1;
 				}
@@ -296,11 +300,27 @@ void packet_process(int c_id, char* packet)
 	}
 	case CS_SCORE: {
 		CS_SCORE_PACKET* p = reinterpret_cast<CS_SCORE_PACKET*>(packet);
+		short room_num = clients_room[c_id];
 		clients[c_id].score = p->score;
-		if (true == scoreCalculation()) {
-			for (auto& cl : clients) {
+		if (-1 != rooms[room_num].scoreCalculate(clients[c_id].score)) {
+			/*for (auto& cl : clients) {
 				if (cl._state != US_INGAME) continue;
 				cl.send_result_packet();
+			}*/
+			int* room_member = rooms[room_num].GetPlayerId();
+			for (int i{}; i < MAX_PLAYER; ++i) {
+				if (-1 != room_member[i])
+				{
+					if (rooms[room_num].max_score == clients[room_member[i]].score)
+					{
+						clients[room_member[i]].isWin = true;
+					}
+					else
+					{
+						clients[room_member[i]].isWin = false;
+					}
+					clients[room_member[i]].send_result_packet();
+				}
 			}
 		}
 		break;
@@ -431,7 +451,7 @@ void Physics_Calculation_thread()
 			//cout << "인게임된게 있긴 해?" << endl;
 			for (int i{}; i < MAX_BULLET_NUM; ++i) {
 				if (cl.bullet[i].GetisActive()) {
-					cout << i << endl;
+					//cout << i << endl;
 					cl.bullet[i].Move(server_timer.GetTimeElapsed());
 					//cout << "[" << cl._id << "] " << cl.bullet[i].GetPosition().x << ", " << cl.bullet[i].GetPosition().y << ", " << cl.bullet[i].GetPosition().z << endl;
 				}
@@ -468,7 +488,7 @@ void Physics_Calculation_thread()
 						if (CollisionCheck_objects(clients[check_id].bullet[bullet_num].GetPosition(), r.map_information.Map_Block[map_block_num].GetPosition(),
 							clients[check_id].bullet[bullet_num].GetRadius(), r.map_information.Map_Block[map_block_num].GetRadius())) {
 							// 충돌했다면 총알, 블록 비활성화, 충돌했음을 알림
-							cout << "총알이랑 블록 충돌함" << endl;
+							//cout << "총알이랑 블록 충돌함" << endl;
 							clients[check_id].bullet[bullet_num].SetisActive(false);
 							r.map_information.Map_Block[map_block_num].SetisActive(false);
 
@@ -491,7 +511,7 @@ void Physics_Calculation_thread()
 						// 총알과 다른 플레이어가 충돌했다면,
 						if (CollisionCheck_Person(clients[check_id].bullet[bullet_num].GetPosition(), clients[other_id].pos,
 							clients[check_id].bullet[bullet_num].GetRadius(), clients[other_id]._player_radius)) {
-							cout << "플레이어 맞춤" << endl;
+							//cout << "플레이어 맞춤" << endl;
 							// 총알을 비활성화, hp 하락
 							clients[check_id].bullet[bullet_num].SetisActive(false);
 							clients[other_id].hp -= 1;
@@ -501,6 +521,8 @@ void Physics_Calculation_thread()
 								for (int send_round{}; send_round < MAX_PLAYER; ++send_round) {
 									int send_id = room_player_ids[send_round];
 									if (send_id == -1) continue;
+									//cout << send_id << endl;
+									cout << clients[check_id]._id << "가 " << clients[other_id]._id << "를 " << clients[check_id].bullet[bullet_num].GetbulletId() << "번 총알로 맞춤" << endl;
 									clients[send_id].send_hit_packet(clients[check_id].bullet[bullet_num].GetbulletId(), clients[check_id]._id, clients[other_id]._id);
 								}
 							}
@@ -617,9 +639,114 @@ void Physics_Calculation_thread()
 	}
 }
 
+void show_error(SQLHANDLE hHandle, SQLSMALLINT hType, RETCODE RetCode)
+{
+	SQLSMALLINT iRec = 0;
+	SQLINTEGER iError;
+	WCHAR wszMessage[1000];
+	WCHAR wszState[SQL_SQLSTATE_SIZE + 1];
+	if (RetCode == SQL_INVALID_HANDLE) {
+		fwprintf(stderr, L"Invalid handle!\n");
+		return;
+	}
+	while (SQLGetDiagRec(hType, hHandle, ++iRec, wszState, &iError, wszMessage,
+		(SQLSMALLINT)(sizeof(wszMessage) / sizeof(WCHAR)), (SQLSMALLINT*)NULL) == SQL_SUCCESS) {
+		// Hide data truncated..
+		if (wcsncmp(wszState, L"01004", 5)) {
+			fwprintf(stderr, L"[%5.5s] %s (%d)\n", wszState, wszMessage, iError);
+		}
+	}
+}
+
 void InitDB()
 {
+	SQLRETURN retcode;
 
+	setlocale(LC_ALL, "korean");
+	std::wcout.imbue(std::locale("korean"));
+
+	// Allocate environment handle  
+	retcode = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &henv);
+
+	// Set the ODBC version environment attribute  
+	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+		retcode = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER*)SQL_OV_ODBC3, 0);
+
+		// Allocate connection handle  
+		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+			retcode = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
+
+			// Set login timeout to 5 seconds  
+			if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+				SQLSetConnectAttr(hdbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER)5, 0);
+
+				// Connect to data source  
+				retcode = SQLConnect(hdbc, (SQLWCHAR*)L"2024_WINTER_ODBC", SQL_NTS, (SQLWCHAR*)NULL, 0, NULL, 0);
+
+				if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+					cout << "ODBC 연결. DB 초기화 완료" << endl;
+				}
+			}
+		}
+	}
+}
+
+bool Search_Id(const char* id)
+{
+	SQLHSTMT hstmt = 0;
+	SQLRETURN retcode;
+
+	SQLWCHAR wstr[100];
+	SQLWCHAR user_id[20];
+
+	memset(wstr, 0, sizeof(wstr));
+	wsprintf(wstr, L"EXEC id_search %S", id);
+
+	retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+	retcode = SQLExecDirect(hstmt, (SQLWCHAR*)wstr, SQL_NTS);
+}
+
+bool Search_User(const char* id, const char* password)
+{
+	SQLHSTMT hstmt = 0;
+	SQLRETURN retcode;
+
+	SQLWCHAR wstr[100];
+	SQLWCHAR user_id[20];
+	SQLWCHAR user_password[20];
+	SQLINTEGER user_high_score;
+	SQLLEN len[3];
+
+	memset(wstr, 0, sizeof(wstr));
+	wsprintf(wstr, L"EXEC Login %S, %S", id, password);
+	//wsprintf(wstr, L"EXEC Nest_search_user %S", id);
+	//cout << "이 스레드 들어옴?" << endl;
+
+	// Allocate statement handle  
+	retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+	retcode = SQLExecDirect(hstmt, (SQLWCHAR*)wstr, SQL_NTS);
+
+	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+		retcode = SQLBindCol(hstmt, 1, SQL_C_WCHAR, &user_id, 20, &len[0]);
+		retcode = SQLBindCol(hstmt, 2, SQL_C_LONG, &user_password, 20, &len[1]);
+		retcode = SQLBindCol(hstmt, 3, SQL_C_LONG, &user_high_score, 4, &len[2]);
+
+		retcode = SQLFetch(hstmt);
+		if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+			show_error(hstmt, SQL_FETCH_ABSOLUTE, retcode);
+		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+			cout << "성공" << endl;
+		}
+		else
+		{
+			cout << "실패" << endl;
+		}
+	}
+	else
+	{
+		show_error(hstmt, SQL_HANDLE_STMT, retcode);
+	}
+	return true;
 }
 
 void InitRoom()
@@ -664,6 +791,11 @@ void do_timer()
 	}
 }
 
+void do_db()
+{
+	//Search_User("dleh99", "123");
+}
+
 int main()
 {
 	WSADATA WSAData;
@@ -690,7 +822,7 @@ int main()
 
 	vector<thread> worker_threads;
 	int thread_num = thread::hardware_concurrency();
-	for (int i{}; i < thread_num - 2; ++i)
+	for (int i{}; i < thread_num - 3; ++i)
 		worker_threads.emplace_back(worker_thread, iocp_h);
 	
 	// 계산 스레드
@@ -699,10 +831,19 @@ int main()
 	// 타이머 스레드
 	thread timer_thread{ do_timer };
 
+	// DB 스레드
+	thread db_thread{ do_db };
+
+	db_thread.join();
 	timer_thread.join();
 	physics_thread.join();
 	for (auto& thread : worker_threads) 
 		thread.join();
+
+	// DB 해제
+	SQLDisconnect(hdbc);
+	SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
+	SQLFreeHandle(SQL_HANDLE_ENV, henv);
 
 	closesocket(g_s_socket);
 	WSACleanup();
