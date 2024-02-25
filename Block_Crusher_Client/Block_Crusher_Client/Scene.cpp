@@ -9,7 +9,7 @@ CScene::CScene()
 {
 	TitleUI[ID] = {700, 575, 700 + 250, 575 + 30};
 	TitleUI[PW] = {700, 625, 700 + 250, 625 + 30};
-	TitleUI[ServerIP] = { 700, 675, 700 + 250, 675 + 30};
+	TitleUI[RoomNumber] = { 700, 675, 700 + 250, 675 + 30};
 }
 
 CScene::~CScene()
@@ -90,8 +90,14 @@ void CScene::ReleaseUploadBuffers()
 
 void CScene::DisableObject(int bullet_id, int block_id, int p_id)
 {
-	if (m_ppObjects[block_id])
+	if (m_ppObjects[block_id]) {
 		m_ppObjects[block_id]->SetIsActive(false);
+		m_ppObjects[block_id]->SetPosition(99999, 99999, 99999);
+		auto tmp = m_ppObjects[block_id]->GetWorldMatrix();
+		XMFLOAT4X4 result;
+		XMStoreFloat4x4(&result, XMMatrixTranspose(XMLoadFloat4x4(&tmp)));
+		m_pInstance[block_id].worldMatrix = result;
+	}
 	for (int i{}; i < m_nObjects; ++i) {
 		if (m_ppObjects[i]->GetObjectType() != TYPE_BULLET) continue;
 		if (((CBulletObject*)m_ppObjects[i])->GetPlayerId() == p_id && ((CBulletObject*)m_ppObjects[i])->GetBulletId() == bullet_id) {
@@ -544,9 +550,9 @@ void CScene::RenderTitle(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, 
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(0, 0));
 	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT), SolidColorBrush[9].Get());
 
-	// IP 입력란
+	// Room 입력란
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(590, 665));
-	std::wstring str = L"Server IP";
+	std::wstring str = L"Room Number";
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
 		pTextFormat[3].Get(), D2D1::RectF(0, 0, 100, 50), SolidColorBrush[0].Get());
 
@@ -554,8 +560,8 @@ void CScene::RenderTitle(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, 
 	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 250, 30), SolidColorBrush[0].Get());
 
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(705, 665));
-	str = *m_sTitleTexts[ServerIP];
-	if (m_flag == ServerIP) {
+	str = *m_sTitleTexts[RoomNumber];
+	if (m_flag == RoomNumber) {
 		m_d2dDeviceContext->DrawText(karrotstr.c_str(), static_cast<UINT32>(karrotstr.size()),
 			pTextFormat[4].Get(), D2D1::RectF(0, 0, 300, 50), SolidColorBrush[7].Get());
 	}

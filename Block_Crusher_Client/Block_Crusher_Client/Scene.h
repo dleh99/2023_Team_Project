@@ -1,7 +1,7 @@
 #pragma once
 #include "Timer.h"
 #include "Shader.h"
-#include "protocol.h"
+#include "..\..\Block_Crusher_Server\protocol.h"
 //#include "Network.h"
 
 #define MAX_OBJ_COUNT 3000

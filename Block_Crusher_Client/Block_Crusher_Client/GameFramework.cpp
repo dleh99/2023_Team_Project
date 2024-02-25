@@ -22,11 +22,11 @@ CGameFramework::CGameFramework()
 
 	wstring* id = new wstring(L"");
 	wstring* pw = new wstring(L"");
-	wstring* serverip = new wstring(L"127.0.0.1");
+	wstring* room = new wstring(L"");
 
 	m_sTitleTexts[ID] = id;
 	m_sTitleTexts[PW] = pw;
-	m_sTitleTexts[ServerIP] = serverip;
+	m_sTitleTexts[RoomNumber] = room;
 }
 
 CGameFramework::~CGameFramework()
@@ -56,9 +56,9 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hWnd)
 
 #ifdef USE_SERVER
 	NetworkInit();
-	while (!GetGameState()) {
+	/*while (!GetGameState()) {
 		do_recv();
-	}
+	}*/
 #endif
 	BuildObjects();
 
@@ -576,7 +576,9 @@ void CGameFramework::BuildObjects()
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
 	m_pScene = new CScene();
-	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), GetMapKey());
+	// 이 부분 옮겨야 함(맵)
+	//m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), GetMapKey());
+	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 'c');
 	m_pScene->BuildText(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory);
 	for (int i = 0; i < 3; i++)
 		m_pScene->m_sTitleTexts[i] = m_sTitleTexts[i];
@@ -604,6 +606,7 @@ void CGameFramework::BuildObjects()
 	Pos p = GetStartPos();
 	int id = GetNetworkPlayerId();
 	
+	// 이 부분 옮길까?
 	CMainPlayer* pCubePlayer0 = new CMainPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
 		m_pScene->GetGraphicsRootSignature().Get(), -100.f, 250.f, -440.f, pPlayerShader, pSkinnedPlayerShader, pMat);
 
@@ -853,9 +856,22 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			::PostQuitMessage(0);
 			m_SceneState = 0;
 			break;
-		case VK_RETURN:
-			m_SceneState = 1;
+		case VK_RETURN: {
+			try {
+				int num = stoi(*m_sTitleTexts[RoomNumber]);
+				send_login_packet(*m_sTitleTexts[ID], *m_sTitleTexts[PW], num);
+			}
+			catch (const std::invalid_argument& e) {
+				// stoi를 했을 때 int가 아닌 다른 값이 들어오는 경우 -> 경고 메시지 출력
+				cout << "룸에 이상한 값 넣지 마세요" << endl;
+			}
+			catch (const std::out_of_range& e) {
+				// stoi를 했을 때 범위를 벗어난 값이 들어오는 경우 -> 경고 메시지 출력
+				cout << "0이상 332 이하의 값을 넣어주세요" << endl;
+			}
+			//m_SceneState = 1;
 			break;
+		}
 		case VK_F8:
 			//m_flag += 1;
 			break;

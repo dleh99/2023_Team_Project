@@ -61,6 +61,9 @@ enum Animation
 struct CS_LOGIN_PACKET {
 	unsigned char		size;
 	char				type;
+	std::wstring		id;
+	std::wstring		password;
+	int					room_num;
 };
 
 struct CS_MOVE_PACKET {

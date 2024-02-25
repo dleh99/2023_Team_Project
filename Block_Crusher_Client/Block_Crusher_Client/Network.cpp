@@ -64,8 +64,7 @@ int NetworkInit()
 
 	unsigned long noblock = -1;
 	ioctlsocket(g_socket, FIONBIO, &noblock);
-
-	send_login_packet();
+	//send_login_packet();
 
 	return ret;
 }
@@ -77,11 +76,14 @@ int NetworkInit()
 //	send(g_socket, p, sizeof(p), 0);
 //}
 
-void send_login_packet()
+void send_login_packet(wstring i_id, wstring i_password, int i_room)
 {
 	CS_LOGIN_PACKET p{};
 	p.size = sizeof(CS_LOGIN_PACKET);
 	p.type = CS_LOGIN;
+	p.id = i_id;
+	p.password = i_password;
+	p.room_num = i_room;
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 

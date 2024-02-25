@@ -110,60 +110,45 @@ void packet_process(int c_id, char* packet)
 	switch (packet[1]) {
 	case CS_LOGIN: {
 		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
-		cout << c_id << " 접속 완료" << endl;
-		//clients[c_id]._state = US_INGAME;
-		
-		// 비어 있는 맵을 찾아서 들어가는 코드 작성 해야 함
-		/*if (false == Map_infromation.isActive) Map_infromation.isActive = true;
-		if (Map_infromation.player_num < 6) {
-			Map_infromation.player_num++;
-			if (Map_infromation.player_num == 6) {
+		//wcout << "ID : " << p->id << ", PW : " << p->password << ", RN : " << p->room_num << endl;
+		//clients[c_id].send_login_info_packet();
 
-			}
-		}*/
-		clients[c_id].send_login_info_packet();
+		if (p->room_num > 332) {
 
-		// room 지정
-		// 클라이언트에서 방을 지정하는 코드를 작성하는 경우 수정 필요. 지금은 그냥 비어 있는 곳에 들어가도록 설정
-		for (Room& r : rooms) {
-			// 빈 방을 찾는다
-			{
-				lock_guard<mutex> ll{ r._r_lock };
-				if (r.GetRoomState() != RS_WAITING) continue;
-			}
-			// 플레이어를 넣는 것에 성공했다
-			// 플레이어를 넣고 정원(6명)이 찼다
-			// 룸에 있는 모든 플레이어 id에게 패킷을 보낸다
-			if (r.PlayerIn(c_id)) {
-				{
-					//lock_guard<mutex> ll{ room_lock };
-					clients_room[c_id] =  r.GetRoomNum();
-				}
-				if (r.GetRoomState() == RS_READY) {
-					int* r_in_id = r.GetPlayerId();
-					for (int i{}; i < MAX_PLAYER; ++i) {
-						{
-							lock_guard<mutex> ll{ clients[i]._s_lock };
-							clients[i]._state = US_INGAME;
-						}
-						if (r_in_id[i] != -1)
-							clients[r_in_id[i]].send_start_packet(r.GetMapKey());
-					}
-					// room 상태 변경해야 함
-					r.SetRoomState(RS_INGAME);
-				}
-				break;
-			}
 		}
-		//user_number++;
-		/*if (user_number == 3)
-			for (auto& cl : clients) {
-				lock_guard<mutex> ll{ cl._s_lock };
-				if (cl._state == US_CONNECTING) {
-					cl._state = US_INGAME;
-					cl.send_start_packet(Map_infromation.MapChar);
-				}
-			}*/
+		else {
+
+		}
+		//for (Room& r : rooms) {
+		//	// 빈 방을 찾는다
+		//	{
+		//		lock_guard<mutex> ll{ r._r_lock };
+		//		if (r.GetRoomState() != RS_WAITING) continue;
+		//	}
+		//	// 플레이어를 넣는 것에 성공했다
+		//	// 플레이어를 넣고 정원(6명)이 찼다
+		//	// 룸에 있는 모든 플레이어 id에게 패킷을 보낸다
+		//	if (r.PlayerIn(c_id)) {
+		//		{
+		//			//lock_guard<mutex> ll{ room_lock };
+		//			clients_room[c_id] =  r.GetRoomNum();
+		//		}
+		//		if (r.GetRoomState() == RS_READY) {
+		//			int* r_in_id = r.GetPlayerId();
+		//			for (int i{}; i < MAX_PLAYER; ++i) {
+		//				{
+		//					lock_guard<mutex> ll{ clients[i]._s_lock };
+		//					clients[i]._state = US_INGAME;
+		//				}
+		//				if (r_in_id[i] != -1)
+		//					clients[r_in_id[i]].send_start_packet(r.GetMapKey());
+		//			}
+		//			// room 상태 변경해야 함
+		//			r.SetRoomState(RS_INGAME);
+		//		}
+		//		break;
+		//	}
+		//}
 		break;
 	}
 	case CS_MOVE: {
