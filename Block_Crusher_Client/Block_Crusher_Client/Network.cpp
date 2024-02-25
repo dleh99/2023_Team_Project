@@ -136,6 +136,16 @@ void send_score_packet(int score)
 void ProcessPacket(char* ptr)
 {
 	switch (ptr[1]) {
+	case SC_LOGIN_FAIL: {
+		SC_LOGIN_FAIL_PACKET* packet = reinterpret_cast<SC_LOGIN_FAIL_PACKET*>(ptr);
+		if (packet->login_state == LS_OUTOFROOM) {
+			cout << "룸 번호는 332 이하여야 합니다" << endl;
+		}
+		else if (packet->login_state == LS_FULLROOM) {
+			cout << "선택하신 룸에서 게임이 진행중입니다" << endl;
+		}
+		break;
+	}
 	case SC_LOGIN: {	// 처음 로그인 했을 때 받는 패킷. 아이디를 서버는 클라에게 아이디를 부여한다
 		SC_LOGININFO_PACKET* packet = reinterpret_cast<SC_LOGININFO_PACKET*>(ptr);
 		cout << "Login 패킷" << endl;

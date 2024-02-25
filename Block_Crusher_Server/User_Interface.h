@@ -42,6 +42,7 @@ public:
 	void do_recv();
 	void do_send(void* packet);
 
+	void send_login_fail_packet(LOGIN_STATE ls);
 	void send_login_info_packet();
 	void send_start_packet(char mapkey);
 	void send_move_packet(User_Interface* clients, int c_id, Animation animation_state);

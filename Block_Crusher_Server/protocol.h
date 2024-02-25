@@ -29,6 +29,7 @@ constexpr char CS_FALL = 12;
 constexpr char CS_SCORE = 14;
 
 constexpr char SC_LOGIN = 2;
+constexpr char SC_LOGIN_FAIL = 16;
 constexpr char SC_START = 3;
 constexpr char SC_MOVE_PLAYER = 4;
 constexpr char SC_BULLET_ADD = 6;
@@ -54,6 +55,13 @@ enum Animation
 	ANIMATION_SHOOT_LEFT,			// assigned 9
 	ANIMATION_SHOOT_RIGHT,			// assigned 10
 	ANIMATION_SHOOT_BACKWARD,		// assigned 11
+};
+
+enum LOGIN_STATE
+{
+	LS_OUTOFROOM,					// 룸 번호가 엇나감
+	LS_FULLROOM,					// 선택한 룸이 다 참
+
 };
 
 #pragma pack(push, 1)
@@ -101,6 +109,12 @@ struct CS_SCORE_PACKET {
 };
 
 //===========================
+struct SC_LOGIN_FAIL_PACKET
+{
+	unsigned char		size;
+	char				type;
+	LOGIN_STATE			login_state;
+};
 struct SC_LOGININFO_PACKET
 {
 	unsigned char		size;
