@@ -190,6 +190,9 @@ void CGameFramework::CreateDirect3DDevice()
 	/*펜스와 동기화를 위한 이벤트 객체를 생성한다(이벤트 객체의 초기값을 FALSE이다).
 	이벤트가 실행되면(Signal) 이벤트의 값을 자동적으로 FALSE가 되도록 생성한다.*/
 	m_hFenceEvent = ::CreateEvent(NULL, FALSE, FALSE, NULL);
+
+	::gnCbvSrvDescriptorIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	::gnRtvDescriptorIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 }
 
 void CGameFramework::CreateCommandQueue()
@@ -325,9 +328,10 @@ void CGameFramework::CreateRenderTargetViews()
 			**)&m_ppd3dRenderTargetBuffers[i]);
 		m_pd3dDevice->CreateRenderTargetView(m_ppd3dRenderTargetBuffers[i].Get(), NULL,
 			d3dRtvCPUDescriptorHandle);
-
+		
 		//d3dRtvCPUDescriptorHandle.Offset(m_nDsvDescriptorIncrementSize);
-		d3dRtvCPUDescriptorHandle.ptr += m_nRtvDescriptorIncrementSize;
+		//d3dRtvCPUDescriptorHandle.ptr += m_nRtvDescriptorIncrementSize;
+		d3dRtvCPUDescriptorHandle.ptr += ::gnRtvDescriptorIncrementSize;
 
 		// Create a wrapped 11On12 resource of this back buffer. Since we are 
 		// rendering all D3D12 content first and then all D2D content, we specify 
@@ -483,6 +487,10 @@ void CGameFramework::FrameAdvance()
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
+	// 그림자 맵 생성
+	m_pScene->PrepareLightingAndRender(m_pd3dCommandList.Get());
+	m_pScene->m_pDepthRenderShader->PrepareShadowMap(m_pd3dCommandList.Get(), m_pCamera, m_vEnemyPlayers);
+
 	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
 	::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
 	d3dResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -506,9 +514,6 @@ void CGameFramework::FrameAdvance()
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle =
 		m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 
-	//렌더 타겟 뷰(서술자)와 깊이-스텐실 뷰(서술자)를 출력-병합 단계(OM)에 연결한다.
-	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
-
 	//원하는 색상으로 렌더 타겟(뷰)을 지운다.
 	float pfClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
 	m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor/*Colors::Azure*/, 0, NULL);
@@ -517,12 +522,14 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle,
 		D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
+	//렌더 타겟 뷰(서술자)와 깊이-스텐실 뷰(서술자)를 출력-병합 단계(OM)에 연결한다.
+	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
+
 	//렌더링 코드는 여기에 추가될 것이다.
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList.Get(), m_pCamera);
 	
 	if (m_pPlayer)
 		m_pPlayer->Render(m_pd3dCommandList.Get(), m_pCamera);
-		//if(true == m_pPlayer->GetIsActive())
 
 	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
 		if (m_pPlayer)
@@ -531,17 +538,11 @@ void CGameFramework::FrameAdvance()
 
 		if (m_vEnemyPlayers[i])
 			m_vEnemyPlayers[i]->Render(m_pd3dCommandList.Get(), m_pCamera);
-			//if (true == m_vEnemyPlayers[i]->GetIsActive())
 	}
-
 
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-
-	/*현재 렌더 타겟에 대한 렌더링이 끝나기를 기다린다.
-	GPU가 렌더 타겟(버퍼)을 더 이상 사용하지 않으면 렌더 타겟의 상태는
-	프리젠트 상태(D3D12_RESOURCE_STATE_PRESENT)로 바뀔 것이다.*/
 	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
 
 	//명령 리스트를 닫힌 상태로 만든다.
@@ -574,6 +575,9 @@ void CGameFramework::FrameAdvance()
 void CGameFramework::BuildObjects()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
+
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	d3dRtvCPUDescriptorHandle.ptr += (::gnRtvDescriptorIncrementSize * m_nSwapChainBuffers);
 
 	m_pScene = new CScene();
 	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), GetMapKey());
@@ -625,8 +629,9 @@ void CGameFramework::BuildObjects()
 		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 0.0f, pPlayerShader, pSkinnedPlayerShader, pMat);
 
 	m_pPlayer = pCubePlayer;
+	CMaterial* pMaterial = new CMaterial;
+	m_pPlayer->SetMaterial(pMaterial);
 #endif
-
 	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
 	m_pScene->m_pPlayer = m_pPlayer;
 	m_pPlayer->m_pScene = m_pScene;
@@ -757,7 +762,7 @@ void CGameFramework::ProcessInput()
 			이동 거리는 시간에 비례하도록 한다. 플레이어의 이동 속력은 (50/초)로 가정한다.*/
 			if (dwDirection) m_pPlayer->Move(dwDirection, 300.0f * m_GameTimer.GetTimeElapsed(), true);
 		}
-
+		
 		//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다.
 		m_pPlayer->Update(m_GameTimer.GetTimeElapsed(), dwDirection);
 

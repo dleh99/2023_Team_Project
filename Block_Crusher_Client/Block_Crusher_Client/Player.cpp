@@ -498,6 +498,11 @@ void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 	//std::cout << "이 플레이어의 네트워크 ID : " << m_playerNetworkId << std::endl;
 }
 
+void CPlayer::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	CGameObject::ShadowRender(pd3dCommandList, pCamera);
+}
+
 void CPlayer::SetIsRotate(bool tf)
 {
 	isRotate = tf;

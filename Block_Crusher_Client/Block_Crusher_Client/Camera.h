@@ -7,8 +7,9 @@ class CPlayer;
 
 struct VS_CB_CAMERA_INFO
 {
-	XMFLOAT4X4 m_xmf4x4View;
-	XMFLOAT4X4 m_xmf4x4Projection;
+	XMFLOAT4X4	m_xmf4x4View;
+	XMFLOAT4X4	m_xmf4x4Projection;
+	XMFLOAT3	m_xmf3Position;
 };
 
 class CCamera
@@ -36,18 +37,22 @@ protected:
 	// 플레이어가 회전할 때 얼마만큼의 시간을 지연시킨 후 카메라를 회전시킬 것인가를 나타낸다.
 	float			m_fTimeLag;
 
-	// 카메라 변환 행렬
-	XMFLOAT4X4		m_xmf4x4View;
-
-	// 투영 변환 행렬
-	XMFLOAT4X4		m_xmf4x4Projection;
-
 	// 뷰포트와 씨저 사각형
 	D3D12_VIEWPORT	m_d3dViewport;
 	D3D12_RECT		m_d3dScissorRect;
 
 	// 카메라를 가지고 있는 플레이어에 대한 포인터이다.
 	CPlayer*		m_pPlayer = NULL;
+
+	ID3D12Resource* m_pd3dcbCamera = NULL;
+	VS_CB_CAMERA_INFO* m_pcbMappedCamera = NULL;
+
+public:
+	// 카메라 변환 행렬
+	XMFLOAT4X4		m_xmf4x4View;
+
+	// 투영 변환 행렬
+	XMFLOAT4X4		m_xmf4x4Projection;
 
 public:
 	CCamera();

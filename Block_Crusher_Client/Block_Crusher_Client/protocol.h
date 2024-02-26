@@ -1,6 +1,7 @@
 #pragma once
 
-#define USE_SERVER
+//#define USE_SERVER
+//222.117.71.100
 
 constexpr int SERVER_PORT = 4000;
 constexpr int BUF_SIZE = 1024;

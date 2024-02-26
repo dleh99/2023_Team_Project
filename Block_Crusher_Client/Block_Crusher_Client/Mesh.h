@@ -15,6 +15,8 @@ public:
 	CVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); }
 	CVertex(XMFLOAT3 xmf3Position) { m_xmf3Position = xmf3Position; }
 	~CVertex() {  }
+
+	XMFLOAT3 GetPosition() { return m_xmf3Position; }
 };
 
 class CDiffusedVertex :public CVertex
@@ -45,11 +47,29 @@ class CTexturedVertex : public CVertex
 {
 public:
 	XMFLOAT2						m_xmf2TexCoord;
+	XMFLOAT3						m_xmf3Normal;
 
 public:
-	CTexturedVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); m_xmf2TexCoord = XMFLOAT2(0.0f, 0.0f); }
-	CTexturedVertex(float x, float y, float z, XMFLOAT2 xmf2TexCoord) { m_xmf3Position = XMFLOAT3(x, y, z); m_xmf2TexCoord = xmf2TexCoord; }
-	CTexturedVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2TexCoord = XMFLOAT2(0.0f, 0.0f)) { m_xmf3Position = xmf3Position; m_xmf2TexCoord = xmf2TexCoord; }
+	CTexturedVertex() {
+		m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		m_xmf2TexCoord = XMFLOAT2(0.0f, 0.0f);
+		m_xmf3Normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	}
+	CTexturedVertex(float x, float y, float z, XMFLOAT2 xmf2TexCoord) {
+		m_xmf3Position = XMFLOAT3(x, y, z);
+		m_xmf2TexCoord = xmf2TexCoord;
+		m_xmf3Normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	}
+	CTexturedVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2TexCoord = XMFLOAT2(0.0f, 0.0f)) { 
+		m_xmf3Position = xmf3Position;
+		m_xmf2TexCoord = xmf2TexCoord;
+		m_xmf3Normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	}
+	CTexturedVertex(XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Normal, XMFLOAT2 xmf2TexCoord = XMFLOAT2(0.0f, 0.0f)) {
+		m_xmf3Position = xmf3Position;
+		m_xmf2TexCoord = xmf2TexCoord;
+		m_xmf3Normal = xmf3Normal;
+	}
 	~CTexturedVertex() { }
 };
 
@@ -229,9 +249,20 @@ public:
 
 class CCubeMeshTextured : public CMesh
 {
+	ComPtr<ID3D12Resource>		m_pd3dNormalBuffer = NULL;
+	ComPtr<ID3D12Resource>		m_pd3dNormalUploadBuffer = NULL;
+
 public:
 	CCubeMeshTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
 	virtual ~CCubeMeshTextured() { };
+
+	void CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, int nVertices);
+	void CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, UINT nVertices,
+		UINT* pnIndices, UINT nIndices);
+	void CalculateTriangleStripVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, UINT nVertices,
+		UINT* pnIndices, UINT nIndices);
+	void CalculateVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, int nVertices,
+		UINT* pnIndices, int nIndices);
 };
 
 class CSkyBoxMesh : public CMesh
