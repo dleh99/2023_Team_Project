@@ -15,7 +15,7 @@ HANDLE iocp_h;
 SOCKET g_s_socket, g_c_socket;
 Overlapped g_over;
 Timer server_timer;
-DB* db_controll;
+DB db_controll;
 
 array<User_Interface, MAX_USER> clients;
 array<short, MAX_USER> clients_room;
@@ -94,7 +94,9 @@ void packet_process(int c_id, char* packet)
 				clients[c_id].send_login_fail_packet(LS_FULLROOM);
 			}
 			else {
-
+				//cout << "룸까지 접속 완료" << endl;
+				DB_EVENT ev{ clients[c_id]._id, chrono::system_clock::now(), TRY_LOGIN, p->id, p->password };
+				db_queue.push(ev);
 			}
 		}
 		break;
@@ -292,6 +294,26 @@ void worker_thread(HANDLE iocp_h)
 				}
 				break;
 			}
+			case OT_SIGNUP:
+			{
+				cout << "worker thread에서 새로운 아이디" << endl;
+				break;
+			}
+			case OT_LOGIN_SUCCESS:
+			{
+				cout << "worker thread에서 로그인 성공" << endl;
+				break;
+			}
+			case OT_LOGIN_FAIL:
+			{
+				cout << "worker thread에서 로그인 실패" << endl;
+				break;
+			}
+			case OT_ALREADY_INGAME:
+			{
+				cout << "worker thread에서 이미 접속중" << endl;
+				break;
+			}
 		}
 	}
 }
@@ -417,7 +439,6 @@ void do_timer()
 			}
 			switch (ev.event_id) {
 			case EV_RESPAWN: {
-				cout << "타이머 스레드 시간 다 됨" << endl;
 				Overlapped* ov = new Overlapped;
 				ov->_overlapped_type = OT_RESPAWN;
 				PostQueuedCompletionStatus(iocp_h, 1, ev.obj_id, &ov->_over);
@@ -432,7 +453,42 @@ void do_timer()
 
 void do_db()
 {
-	
+	//db_controll.Search_User(L"akjsnb12", L"123");
+	while (true) {
+		DB_EVENT ev;
+		auto current_time = chrono::system_clock::now();
+		if (true == db_queue.try_pop(ev)) {
+			if (ev.wakeup_time > current_time) {
+				db_queue.push(ev);
+				this_thread::sleep_for(1ms);
+				continue;
+			}
+			switch (ev.event_id) {
+			case TRY_LOGIN: {
+				//cout << "로그인 트라이 해본다" << endl;
+				int res = db_controll.Search_User(ev._id, ev._password);
+				Overlapped* ov = new Overlapped;
+				if (res == DB_SIGN_UP) {
+					ov->_overlapped_type = OT_SIGNUP;
+				}
+				else if (res == DB_LOGIN_SUCCESS) {
+					ov->_overlapped_type = OT_LOGIN_SUCCESS;
+				}
+				else if (res == DB_LOGIN_FAIL) {
+					ov->_overlapped_type = OT_LOGIN_FAIL;
+				}
+				else if (res == DB_ALREADY_INGAME) {
+					ov->_overlapped_type = OT_ALREADY_INGAME;
+				}
+
+				PostQueuedCompletionStatus(iocp_h, 1, ev.obj_id, &ov->_over);
+				break;
+			}
+			}
+			continue;
+		}
+		this_thread::sleep_for(1ms);
+	}
 }
 
 int main()
@@ -456,7 +512,7 @@ int main()
 	g_over._overlapped_type = OT_ACCEPT;
 	AcceptEx(g_s_socket, g_c_socket, g_over._send_buf, 0, addr_size + 16, addr_size + 16, 0, &g_over._over);
 
-	db_controll->InitDB();
+	db_controll.InitDB();
 	InitRoom();	
 
 	vector<thread> worker_threads;
@@ -480,7 +536,7 @@ int main()
 		thread.join();
 
 	// DB 해제
-	db_controll->ReleaseDB();
+	db_controll.ReleaseDB();
 
 	closesocket(g_s_socket);
 	WSACleanup();

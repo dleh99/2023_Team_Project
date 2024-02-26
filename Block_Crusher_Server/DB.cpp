@@ -4,12 +4,13 @@ DB_EVENT::DB_EVENT()
 {
 }
 
-DB_EVENT::DB_EVENT(int ob_id, std::chrono::system_clock::time_point time, DB_EVENT_TYPE et, int t_id)
+DB_EVENT::DB_EVENT(int ob_id, std::chrono::system_clock::time_point time, DB_EVENT_TYPE et, std::wstring id, std::wstring password)
 {
 	obj_id = ob_id;
 	wakeup_time = time;
 	event_id = et;
-	target_id = t_id;
+	_id = id;
+	_password = password;
 }
 
 void DB::InitDB()
@@ -52,7 +53,7 @@ void DB::ReleaseDB()
 	SQLFreeHandle(SQL_HANDLE_ENV, henv);
 }
 
-bool DB::Search_User(const char* id, const char* password)
+int DB::Search_User(std::wstring id, std::wstring password)
 {
 	SQLHSTMT hstmt = 0;
 	SQLRETURN retcode;
@@ -61,12 +62,12 @@ bool DB::Search_User(const char* id, const char* password)
 	SQLWCHAR user_id[20];
 	SQLWCHAR user_password[20];
 	SQLINTEGER user_high_score;
-	SQLLEN len[3];
+	SQLINTEGER user_login_state = -1;
+	SQLLEN len[4];
 
 	memset(wstr, 0, sizeof(wstr));
-	wsprintf(wstr, L"EXEC Login %S, %S", id, password);
-	//wsprintf(wstr, L"EXEC Nest_search_user %S", id);
-	//cout << "이 스레드 들어옴?" << endl;
+	wsprintf(wstr, L"EXEC Login %ls, %ls", id.c_str(), password.c_str());
+	std::wcout << wstr << std::endl;
 
 	// Allocate statement handle  
 	retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
@@ -74,25 +75,49 @@ bool DB::Search_User(const char* id, const char* password)
 
 	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
 		retcode = SQLBindCol(hstmt, 1, SQL_C_WCHAR, &user_id, 20, &len[0]);
-		retcode = SQLBindCol(hstmt, 2, SQL_C_LONG, &user_password, 20, &len[1]);
-		retcode = SQLBindCol(hstmt, 3, SQL_C_LONG, &user_high_score, 4, &len[2]);
+		retcode = SQLBindCol(hstmt, 2, SQL_C_WCHAR, &user_password, 20, &len[1]);
+		retcode = SQLBindCol(hstmt, 3, SQL_INTEGER, &user_high_score, 4, &len[2]);
+		retcode = SQLBindCol(hstmt, 4, SQL_INTEGER, &user_login_state, 4, &len[3]);
 
 		retcode = SQLFetch(hstmt);
-		if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
-			show_error(hstmt, SQL_FETCH_ABSOLUTE, retcode);
-		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-			std::cout << "성공" << std::endl;
+		if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO) {
+			std::cout << retcode << std::endl;
+			show_error(hstmt, SQL_HANDLE_STMT, retcode);
 		}
-		else
-		{
-			std::cout << "실패" << std::endl;
+		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+			if (user_login_state == DB_SIGN_UP) {
+				std::cout << "새로운 id 감지. 회원가입 합니다잉" << std::endl;
+			}
+			else if (user_login_state == DB_LOGIN_SUCCESS) {
+				std::cout << "로그인 성공" << std::endl;
+			}
+			else if (user_login_state == DB_LOGIN_FAIL) {
+				std::cout << "로그인 실패" << std::endl;
+			}
+			else if (user_login_state == DB_ALREADY_INGAME) {
+				std::cout << "이미 접속중인 계정" << std::endl;
+			}
+			else if (user_login_state == -1) {
+				std::cout << "여기도 들어옴" << std::endl;
+			}
+			SQLCancel(hstmt);
+			SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+		}
+		else {
+			show_error(hstmt, SQL_HANDLE_STMT, retcode);
 		}
 	}
 	else
 	{
 		show_error(hstmt, SQL_HANDLE_STMT, retcode);
 	}
-	return true;
+
+	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+		SQLCancel(hstmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+	}
+
+	return user_login_state;
 }
 
 bool DB::Search_Id(const char* id)

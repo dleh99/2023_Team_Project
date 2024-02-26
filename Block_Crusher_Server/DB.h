@@ -3,6 +3,11 @@
 
 enum DB_EVENT_TYPE { TRY_LOGIN };
 
+constexpr int DB_SIGN_UP = 1;
+constexpr int DB_LOGIN_SUCCESS = 2;
+constexpr int DB_LOGIN_FAIL = 3;
+constexpr int DB_ALREADY_INGAME = 4;
+
 class DB
 {
 private:
@@ -11,7 +16,7 @@ private:
 public:
 	void InitDB();
 	void ReleaseDB();
-	bool Search_User(const char* id, const char* password);
+	int Search_User(std::wstring id, std::wstring password);
 	bool Search_Id(const char* id);
 	void show_error(SQLHANDLE hHandle, SQLSMALLINT hType, RETCODE RetCode);
 };
@@ -22,10 +27,11 @@ public:
 	int obj_id;
 	std::chrono::system_clock::time_point		wakeup_time;
 	DB_EVENT_TYPE event_id;
-	int target_id;
+	std::wstring _id;
+	std::wstring _password;
 public:
 	DB_EVENT();
-	DB_EVENT(int ob_id, std::chrono::system_clock::time_point time, DB_EVENT_TYPE et, int t_id);
+	DB_EVENT(int ob_id, std::chrono::system_clock::time_point time, DB_EVENT_TYPE et, std::wstring id, std::wstring password);
 	constexpr bool operator < (const DB_EVENT& L) const
 	{
 		return (wakeup_time > L.wakeup_time);
