@@ -1,7 +1,7 @@
 #pragma once
 #include "header.h"
 
-enum DB_EVENT_TYPE { TRY_LOGIN };
+enum DB_EVENT_TYPE { TRY_LOGIN, LOGIN_DISCONNECT };
 
 constexpr int DB_SIGN_UP = 1;
 constexpr int DB_LOGIN_SUCCESS = 2;
@@ -17,7 +17,7 @@ public:
 	void InitDB();
 	void ReleaseDB();
 	int Search_User(std::wstring id, std::wstring password);
-	bool Search_Id(const char* id);
+	void Disconnect_User(std::wstring id);
 	void show_error(SQLHANDLE hHandle, SQLSMALLINT hType, RETCODE RetCode);
 };
 

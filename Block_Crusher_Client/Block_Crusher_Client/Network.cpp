@@ -144,6 +144,22 @@ void ProcessPacket(char* ptr)
 		else if (packet->login_state == LS_FULLROOM) {
 			cout << "선택하신 룸에서 게임이 진행중입니다" << endl;
 		}
+		else if (packet->login_state == LS_LOGIN_FAIL) {
+			cout << "입력하신 ID 또는 비밀번호가 틀렸습니다" << endl;
+		}
+		else if (packet->login_state == LS_ALREADY_INGAME) {
+			cout << "입력하신 ID의 계정이 이미 게임 실행 중입니다" << endl;
+		}
+		break;
+	}
+	case SC_LOGIN_SUCCESS: {
+		SC_LOGIN_SUCCESS_PACKET* packet = reinterpret_cast<SC_LOGIN_SUCCESS_PACKET*>(ptr);
+		if (packet->login_state == LS_SIGNUP) {
+			cout << "새로 입력하신 ID. 자동으로 회완가입 되어 게임에 진입합니다" << endl;
+		}
+		else if (packet->login_state == LS_LOGIN_SUCCESS) {
+			cout << "로그인 성공" << endl;
+		}
 		break;
 	}
 	case SC_LOGIN: {	// 처음 로그인 했을 때 받는 패킷. 아이디를 서버는 클라에게 아이디를 부여한다

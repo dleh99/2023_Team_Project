@@ -15,6 +15,7 @@ User_Interface::User_Interface()
 	Death_time = 0.f;
 	score = -1;
 	isWin = false;
+	login_id = L"";
 }
 
 User_Interface::~User_Interface()
@@ -41,6 +42,14 @@ void User_Interface::send_login_fail_packet(LOGIN_STATE ls)
 	SC_LOGIN_FAIL_PACKET p;
 	p.size = sizeof(SC_LOGIN_FAIL_PACKET);
 	p.type = SC_LOGIN_FAIL;
+	p.login_state = ls;
+}
+
+void User_Interface::send_login_success_packet(LOGIN_STATE ls)
+{
+	SC_LOGIN_SUCCESS_PACKET p;
+	p.size = sizeof(SC_LOGIN_SUCCESS_PACKET);
+	p.type = SC_LOGIN_SUCCESS;
 	p.login_state = ls;
 }
 

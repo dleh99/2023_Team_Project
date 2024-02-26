@@ -43,13 +43,16 @@ int set_client_id()
 
 void disconnect(int c_id)
 {
+	// DB에서 login_state 변경
+	DB_EVENT ev{ clients[c_id]._id, chrono::system_clock::now(), LOGIN_DISCONNECT, clients[c_id].login_id, L"" };
+	db_queue.push(ev);
+
 	// 룸에서도 빠져나가게 해야함
-	for (auto& r : rooms) {
-		if (r.PlayerOut(c_id)) {
-			clients_room[c_id] = -1;
-			break;
-		}
-	}
+	short room_num = clients_room[c_id];
+	if (rooms[room_num].PlayerOut(c_id))
+		cout << c_id << "룸에서 탈퇴 완료" << endl;
+	
+	// 소켓 해제
 	closesocket(clients[c_id]._socket);
 	cout << "[" << c_id << "] 탈퇴함" << endl;
 	//user_number--;
@@ -94,7 +97,9 @@ void packet_process(int c_id, char* packet)
 				clients[c_id].send_login_fail_packet(LS_FULLROOM);
 			}
 			else {
-				//cout << "룸까지 접속 완료" << endl;
+				cout << "몇번 들어와" << endl;
+				wcout << p->id << ", " << p->password << endl;
+ 				clients[c_id].login_id = p->id;
 				DB_EVENT ev{ clients[c_id]._id, chrono::system_clock::now(), TRY_LOGIN, p->id, p->password };
 				db_queue.push(ev);
 			}
@@ -297,21 +302,30 @@ void worker_thread(HANDLE iocp_h)
 			case OT_SIGNUP:
 			{
 				cout << "worker thread에서 새로운 아이디" << endl;
+				clients[key].send_login_success_packet(LS_SIGNUP);
 				break;
 			}
 			case OT_LOGIN_SUCCESS:
 			{
 				cout << "worker thread에서 로그인 성공" << endl;
+				clients[key].send_login_success_packet(LS_LOGIN_SUCCESS);
 				break;
 			}
 			case OT_LOGIN_FAIL:
 			{
 				cout << "worker thread에서 로그인 실패" << endl;
+				clients[key].send_login_fail_packet(LS_LOGIN_FAIL);
 				break;
 			}
 			case OT_ALREADY_INGAME:
 			{
 				cout << "worker thread에서 이미 접속중" << endl;
+				clients[key].send_login_fail_packet(LS_ALREADY_INGAME);
+				break;
+			}
+			case OT_DISCONNECT:
+			{
+				cout << "DB에서 login state 변경 완료" << endl;
 				break;
 			}
 		}
@@ -481,6 +495,13 @@ void do_db()
 					ov->_overlapped_type = OT_ALREADY_INGAME;
 				}
 
+				PostQueuedCompletionStatus(iocp_h, 1, ev.obj_id, &ov->_over);
+				break;
+			}
+			case LOGIN_DISCONNECT: {
+				db_controll.Disconnect_User(ev._id);
+				Overlapped* ov = new Overlapped;
+				ov->_overlapped_type = OT_DISCONNECT;
 				PostQueuedCompletionStatus(iocp_h, 1, ev.obj_id, &ov->_over);
 				break;
 			}

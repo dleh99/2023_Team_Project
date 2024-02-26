@@ -67,7 +67,7 @@ int DB::Search_User(std::wstring id, std::wstring password)
 
 	memset(wstr, 0, sizeof(wstr));
 	wsprintf(wstr, L"EXEC Login %ls, %ls", id.c_str(), password.c_str());
-	std::wcout << wstr << std::endl;
+	//std::wcout << wstr << std::endl;
 
 	// Allocate statement handle  
 	retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
@@ -81,11 +81,11 @@ int DB::Search_User(std::wstring id, std::wstring password)
 
 		retcode = SQLFetch(hstmt);
 		if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO) {
-			std::cout << retcode << std::endl;
+			//std::cout << retcode << std::endl;
 			show_error(hstmt, SQL_HANDLE_STMT, retcode);
 		}
 		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-			if (user_login_state == DB_SIGN_UP) {
+			/*if (user_login_state == DB_SIGN_UP) {
 				std::cout << "새로운 id 감지. 회원가입 합니다잉" << std::endl;
 			}
 			else if (user_login_state == DB_LOGIN_SUCCESS) {
@@ -99,7 +99,7 @@ int DB::Search_User(std::wstring id, std::wstring password)
 			}
 			else if (user_login_state == -1) {
 				std::cout << "여기도 들어옴" << std::endl;
-			}
+			}*/
 			SQLCancel(hstmt);
 			SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
 		}
@@ -120,19 +120,42 @@ int DB::Search_User(std::wstring id, std::wstring password)
 	return user_login_state;
 }
 
-bool DB::Search_Id(const char* id)
+void DB::Disconnect_User(std::wstring id)
 {
 	SQLHSTMT hstmt = 0;
 	SQLRETURN retcode;
 
 	SQLWCHAR wstr[100];
 	SQLWCHAR user_id[20];
+	SQLLEN len[1];
 
 	memset(wstr, 0, sizeof(wstr));
-	wsprintf(wstr, L"EXEC id_search %S", id);
+	wsprintf(wstr, L"EXEC id_disconnect %ls", id.c_str());
 
+	// Allocate statement handle  
 	retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
 	retcode = SQLExecDirect(hstmt, (SQLWCHAR*)wstr, SQL_NTS);
+
+	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+		retcode = SQLBindCol(hstmt, 1, SQL_C_WCHAR, &user_id, 20, &len[0]);
+
+		retcode = SQLFetch(hstmt);
+		if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO) 
+			show_error(hstmt, SQL_HANDLE_STMT, retcode);
+		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+			std::cout << "id DB에서 삭제 완" << std::endl;
+			SQLCancel(hstmt);
+			SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+		}
+		else {
+			show_error(hstmt, SQL_HANDLE_STMT, retcode);
+		}
+	}
+
+	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+		SQLCancel(hstmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+	}
 }
 
 void DB::show_error(SQLHANDLE hHandle, SQLSMALLINT hType, RETCODE RetCode)
