@@ -62,9 +62,12 @@ public:
 	bool BSCollisionCheck(XMFLOAT3 Position1, XMFLOAT3 Position2, float Radius1, float Radius2);
 	int AddBlocksByMapData(CMesh* pMesh, CShader* pShader, CMaterial* pMaterial,int nindex, char mapkey);
 
+	//BoundingBox CalculateBoundingBox();
+
 	ComPtr<ID3D12RootSignature> CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 	ComPtr<ID3D12RootSignature> GetGraphicsRootSignature();
 	
+	int m_nObjects = 0;
 	CGameObject** m_ppObjects = NULL;
 	int m_nBlock = 0;
 	CPlayer* m_pPlayer= NULL;
@@ -93,6 +96,7 @@ public:
 	void BuildLightsAndMaterials();
 
 	// Scene에 있는 조명과 재질의 리소스를 생성하고 갱신
+	void PrepareLightingAndRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
@@ -102,7 +106,6 @@ protected:
 	int m_nShaders = 0;*/
 	
 	int m_nblock = 0;
-	int m_nObjects = 0;
 	int m_nRandObject = 0;
 
 	float m_fPlayTime = 120.0f;
@@ -118,5 +121,10 @@ protected:
 	ComPtr<ID3D12RootSignature> m_pd3dGraphicsRootSignature = NULL;
 
 	bool isEnd = false;
+
+public:
+	CDepthRenderShader* m_pDepthRenderShader = NULL;
+	CShadowMapShader* m_pShadowShader = NULL;
+	CTextureToViewportShader* m_pShadowMapToViewport = NULL;
 };
 

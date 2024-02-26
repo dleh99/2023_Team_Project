@@ -71,14 +71,19 @@ void CTexture::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	if (m_nRootParameters == m_nTextures)
 	{
-		for (int i = 0; i < m_nRootParameters; i++)
+		/*for (int i = 0; i < m_nRootParameters; i++)
 		{
 			if (m_pd3dSrvGpuDescriptorHandles[i].ptr && (m_pnRootParameterIndices[i] != -1)) pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[i], m_pd3dSrvGpuDescriptorHandles[i]);
+		}*/
+		for (int i = 0; i < m_nRootParameters; i++)
+		{
+			pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[i], m_pd3dSrvGpuDescriptorHandles[i]);
 		}
 	}
 	else
 	{
-		if (m_pd3dSrvGpuDescriptorHandles[0].ptr) pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[0], m_pd3dSrvGpuDescriptorHandles[0]);
+		//if (m_pd3dSrvGpuDescriptorHandles[0].ptr) pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[0], m_pd3dSrvGpuDescriptorHandles[0]);
+		pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[0], m_pd3dSrvGpuDescriptorHandles[0]);
 	}
 }
 
@@ -99,6 +104,14 @@ void CTexture::ReleaseUploadBuffers()
 		delete[] m_ppd3dTextureUploadBuffers;
 		m_ppd3dTextureUploadBuffers = NULL;
 	}
+}
+
+ID3D12Resource* CTexture::CreateTexture(ID3D12Device* pd3dDevice, UINT nWidth, UINT nHeight, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE* pd3dClearValue, UINT nResourceType, UINT nIndex)
+{
+	m_pnResourceTypes[nIndex] = nResourceType;
+	m_ppd3dTextures[nIndex] = ::CreateTexture2DResource(pd3dDevice, nWidth, nHeight, 1, 0, dxgiFormat, d3dResourceFlags, d3dResourceStates, pd3dClearValue);
+
+	return m_ppd3dTextures[nIndex];
 }
 
 void CTexture::LoadTextureFromDDSFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,const wchar_t* pszFileName, UINT nResourceType, UINT nIndex)
@@ -246,7 +259,7 @@ CGameObject::~CGameObject()
 
 void CGameObject::SetShader(CShader* pShader)
 {
-	if (m_pShader) m_pShader->Release();
+	//if (m_pShader) m_pShader->Release();
 	m_pShader = pShader;
 	if (m_pShader) m_pShader->AddRef();
 }
@@ -305,7 +318,8 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 
 	if (m_pShader)
 	{
-		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+		//m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+		//if (!m_bShadow)
 		m_pShader->Render(pd3dCommandList, pCamera);
 	}
 
@@ -337,8 +351,34 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 		m_pMesh->Render(pd3dCommandList);
 	}
 
-	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
-	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
+	if (m_pSibling)
+	{
+		//m_pSibling->m_bShadow = true;
+		m_pSibling->Render(pd3dCommandList, pCamera);
+		//m_pSibling->m_bShadow = false;
+	}
+	if (m_pChild)
+	{
+		//m_pChild->m_bShadow = true;
+		m_pChild->Render(pd3dCommandList, pCamera);
+		//m_pChild->m_bShadow = false;
+	}
+}
+
+void CGameObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	OnPrepareRender();
+
+	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
+
+	if (m_pMesh)
+	{
+		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+		m_pMesh->Render(pd3dCommandList);
+	}
+
+	if (m_pSibling) m_pSibling->ShadowRender(pd3dCommandList, pCamera);
+	if (m_pChild) m_pChild->ShadowRender(pd3dCommandList, pCamera);
 }
 
 void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -356,7 +396,10 @@ void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandLis
 
 void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	
+	XMFLOAT4X4 xmf4x4World;
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &xmf4x4World, 0);
 }
 
 void CGameObject::ReleaseShaderVariables()

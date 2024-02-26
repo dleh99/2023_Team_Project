@@ -95,9 +95,12 @@ inline void Swap(float* pfS, float* pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT
 #define _DEPTH_BUFFER_WIDTH		(FRAME_BUFFER_WIDTH * 4)
 #define _DEPTH_BUFFER_HEIGHT	(FRAME_BUFFER_HEIGHT * 4)
 
+//#define _WITH_RASTERIZER_DEPTH_BIAS
+
 // 정의하면 처음 실행할 때 전체화면 모드로 실행
 // #define _WITH_SWAPCHAIN_FULLSCREEN_STATE
 extern UINT	gnCbvSrvDescriptorIncrementSize;
+extern UINT gnRtvDescriptorIncrementSize;
 
 extern ID3D12Resource* CreateBufferResource(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList, void* pData, UINT nBytes,
@@ -106,7 +109,9 @@ extern ID3D12Resource* CreateBufferResource(ID3D12Device* pd3dDevice,
 	ID3D12Resource** ppd3dUploadBuffer = NULL);
 
 extern ID3D12Resource* CreateTextureResourceFromDDSFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,const wchar_t* pszFileName, ID3D12Resource** ppd3dUploadBuffer, D3D12_RESOURCE_STATES d3dResourceStates = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+extern ID3D12Resource* CreateTexture2DResource(ID3D12Device* pd3dDevice, UINT nWidth, UINT nHeight, UINT nElements, UINT nMipLevels, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE* pd3dClearValue);
 
+extern void SynchronizeResourceTransition(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dResource, D3D12_RESOURCE_STATES d3dStateBefore, D3D12_RESOURCE_STATES d3dStateAfter);
 
 namespace Vector3
 {

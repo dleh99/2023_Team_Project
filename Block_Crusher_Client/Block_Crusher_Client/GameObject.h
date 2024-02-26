@@ -78,6 +78,8 @@ public:
 	D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(int nIndex);
 
 	void ReleaseUploadBuffers();
+
+	ID3D12Resource* CreateTexture(ID3D12Device* pd3dDevice, UINT nWidth, UINT nHeight, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE* pd3dClearValue, UINT nResourceType, UINT nIndex);
 };
 
 struct MATERIAL
@@ -314,6 +316,7 @@ public:
 	CMaterial* m_pMaterial = NULL;
 
 	CShader* m_pShader = NULL;
+	bool m_bShadow = false;
 
 	XMFLOAT4X4 m_xmf4x4Transform;
 	XMFLOAT4X4 m_xmf4x4World;
@@ -335,6 +338,8 @@ public:
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 	void ReleaseUploadBuffers();
 
+	virtual CShader* GetShader() { return m_pShader; }
+
 	virtual void SetMesh(CMesh* pMesh);
 	virtual void SetMaterial(CMaterial* pMaterial);
 	virtual void SetShader(CShader* pShader);
@@ -344,6 +349,7 @@ public:
 
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 	// 상수 버퍼를 생성한다.
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -362,6 +368,7 @@ public:
 	bool GetIsActive();
 
 	float GetBoundingRadius() { return m_fBlockBoundingRadius; };
+	//void CalculateBoundingBox();
 
 	// 게임 객체의 워치를 설정한다.
 	void SetPosition(float x, float y, float z);
