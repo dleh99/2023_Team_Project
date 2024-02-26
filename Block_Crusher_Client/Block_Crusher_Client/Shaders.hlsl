@@ -393,6 +393,10 @@ struct VS_OUTPUT_INSTANCE
 {
 	float4 position : SV_POSITION;
 	float2 uv : TEXCOORD;
+
+	float3 normal : NORMAL;
+	float3 positionW : POSITION;
+	float4 shadowMapUVs[MAX_LIGHTS] : TEXCOORD1;
 };
 
 struct VS_INPUT_INSTANCE
@@ -400,21 +404,42 @@ struct VS_INPUT_INSTANCE
 	float3 position : POSITION;
 	float2 uv : TEXCOORD;
 	matrix worldMatrix : INSTANCE;
+	float3 normal : NORMAL;
 };
 
 VS_OUTPUT_INSTANCE VSInstancing(VS_INPUT_INSTANCE input)
 {
-	VS_OUTPUT_INSTANCE output;
+	VS_OUTPUT_INSTANCE output = (VS_OUTPUT_INSTANCE)0;
 
-	output.position = mul(mul(mul(float4(input.position, 1.0f), input.worldMatrix), gmtxView), gmtxProjection);
+	//float4 positionW = mul(float4(input.position, 1.0f), gmtxWorld);
+	float4 positionW = mul(float4(input.position, 1.0f), input.worldMatrix);
+	output.positionW = positionW.xyz;
+	output.position = mul(mul(positionW, gmtxView), gmtxProjection);
+
+	//output.position = mul(mul(mul(float4(input.position, 1.0f), input.worldMatrix), gmtxView), gmtxProjection);
 	output.uv = input.uv;
+
+	output.normal = mul(input.normal, (float3x3)input.worldMatrix);
+
+	[unroll]
+	for (int i = 0; i < MAX_LIGHTS; i++)
+	{
+		if (gcbToLightSpaces[i].f4Position.w != 0.0f) output.shadowMapUVs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTextureSpace);
+	}
+
 	return output;
+
+
 }
 
 float4 PSInstancing(VS_OUTPUT_INSTANCE input) : SV_TARGET
 {
 		float4 cColor = gtxtTexture.Sample(gSamplerState, input.uv);
+		float3 normalW = normalize(input.normal);
 		//float4 cColor = { 1,1,1,1 };
 
-		return(cColor);
+		float4 cIllumination = Lighting(input.position.xyz, normalW, true, input.shadowMapUVs);
+
+		//return(cColor);
+		return lerp(cColor, cIllumination, 0.5f);
 }

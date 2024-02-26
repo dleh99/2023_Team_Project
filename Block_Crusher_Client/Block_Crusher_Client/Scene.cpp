@@ -59,7 +59,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	pBulletMesh = BulletMesh;
 
-	AddBlocksByMapData(pCubeMesh, pTShader, pMaterial, 0, mapkey);
+	//AddBlocksByMapData(pCubeMesh, pTShader, pMaterial, 0, mapkey);
 
 	m_pDepthRenderShader = new CDepthRenderShader(this, m_pLights->m_pLights);
 	DXGI_FORMAT pdxgiRtvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
@@ -489,7 +489,6 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	if (m_pInstanceShader)
 		m_pInstanceShader->Render(pd3dCommandList, pCamera);
 
-	for (int j = m_nBlock; j < m_nObjects; j++)
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera);
 
 	//if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
@@ -890,7 +889,7 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 				XMFLOAT3 position = { -(float)i * 12.0f + 20.0f,
 				 -(float)j * 12.0f , -(float)k * 12.0f + 40.0f };
 				CBlockObject* pBlockObject = new CBlockObject();
-				//pBlockObject->SetMesh(pMesh);
+				pBlockObject->SetMesh(pMesh);
 				//pBlockObject->SetShader(pShader);
 				//pBlockObject->SetMaterial(pMaterial);
 				pBlockObject->SetIsActive(true);
@@ -910,7 +909,7 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 				//std::cout << position.x << " " << position.y << " " << position.z << std::endl;
 
 				CBlockObject* pBlockObject = new CBlockObject();
-				//pBlockObject->SetMesh(pMesh);
+				pBlockObject->SetMesh(pMesh);
 				//pBlockObject->SetShader(pShader);
 				//pBlockObject->SetMaterial(pMaterial);
 				pBlockObject->SetIsActive(true);

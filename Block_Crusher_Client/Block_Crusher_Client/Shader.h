@@ -274,7 +274,6 @@ public:
 protected:
 	CTexture* m_pDepthFromLightTexture = NULL;
 };
-};
 
 class CInstancingShader : public CShader
 {

@@ -1086,7 +1086,9 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 
 	UpdateShaderVariables(pd3dCommandList);
 
-	for (int i = 0; i < m_pObjectsScene->m_nObjects; i++)
+	
+	//for (int i = 0; i < m_pObjectsScene->m_nObjects; i++)
+	for (int i = m_pObjectsScene->m_nBlock; i < m_pObjectsScene->m_nObjects; i++)
 	{
 		if (m_pObjectsScene->m_ppObjects[i] && m_pObjectsScene->m_ppObjects[i]->GetIsActive())
 		{
@@ -1184,7 +1186,7 @@ CInstancingShader::~CInstancingShader()
 
 D3D12_INPUT_LAYOUT_DESC CInstancingShader::CreateInputLayout()
 {
-	UINT nInputElementDescs = 6;
+	UINT nInputElementDescs = 7;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
@@ -1196,6 +1198,9 @@ D3D12_INPUT_LAYOUT_DESC CInstancingShader::CreateInputLayout()
 	pd3dInputElementDescs[3] = { "INSTANCE", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
 	pd3dInputElementDescs[4] = { "INSTANCE", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1,32, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
 	pd3dInputElementDescs[5] = { "INSTANCE", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+
+	pd3dInputElementDescs[6] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20,
+		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
 	::ZeroMemory(&d3dInputLayoutDesc, sizeof(D3D12_INPUT_LAYOUT_DESC));
