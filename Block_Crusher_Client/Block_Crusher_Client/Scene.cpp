@@ -77,6 +77,8 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT);
 	m_pShadowMapToViewport->BuildObjects(pd3dDevice, pd3dCommandList, m_pDepthRenderShader->GetDepthTexture());
 
+	m_pInstanceShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pDepthRenderShader->GetDepthTexture());
+
 	//AddBlocksByMapData(pCubeMesh, m_pShadowShader, pMaterial, 0, mapkey);
 	m_pInstance = m_pInstanceShader->GetInstancePointer();
 	
@@ -492,13 +494,6 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera);
 
 	//if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
-
-	/*for (int j = 0; j < m_nObjects; j++)
-	{
-		if (m_ppObjects[j] && m_ppObjects[j]->GetIsActive()) {
-			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
-		}
-	}*/
 
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);

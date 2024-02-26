@@ -1086,11 +1086,10 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 
 	UpdateShaderVariables(pd3dCommandList);
 
-	
-	//for (int i = 0; i < m_pObjectsScene->m_nObjects; i++)
 	for (int i = m_pObjectsScene->m_nBlock; i < m_pObjectsScene->m_nObjects; i++)
 	{
-		if (m_pObjectsScene->m_ppObjects[i] && m_pObjectsScene->m_ppObjects[i]->GetIsActive())
+		if (m_pObjectsScene->m_ppObjects[i] && m_pObjectsScene->m_ppObjects[i]->GetIsActive() &&
+			m_pObjectsScene->m_ppObjects[i]->GetObjectType() == TYPE_BULLET)
 		{
 			m_pObjectsScene->m_ppObjects[i]->Render(pd3dCommandList, pCamera);
 		}
@@ -1210,6 +1209,32 @@ D3D12_INPUT_LAYOUT_DESC CInstancingShader::CreateInputLayout()
 	return d3dInputLayoutDesc;
 }
 
+//D3D12_DEPTH_STENCIL_DESC CInstancingShader::CreateDepthStencilState()
+//{
+//	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc;
+//	::ZeroMemory(&d3dDepthStencilDesc, sizeof(D3D12_DEPTH_STENCIL_DESC));
+//	d3dDepthStencilDesc.DepthEnable = FALSE;
+//	d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+//	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+//	d3dDepthStencilDesc.StencilEnable = FALSE;
+//	d3dDepthStencilDesc.StencilReadMask = 0x00;
+//	d3dDepthStencilDesc.StencilWriteMask = 0x00;
+//	d3dDepthStencilDesc.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+//	d3dDepthStencilDesc.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+//	d3dDepthStencilDesc.FrontFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+//	d3dDepthStencilDesc.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
+//	d3dDepthStencilDesc.BackFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+//	d3dDepthStencilDesc.BackFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+//	d3dDepthStencilDesc.BackFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+//	d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
+//
+//	return d3dDepthStencilDesc;
+//}
+
+
+void CInstancingShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
 
 D3D12_SHADER_BYTECODE CInstancingShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
 {
@@ -1219,6 +1244,24 @@ D3D12_SHADER_BYTECODE CInstancingShader::CreateVertexShader(ID3DBlob** ppd3dShad
 D3D12_SHADER_BYTECODE CInstancingShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
 {
 	return CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSInstancing", "ps_5_1", ppd3dShaderBlob);
+}
+
+void CInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	if (m_pDepthFromLightTexture) m_pDepthFromLightTexture->UpdateShaderVariables(pd3dCommandList);
+}
+
+void CInstancingShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
+{
+	m_pDepthFromLightTexture = (CTexture*)pContext;
+	m_pDepthFromLightTexture->AddRef();
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+void CInstancingShader::ReleaseObjects()
+{
+	if (m_pDepthFromLightTexture) m_pDepthFromLightTexture->Release();
 }
 
 void CInstancingShader::CreateInstanceBuffer(ID3D12Device* device)
@@ -1253,6 +1296,9 @@ void CInstancingShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandLi
 void CInstancingShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	OnPrepareRender(pd3dCommandList);
+
+	// ±×¸²ÀÚ ¸Ê ½¦ÀÌ´õ·Î Update
+	UpdateShaderVariables(pd3dCommandList);
 
 	if (m_ptexture) 
 		m_ptexture->UpdateShaderVariables(pd3dCommandList);

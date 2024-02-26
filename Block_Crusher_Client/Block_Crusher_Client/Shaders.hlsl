@@ -393,7 +393,6 @@ struct VS_OUTPUT_INSTANCE
 {
 	float4 position : SV_POSITION;
 	float2 uv : TEXCOORD;
-
 	float3 normal : NORMAL;
 	float3 positionW : POSITION;
 	float4 shadowMapUVs[MAX_LIGHTS] : TEXCOORD1;
@@ -428,8 +427,6 @@ VS_OUTPUT_INSTANCE VSInstancing(VS_INPUT_INSTANCE input)
 	}
 
 	return output;
-
-
 }
 
 float4 PSInstancing(VS_OUTPUT_INSTANCE input) : SV_TARGET
