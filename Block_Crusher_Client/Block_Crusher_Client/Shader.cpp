@@ -878,13 +878,16 @@ void CDepthRenderShader::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList
 	// 그림자 맵에 그릴 것들
 
 	// 블록 등 오브젝트들
-	for (int i = 0; i < m_pObjectsScene->m_nObjects; i++)
-	{
-		if (m_pObjectsScene->m_ppObjects[i] && m_pObjectsScene->m_ppObjects[i]->GetIsActive())
-		{
-			m_pObjectsScene->m_ppObjects[i]->ShadowRender(pd3dCommandList, pCamera);
-		}
-	}
+	if(m_pObjectsScene->m_pInstanceShader)
+		m_pObjectsScene->m_pInstanceShader->Render(pd3dCommandList, pCamera);
+
+	//for (int i = 0; i < m_pObjectsScene->m_nObjects; i++)
+	//{
+	//	if (m_pObjectsScene->m_ppObjects[i] && m_pObjectsScene->m_ppObjects[i]->GetIsActive())
+	//	{
+	//		m_pObjectsScene->m_ppObjects[i]->ShadowRender(pd3dCommandList, pCamera);
+	//	}
+	//}
 
 	// 플레이어들
 	// 애니메이션 그림자 그리는 쉐이더 필요

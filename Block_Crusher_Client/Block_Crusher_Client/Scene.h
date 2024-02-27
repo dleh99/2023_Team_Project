@@ -131,7 +131,6 @@ protected:
 	ComPtr<ID3D12RootSignature> m_pd3dGraphicsRootSignature = NULL;
 
 	Instance* m_pInstance = NULL;
-	CInstancingShader* m_pInstanceShader = NULL;
 
 	RECT TitleUI[3];
 	int m_flag = ID;
@@ -139,6 +138,7 @@ protected:
 	bool isEnd = false;
 
 public:
+	CInstancingShader* m_pInstanceShader = NULL;
 	CDepthRenderShader* m_pDepthRenderShader = NULL;
 	CShadowMapShader* m_pShadowShader = NULL;
 	CTextureToViewportShader* m_pShadowMapToViewport = NULL;
