@@ -879,7 +879,7 @@ void CDepthRenderShader::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList
 
 	// 블록 등 오브젝트들
 	if(m_pObjectsScene->m_pInstanceShader)
-		m_pObjectsScene->m_pInstanceShader->Render(pd3dCommandList, pCamera);
+		m_pObjectsScene->m_pInstanceShader->ShadowRender(pd3dCommandList, pCamera);
 
 	//for (int i = 0; i < m_pObjectsScene->m_nObjects; i++)
 	//{
@@ -1307,6 +1307,12 @@ void CInstancingShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 		m_ptexture->UpdateShaderVariables(pd3dCommandList);
 	
 	if(m_mesh)
+		m_mesh->Render(pd3dCommandList, m_instanceBufferView);
+}
+
+void CInstancingShader::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	if (m_mesh)
 		m_mesh->Render(pd3dCommandList, m_instanceBufferView);
 }
 

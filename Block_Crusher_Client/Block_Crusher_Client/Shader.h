@@ -296,6 +296,7 @@ public:
 	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 	void CreateInstanceBuffer(ID3D12Device* device);
 	Instance* GetInstancePointer() const { return m_instanceBufferPointer; }
