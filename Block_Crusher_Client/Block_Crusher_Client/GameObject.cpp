@@ -239,6 +239,10 @@ CGameObject::CGameObject()
 	XMStoreFloat4x4(&m_xmf4x4World, XMMatrixIdentity());
 	
 	m_fBlockBoundingRadius = sqrt(144.f * 3.f) / 2;
+
+	for (int i = 0; i < 64; ++i)
+		m_pstrFrameName[i] = '\0';
+	m_d3dCbvGPUDescriptorHandle.ptr = NULL;
 }
 
 CGameObject::~CGameObject()

@@ -88,7 +88,7 @@ inline void Swap(float* pfS, float* pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT
 #define ANIMATION_TYPE_LOOP				1
 #define ANIMATION_TYPE_PINGPONG			2
 
-#define MAX_LIGHTS 2
+#define MAX_LIGHTS 1
 #define MAX_MATERIALS 8
 
 #define POINT_LIGHT 1

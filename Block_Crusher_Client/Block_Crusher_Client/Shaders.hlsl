@@ -47,6 +47,7 @@ struct VS_OUTPUT
 {
 	float4 position : SV_POSITION;
 	float4 color : COLOR;
+	float4 shadowMapUVs[MAX_LIGHTS] : TEXCOORD;
 };
 
 Texture2D gtxtTexture : register(t0);
@@ -58,10 +59,17 @@ SamplerState gssClamp : register(s1);
 // 정점 셰이더를 정의한다.
 VS_OUTPUT VSDiffused(VS_INPUT input)
 {
-	VS_OUTPUT output;
+	VS_OUTPUT output = (VS_OUTPUT)0;
 
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	float4 positionW = mul(float4(input.position, 1.0f), gmtxWorld);
+	output.position = mul(mul(positionW, gmtxView), gmtxProjection);
 	output.color = input.color;
+
+	[unroll]
+	for (int i = 0; i < MAX_LIGHTS; i++)
+	{
+		if (gcbToLightSpaces[i].f4Position.w != 0.0f) output.shadowMapUVs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTextureSpace);
+	}
 
 	return output;
 }
@@ -70,8 +78,12 @@ VS_OUTPUT VSDiffused(VS_INPUT input)
 float4 PSDiffused(VS_OUTPUT input) : SV_TARGET
 {
 	float4 color = {1,0,0,1};
+	float3 normalW = { 1, 0, 0 };
 
-	return color;
+	float4 cIllumination = Lighting(input.position.xyz, normalW, true, input.shadowMapUVs);
+
+	//return color;
+	return lerp(color, cIllumination, 0.4f);
 }
 
 /// ////////////////////////////////////////////////////////////////////////////////////////////
@@ -433,7 +445,7 @@ float4 PSInstancing(VS_OUTPUT_INSTANCE input) : SV_TARGET
 {
 		float4 cColor = gtxtTexture.Sample(gSamplerState, input.uv);
 		float3 normalW = normalize(input.normal);
-		//float4 cColor = { 1,1,1,1 };
+		//cColor = (float4)(1, 1, 1, 1);
 
 		float4 cIllumination = Lighting(input.position.xyz, normalW, true, input.shadowMapUVs);
 

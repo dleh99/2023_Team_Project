@@ -453,12 +453,12 @@ CCubeMeshTextured::CCubeMeshTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	XMFLOAT3 pxmf3Positions[24];
 	XMFLOAT3 pxmf3Normals[24];
 
-	for (int i = 0; i < m_nVertices; ++i)
+	for (UINT i = 0; i < m_nVertices; ++i)
 		pxmf3Positions[i] = pVertices[i].GetPosition();
 
 	CalculateVertexNormals(pxmf3Normals, pxmf3Positions, m_nVertices, pnIndices, m_nIndices);
 
-	for (int i = 0; i < m_nVertices; ++i)
+	for (UINT i = 0; i < m_nVertices; ++i)
 		pVertices[i] = CTexturedVertex(pxmf3Positions[i], pxmf3Normals[i], pVertices[i].m_xmf2TexCoord);
 
 	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
@@ -537,6 +537,9 @@ CSkyBoxMesh::~CSkyBoxMesh()
 CSkinnedMesh::CSkinnedMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CMeshLoadInfo* pMeshInfo)
 	: CPlayerMesh(pd3dDevice, pd3dCommandList, pMeshInfo)
 {
+	m_d3dBoneIndexBufferView = D3D12_VERTEX_BUFFER_VIEW{};
+	m_d3dBoneWeightBufferView = D3D12_VERTEX_BUFFER_VIEW{};
+	m_ppstrSkinningBoneNames = NULL;
 }
 
 CSkinnedMesh::~CSkinnedMesh()
@@ -639,7 +642,7 @@ void CSkinnedMesh::LoadSkinInfoFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 			{
 				m_pxmn4BoneIndices = new XMINT4[m_nVertices];
 
-				for (int i = 0; i < m_nVertices; i++)
+				for (UINT i = 0; i < m_nVertices; i++)
 				{
 					fileStream.read((char*)&m_pxmn4BoneIndices[i], sizeof(XMINT4));
 				}
@@ -662,7 +665,7 @@ void CSkinnedMesh::LoadSkinInfoFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 			{
 				m_pxmf4BoneWeights = new XMFLOAT4[m_nVertices];
 
-				for (int i = 0; i < m_nVertices; i++)
+				for (UINT i = 0; i < m_nVertices; i++)
 				{
 					fileStream.read((char*)&m_pxmf4BoneWeights[i], sizeof(XMFLOAT4));
 				}
@@ -702,6 +705,9 @@ void CCubeMeshTextured::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normal
 
 void CCubeMeshTextured::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, UINT nVertices, UINT* pnIndices, UINT nIndices)
 {
+	if (pnIndices == NULL)
+		return;
+
 	UINT nPrimitives = (pnIndices) ? (nIndices / 3) : (nVertices / 3);
 	XMFLOAT3 xmf3SumOfNormal, xmf3Edge01, xmf3Edge02, xmf3Normal;
 	UINT nIndex0, nIndex1, nIndex2;

@@ -151,7 +151,7 @@ ComPtr<ID3D12RootSignature> CScene::GetGraphicsRootSignature()
 
 void CScene::BuildLightsAndMaterials()
 {
-	m_nLights = 2;
+	m_nLights = 1;
 	m_pLights = new LIGHTS[m_nLights];
 	::ZeroMemory(m_pLights, sizeof(LIGHTS) * m_nLights);
 
@@ -164,7 +164,7 @@ void CScene::BuildLightsAndMaterials()
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -0.5f, 1.0f);
 
-	m_pLights->m_pLights[1].m_bEnable = false;
+	/*m_pLights->m_pLights[1].m_bEnable = false;
 	m_pLights->m_pLights[1].m_nType = POINT_LIGHT;
 	m_pLights->m_pLights[1].m_fRange = 1000.0f;
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f);
@@ -172,7 +172,7 @@ void CScene::BuildLightsAndMaterials()
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
 	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(20.0f, 20.0f, 40.0f);
 	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
+	m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);*/
 
 	m_pMaterials = new MATERIALS;
 	::ZeroMemory(m_pMaterials, sizeof(MATERIALS));
@@ -493,7 +493,7 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera);
 
-	//if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
+	if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
 
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);

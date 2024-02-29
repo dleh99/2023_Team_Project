@@ -1,5 +1,5 @@
 
-#define MAX_LIGHTS 2
+#define MAX_LIGHTS 1
 #define MAX_MATERIALS 8
 
 #define POINT_LIGHT 1

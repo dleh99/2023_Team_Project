@@ -8,6 +8,13 @@ CShader::CShader()
 {
 	m_d3dSrvCPUDescriptorStartHandle.ptr = NULL;
 	m_d3dSrvGPUDescriptorStartHandle.ptr = NULL;
+
+	m_d3dCbvCPUDescriptorStartHandle.ptr = NULL;
+	m_d3dCbvGPUDescriptorStartHandle.ptr = NULL;
+	m_d3dSrvCPUDescriptorNextHandle.ptr = NULL;
+	m_d3dSrvGPUDescriptorNextHandle.ptr = NULL;
+
+	m_ptexture = NULL;
 }
 
 CShader::~CShader()
@@ -662,6 +669,13 @@ CDepthRenderShader::CDepthRenderShader(CScene* pScene, LIGHT* pLights)
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.5f, 0.5f, 0.0f, 1.0f };
 	m_xmProjectionToTexture = XMLoadFloat4x4(&xmf4x4ToTexture);
+
+	m_d3dDsvDescriptorCPUHandle = D3D12_CPU_DESCRIPTOR_HANDLE{};
+	for (int i = 0; i < MAX_DEPTH_TEXTURES; ++i)
+	{
+		m_pd3dRtvCPUDescriptorHandles[i] = D3D12_CPU_DESCRIPTOR_HANDLE{};
+		m_ppDepthRenderCameras[i] = NULL;
+	}
 }
 
 CDepthRenderShader::~CDepthRenderShader()
@@ -941,7 +955,7 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 
 			XMMATRIX xmmtxLightView = XMMatrixLookToLH(XMLoadFloat3(&xmf3Position), XMLoadFloat3(&xmf3Look), XMLoadFloat3(&xmf3Up));
 
-			XMMATRIX xmmtxProjection;
+			XMMATRIX xmmtxProjection = XMMATRIX{};
 			if (m_pLights[j].m_nType == DIRECTIONAL_LIGHT)
 			{
 				xmmtxProjection = CreateOrthographicProjectionMatrix(xmmtxLightView, pCamera, &xmBoundingBox);

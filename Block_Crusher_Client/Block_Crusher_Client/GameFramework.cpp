@@ -20,6 +20,11 @@ CGameFramework::CGameFramework()
 		m_nFenceValues[i] = 0;
 	m_pScene = NULL;
 
+	m_ptOldCursorPos.x = 0;
+	m_ptOldCursorPos.y = 0;
+	m_ptWinCursorMouse.x = 0;
+	m_ptWinCursorMouse.y = 0;
+
 	wstring* id = new wstring(L"");
 	wstring* pw = new wstring(L"");
 	wstring* serverip = new wstring(L"127.0.0.1");
@@ -823,6 +828,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			m_pScene->m_ptWinCursorMouse.y = HIWORD(lParam);
 			m_flag = m_pScene->CCTitleUI();
 		}
+		[[fallthrough]];
 	case WM_RBUTTONUP:
 		//마우스 캡쳐를 해제한다.
 		::ReleaseCapture();
