@@ -65,6 +65,7 @@ int NetworkInit()
 	unsigned long noblock = -1;
 	ioctlsocket(g_socket, FIONBIO, &noblock);
 	//send_login_packet();
+	cout << "네트워크 연결" << endl;
 
 	return ret;
 }
@@ -81,9 +82,12 @@ void send_login_packet(wstring i_id, wstring i_password, int i_room)
 	CS_LOGIN_PACKET p{};
 	p.size = sizeof(CS_LOGIN_PACKET);
 	p.type = CS_LOGIN;
-	p.id = i_id;
-	p.password = i_password;
+	memcpy(p.id, i_id.c_str(), sizeof(p.id));
+	memcpy(p.password, i_password.c_str(), sizeof(p.password));
 	p.room_num = i_room;
+	//wcout << L"아이디 : " << i_id << L", 비밀번호 : " << i_password << L", 방 번호 : " << i_room << endl;
+	wcout << i_id << ", " << i_password << ", " << i_room << endl;
+	cout << "데이터 크기 : " << p.size << endl;
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
@@ -138,8 +142,9 @@ void ProcessPacket(char* ptr)
 	switch (ptr[1]) {
 	case SC_LOGIN_FAIL: {
 		SC_LOGIN_FAIL_PACKET* packet = reinterpret_cast<SC_LOGIN_FAIL_PACKET*>(ptr);
+		cout << "실패 패킷이 옴" << endl;
 		if (packet->login_state == LS_OUTOFROOM) {
-			cout << "룸 번호는 332 이하여야 합니다" << endl;
+			cout << "룸 번호는 0이상, 332 이하여야 합니다" << endl;
 		}
 		else if (packet->login_state == LS_FULLROOM) {
 			cout << "선택하신 룸에서 게임이 진행중입니다" << endl;

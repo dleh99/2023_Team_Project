@@ -43,6 +43,7 @@ void User_Interface::send_login_fail_packet(LOGIN_STATE ls)
 	p.size = sizeof(SC_LOGIN_FAIL_PACKET);
 	p.type = SC_LOGIN_FAIL;
 	p.login_state = ls;
+	do_send(&p);
 }
 
 void User_Interface::send_login_success_packet(LOGIN_STATE ls)
@@ -51,6 +52,7 @@ void User_Interface::send_login_success_packet(LOGIN_STATE ls)
 	p.size = sizeof(SC_LOGIN_SUCCESS_PACKET);
 	p.type = SC_LOGIN_SUCCESS;
 	p.login_state = ls;
+	do_send(&p);
 }
 
 void User_Interface::send_login_info_packet()

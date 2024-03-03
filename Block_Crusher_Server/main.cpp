@@ -44,13 +44,17 @@ int set_client_id()
 void disconnect(int c_id)
 {
 	// DB에서 login_state 변경
-	DB_EVENT ev{ clients[c_id]._id, chrono::system_clock::now(), LOGIN_DISCONNECT, clients[c_id].login_id, L"" };
-	db_queue.push(ev);
+	if (clients[c_id].login_id != L"") {
+		DB_EVENT ev{ clients[c_id]._id, chrono::system_clock::now(), LOGIN_DISCONNECT, clients[c_id].login_id, L"" };
+		db_queue.push(ev);
+	}
 
 	// 룸에서도 빠져나가게 해야함
 	short room_num = clients_room[c_id];
-	if (rooms[room_num].PlayerOut(c_id))
-		cout << c_id << "룸에서 탈퇴 완료" << endl;
+	if (room_num != -1) {
+		if (rooms[room_num].PlayerOut(c_id))
+			cout << "[" << c_id << "] 룸에서 탈퇴 완료" << endl;
+	}
 	
 	// 소켓 해제
 	closesocket(clients[c_id]._socket);
@@ -83,22 +87,27 @@ bool CollisionCheck_objects(XMFLOAT3 p1, XMFLOAT3 p2, float r1, float r2)
 
 void packet_process(int c_id, char* packet)
 {
+	//cout << "패킷 해석" << endl;
 	switch (packet[1]) {
 	case CS_LOGIN: {
 		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
-		//wcout << "ID : " << p->id << ", PW : " << p->password << ", RN : " << p->room_num << endl;
+		//cout <<  packet[0] << ", ";
+		wcout << "ID : " << p->id << ", PW : " << p->password << ", RN : " << p->room_num << endl;
 		//clients[c_id].send_login_info_packet();
 
-		if (p->room_num > 332) {
+		if (p->room_num > 332 || p->room_num < 0) {
 			clients[c_id].send_login_fail_packet(LS_OUTOFROOM);
 		}
 		else {
 			if (false == rooms[p->room_num].PlayerIn(c_id)) {
+				// 여기도 오류 나옴
 				clients[c_id].send_login_fail_packet(LS_FULLROOM);
 			}
 			else {
-				cout << "몇번 들어와" << endl;
-				wcout << p->id << ", " << p->password << endl;
+				//cout << "몇번 들어와" << endl;
+				//wcout << L"아이디 : " << p->id << L", 비밀번호 : " << p->password << L", 방 번호 : " << p->room_num << endl;
+				//cout << rooms[p->room_num].GetRoomNum() << "번 방 인원수 : " << rooms[p->room_num].clients_number << endl;
+				clients_room[c_id] = p->room_num;
  				clients[c_id].login_id = p->id;
 				DB_EVENT ev{ clients[c_id]._id, chrono::system_clock::now(), TRY_LOGIN, p->id, p->password };
 				db_queue.push(ev);
@@ -205,12 +214,14 @@ void worker_thread(HANDLE iocp_h)
 		BOOL ret = GetQueuedCompletionStatus(iocp_h, &byte_size, &key, &over, INFINITE);
 		Overlapped* ex_over = reinterpret_cast<Overlapped*>(over);
 
+		//cout << static_cast<int>(key) << endl;
+
 		// 오류가 났을 때 처리
 		if (FALSE == ret) {
 			if (ex_over->_overlapped_type == OT_ACCEPT) std::cout << "Error of Accept";
 			else {
 				//std::cout << "Error on client [" << key << "] in GQCS" << std::endl;
-				disconnect(key);
+				disconnect(static_cast<int>(key));
 				if (ex_over->_overlapped_type == OT_SEND) delete ex_over;
 				continue;
 			}
@@ -218,7 +229,7 @@ void worker_thread(HANDLE iocp_h)
 
 		// 온 데이터가 없을 때
 		if ((byte_size == 0) && ((ex_over->_overlapped_type == OT_RECV) || (ex_over->_overlapped_type == OT_SEND))) {
-			disconnect(key);
+			disconnect(static_cast<int>(key));
 			if (ex_over->_overlapped_type == OT_SEND) delete ex_over;
 			continue;
 		}
@@ -241,6 +252,8 @@ void worker_thread(HANDLE iocp_h)
 					// 상태 변환(접속중)
 					//clients[client_id]._state = US_CONNECTING;
 
+					//cout << "커넥팅" << endl;
+
 					CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_c_socket), iocp_h, client_id, 0);
 					clients[client_id].do_recv();
 					g_c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
@@ -256,10 +269,17 @@ void worker_thread(HANDLE iocp_h)
 			}
 			case OT_RECV:
 			{
+				//cout << "리시브 중" << endl;
+				if (byte_size == 0)
+				{
+					disconnect(static_cast<int>(key));
+					continue;
+				}
 				int remain_data = byte_size + clients[key]._prev_remain;
 				char* p = ex_over->_send_buf;
 				// 패킷 재조립
 				while (remain_data > 0) {
+					//cout << "패킷 재조립 중" << endl;
 					int packet_size = p[0];
 					if (packet_size <= remain_data) {
 						packet_process(static_cast<int>(key), p);
@@ -268,10 +288,14 @@ void worker_thread(HANDLE iocp_h)
 					}
 					else break;
 				}
+				//cout << "나왔다리" << endl;
 				// 데이터 꼭다리
 				clients[key]._prev_remain = remain_data;
 				if (remain_data > 0) {
 					memcpy(ex_over->_send_buf, p, remain_data);
+				}
+				if (remain_data == 0) {
+					clients[key]._prev_remain = 0;
 				}
 				clients[key].do_recv();
 				break;
@@ -289,38 +313,48 @@ void worker_thread(HANDLE iocp_h)
 
 				XMFLOAT3 random_pos = physics_engine.PickPos();
 
-				for (auto& send_cl : clients) {
-					{
-						lock_guard<mutex> ll{ send_cl._s_lock };
-						if (send_cl._state != US_INGAME) continue;
-					}
-					//cout << "[" << send_cl._id << "] 에게 " << key << "가 부활했다고 보냄" << endl;
-					send_cl.send_respawn_packet(random_pos.x, random_pos.y, random_pos.z, key);
+				short room_number = clients_room[key];
+				int* same_room_player = rooms[room_number].GetPlayerId();
+
+				for (int round{}; round < MAX_PLAYER; ++round) {
+					int player_id = *same_room_player;
+					if (player_id == -1) continue;
+					clients[player_id].send_respawn_packet(random_pos.x, random_pos.y, random_pos.z, key);
+					same_room_player += 1;
 				}
+				delete ex_over;
 				break;
 			}
 			case OT_SIGNUP:
 			{
 				cout << "worker thread에서 새로운 아이디" << endl;
 				clients[key].send_login_success_packet(LS_SIGNUP);
+				delete ex_over;
 				break;
 			}
 			case OT_LOGIN_SUCCESS:
 			{
 				cout << "worker thread에서 로그인 성공" << endl;
 				clients[key].send_login_success_packet(LS_LOGIN_SUCCESS);
+				delete ex_over;
 				break;
 			}
 			case OT_LOGIN_FAIL:
 			{
 				cout << "worker thread에서 로그인 실패" << endl;
 				clients[key].send_login_fail_packet(LS_LOGIN_FAIL);
+				clients_room[key] = -1;
+				clients[key].login_id = L"";
+				delete ex_over;
 				break;
 			}
 			case OT_ALREADY_INGAME:
 			{
 				cout << "worker thread에서 이미 접속중" << endl;
 				clients[key].send_login_fail_packet(LS_ALREADY_INGAME);
+				clients_room[key] = -1;
+				clients[key].login_id = L"";
+				delete ex_over;
 				break;
 			}
 			case OT_DISCONNECT:
@@ -435,7 +469,7 @@ void InitRoom()
 		room_num++;
 	}
 
-	for (char c : clients_room) {
+	for (short c : clients_room) {
 		c = -1;
 	}
 }
@@ -479,7 +513,7 @@ void do_db()
 			}
 			switch (ev.event_id) {
 			case TRY_LOGIN: {
-				//cout << "로그인 트라이 해본다" << endl;
+				cout << "로그인 트라이 해본다" << endl;
 				int res = db_controll.Search_User(ev._id, ev._password);
 				Overlapped* ov = new Overlapped;
 				if (res == DB_SIGN_UP) {

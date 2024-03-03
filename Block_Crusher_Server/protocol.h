@@ -73,8 +73,8 @@ enum LOGIN_STATE
 struct CS_LOGIN_PACKET {
 	unsigned char		size;
 	char				type;
-	std::wstring		id;
-	std::wstring		password;
+	wchar_t				id[20];
+	wchar_t				password[20];
 	int					room_num;
 };
 

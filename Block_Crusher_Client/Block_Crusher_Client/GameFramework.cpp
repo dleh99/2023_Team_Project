@@ -737,7 +737,7 @@ void CGameFramework::ProcessInput()
 		z = m_pPlayer->GetPosition().z;
 		//cout << x << ", " << y << ", " << z << endl;
 		//cout << m_pPlayer->GetAniState() << endl;
-		send_move_packet(x, y, z, cxDelta, cyDelta, m_pPlayer->GetAniState());
+		//send_move_packet(x, y, z, cxDelta, cyDelta, m_pPlayer->GetAniState());
 
 		if (y < -150.f) {
 			send_fall_packet();
@@ -859,6 +859,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case VK_RETURN: {
 			try {
 				int num = stoi(*m_sTitleTexts[RoomNumber]);
+				cout << "¿©±â µé¾î¿È" << endl;
 				send_login_packet(*m_sTitleTexts[ID], *m_sTitleTexts[PW], num);
 			}
 			catch (const std::invalid_argument& e) {
