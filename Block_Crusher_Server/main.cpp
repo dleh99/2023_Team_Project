@@ -145,10 +145,10 @@ void packet_process(int c_id, char* packet)
 		int* same_room_player = rooms[room_number].GetPlayerId();
 
 		for (int round{}; round < MAX_PLAYER; ++round) {
-			int player_id = *same_room_player;
+			int player_id = same_room_player[round];
 			if (player_id == -1) continue;
+			if (player_id == c_id) continue;
 			clients[player_id].send_move_packet(clients.data(), c_id, p->animation_state);
-			same_room_player += 1;
 		}
 		break;
 	}
@@ -165,11 +165,10 @@ void packet_process(int c_id, char* packet)
 				int* same_room_player = rooms[room_number].GetPlayerId();
 
 				for (int round{}; round < MAX_PLAYER; ++round) {
-					int player_id = *same_room_player;
+					int player_id = same_room_player[round];
 					if (player_id == -1) continue;
 					if (player_id == c_id) continue;
 					clients[player_id].send_bullet_add_packet(clients.data(), c_id, i);
-					same_room_player += 1;
 				}
 				break;
 			}
@@ -187,11 +186,10 @@ void packet_process(int c_id, char* packet)
 			int* same_room_player = rooms[room_number].GetPlayerId();
 
 			for (int round{}; round < MAX_PLAYER; ++round) {
-				int player_id = *same_room_player;
+				int player_id = same_room_player[round];
 				if (player_id == -1) continue;
 				if (player_id == c_id) continue;
 				clients[player_id].send_fall_packet(c_id);
-				same_room_player += 1;
 			}
 		}
 		break;
@@ -335,10 +333,9 @@ void worker_thread(HANDLE iocp_h)
 				int* same_room_player = rooms[room_number].GetPlayerId();
 
 				for (int round{}; round < MAX_PLAYER; ++round) {
-					int player_id = *same_room_player;
+					int player_id = same_room_player[round];
 					if (player_id == -1) continue;
 					clients[player_id].send_respawn_packet(random_pos.x, random_pos.y, random_pos.z, key);
-					same_room_player += 1;
 				}
 				delete ex_over;
 				break;
