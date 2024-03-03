@@ -184,7 +184,7 @@ void ProcessPacket(char* ptr)
 		m_gameStart = true;
 		m_mapKey = packet->map_key;
 
-		NetScene->BuildObjects(m_mapKey);
+		//NetScene->BuildObjects(m_mapKey);
 		NetScene->m_SceneState = 1;
 		cout << "시작 패킷 받음" << endl;
 		break;
