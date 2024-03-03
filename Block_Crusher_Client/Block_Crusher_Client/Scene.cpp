@@ -117,8 +117,14 @@ void CScene::ReleaseUploadBuffers()
 
 void CScene::DisableObject(int bullet_id, int block_id, int p_id)
 {
-	if (m_ppObjects[block_id])
+	if (m_ppObjects[block_id]) {
 		m_ppObjects[block_id]->SetIsActive(false);
+		m_ppObjects[block_id]->SetPosition(99999, 99999, 99999);
+		auto tmp = m_ppObjects[block_id]->GetWorldMatrix();
+		XMFLOAT4X4 result;
+		XMStoreFloat4x4(&result, XMMatrixTranspose(XMLoadFloat4x4(&tmp)));
+		m_pInstance[block_id].worldMatrix = result;
+	}
 	for (int i{}; i < m_nObjects; ++i) {
 		if (m_ppObjects[i]->GetObjectType() != TYPE_BULLET) continue;
 		if (((CBulletObject*)m_ppObjects[i])->GetPlayerId() == p_id && ((CBulletObject*)m_ppObjects[i])->GetBulletId() == bullet_id) {
