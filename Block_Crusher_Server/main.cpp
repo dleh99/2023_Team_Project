@@ -85,6 +85,21 @@ bool CollisionCheck_objects(XMFLOAT3 p1, XMFLOAT3 p2, float r1, float r2)
 	return false;
 }
 
+void checking_room(int key)
+{
+	short room_num = clients_room[key];
+
+	lock_guard<mutex> ll{ rooms[room_num]._r_lock };
+	if (RS_READY == rooms[room_num].GetRoomState())
+	{
+		rooms[room_num].SetRoomState(RS_INGAME);
+		int* room_mambers = rooms[room_num].GetPlayerId();
+		for (int i{}; i < MAX_PLAYER; ++i) {
+			clients[room_mambers[i]].send_start_packet(rooms[room_num].GetMapKey());
+		}
+	}
+}
+
 void packet_process(int c_id, char* packet)
 {
 	//cout << "패킷 해석" << endl;
@@ -100,7 +115,6 @@ void packet_process(int c_id, char* packet)
 		}
 		else {
 			if (false == rooms[p->room_num].PlayerIn(c_id)) {
-				// 여기도 오류 나옴
 				clients[c_id].send_login_fail_packet(LS_FULLROOM);
 			}
 			else {
@@ -329,6 +343,7 @@ void worker_thread(HANDLE iocp_h)
 			{
 				cout << "worker thread에서 새로운 아이디" << endl;
 				clients[key].send_login_success_packet(LS_SIGNUP);
+				checking_room(key);
 				delete ex_over;
 				break;
 			}
@@ -336,6 +351,7 @@ void worker_thread(HANDLE iocp_h)
 			{
 				cout << "worker thread에서 로그인 성공" << endl;
 				clients[key].send_login_success_packet(LS_LOGIN_SUCCESS);
+				checking_room(key);
 				delete ex_over;
 				break;
 			}
@@ -519,7 +535,7 @@ void do_db()
 			}
 			switch (ev.event_id) {
 			case TRY_LOGIN: {
-				cout << "로그인 트라이 해본다" << endl;
+				//cout << "로그인 트라이 해본다" << endl;
 				int res = db_controll.Search_User(ev._id, ev._password);
 				Overlapped* ov = new Overlapped;
 				if (res == DB_SIGN_UP) {

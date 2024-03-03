@@ -71,6 +71,7 @@ bool Room::PlayerOut(int p_id)
 		clients_id[key] = -1;
 		clients_number--;
 		//std::cout << "[³ª°¨] " << clients_number << std::endl;
+		if (RS_READY == room_state) room_state = RS_WAITING;
 		return true;
 	}
 	return false;

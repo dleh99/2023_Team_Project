@@ -66,9 +66,9 @@ int DB::Search_User(std::wstring id, std::wstring password)
 	SQLLEN len[4];
 
 	memset(wstr, 0, sizeof(wstr));
-	std::wcout << "아이디 : " << id << ", 비밀번호 : " << password << std::endl;
-	wsprintf(wstr, L"EXEC Login %ls, %ls", id.c_str(), password.c_str());
-	std::wcout << wstr << std::endl;
+	//std::wcout << "아이디 : " << id << ", 비밀번호 : " << password << std::endl;
+	//wsprintf(wstr, L"EXEC Login %ls, %ls", id.c_str(), password.c_str());
+	//std::wcout << wstr << std::endl;
 
 	// Allocate statement handle  
 	retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
@@ -86,10 +86,10 @@ int DB::Search_User(std::wstring id, std::wstring password)
 			show_error(hstmt, SQL_HANDLE_STMT, retcode);
 		}
 		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-			std::wcout << user_id << ", " << user_password << ", ";
+			/*std::wcout << user_id << ", " << user_password << ", ";
 			std::cout << "점수 : " << user_high_score << ", 로그인 : " << user_login_state << std::endl;
 			if (user_login_state == DB_SIGN_UP) {
-				std::cout << "새로운 id 감지. 회원가입 합니다잉" << std::endl;
+				std::cout << "새로운 id 감지. 회원가입 합니다" << std::endl;
 			}
 			else if (user_login_state == DB_LOGIN_SUCCESS) {
 				std::cout << "로그인 성공" << std::endl;
@@ -102,7 +102,7 @@ int DB::Search_User(std::wstring id, std::wstring password)
 			}
 			else if (user_login_state == -1) {
 				std::cout << "여기도 들어옴" << std::endl;
-			}
+			}*/
 			SQLCancel(hstmt);
 			SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
 		}
