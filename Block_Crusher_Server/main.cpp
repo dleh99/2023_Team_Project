@@ -343,7 +343,10 @@ void worker_thread(HANDLE iocp_h)
 			{
 				cout << "worker thread에서 로그인 실패" << endl;
 				clients[key].send_login_fail_packet(LS_LOGIN_FAIL);
-				clients_room[key] = -1;
+				if (clients_room[key] != -1) {
+					rooms[clients_room[key]].PlayerOut(key);
+					clients_room[key] = -1;
+				}
 				clients[key].login_id = L"";
 				delete ex_over;
 				break;
@@ -352,7 +355,10 @@ void worker_thread(HANDLE iocp_h)
 			{
 				cout << "worker thread에서 이미 접속중" << endl;
 				clients[key].send_login_fail_packet(LS_ALREADY_INGAME);
-				clients_room[key] = -1;
+				if (clients_room[key] != -1) {
+					rooms[clients_room[key]].PlayerOut(key);
+					clients_room[key] = -1;
+				}
 				clients[key].login_id = L"";
 				delete ex_over;
 				break;
