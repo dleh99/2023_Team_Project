@@ -207,10 +207,10 @@ void packet_process(int c_id, char* packet)
 		int* same_room_player = rooms[room_number].GetPlayerId();
 
 		for (int round{}; round < MAX_PLAYER; ++round) {
-			int player_id = *same_room_player;
+			int player_id = same_room_player[round];
 			if (player_id == -1) continue;
+			if (player_id == c_id) continue;
 			clients[player_id].send_move_packet(clients.data(), c_id, p->animation_state);
-			same_room_player += 1;
 		}
 		break;
 	}
@@ -237,11 +237,11 @@ void packet_process(int c_id, char* packet)
 				int* same_room_player = rooms[room_number].GetPlayerId();
 
 				for (int round{}; round < MAX_PLAYER; ++round) {
-					int player_id = *same_room_player;
+					int player_id = same_room_player[round];
+					//cout << player_id << endl;
 					if (player_id == -1) continue;
 					if (player_id == c_id) continue;
 					clients[player_id].send_bullet_add_packet(clients.data(), c_id, i);
-					same_room_player += 1;
 				}
 				/*for (auto& r : rooms) {
 					if (-1 == r.FindPlayer(c_id)) continue;
