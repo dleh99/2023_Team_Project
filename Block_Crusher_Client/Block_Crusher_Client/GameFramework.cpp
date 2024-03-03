@@ -587,8 +587,7 @@ void CGameFramework::BuildObjects()
 	for (int i = 0; i < 3; i++)
 		m_pScene->m_sTitleTexts[i] = m_sTitleTexts[i];
 
-	auto rs = m_pScene->GetGraphicsRootSignature();
-	rs = m_pScene->CreateGraphicsRootSignature(m_pd3dDevice.Get());
+	m_pScene->m_pd3dGraphicsRootSignature = m_pScene->CreateGraphicsRootSignature(m_pd3dDevice.Get());
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	pTexture->LoadTextureFromDDSFile(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), L"Textures/SpaceMan_Rank_01_Black.dds", RESOURCE_TEXTURE2D, 0);

@@ -52,6 +52,7 @@ public:
 
 	ID3D12Device* m_pd3dDevice =  NULL;
 	ID3D12GraphicsCommandList* m_pd3dCommandList = NULL;
+	ComPtr<ID3D12RootSignature> m_pd3dGraphicsRootSignature = NULL;
 
 	bool GetisEnd() { return isEnd; };
 
@@ -74,8 +75,6 @@ protected:
 
 	ComPtr<IDWriteTextFormat> pTextFormat[5];
 	ComPtr<ID2D1SolidColorBrush> SolidColorBrush[10];
-
-	ComPtr<ID3D12RootSignature> m_pd3dGraphicsRootSignature = NULL;
 
 	Instance* m_pInstance = NULL;
 	CInstancingShader* m_pInstanceShader = NULL;
