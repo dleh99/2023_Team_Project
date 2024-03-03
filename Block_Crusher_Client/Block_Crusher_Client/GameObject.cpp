@@ -126,6 +126,7 @@ D3D12_SHADER_RESOURCE_VIEW_DESC CTexture::GetShaderResourceViewDesc(int nIndex)
 	D3D12_RESOURCE_DESC d3dResourceDesc = pShaderResource->GetDesc();
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc;
+	::ZeroMemory(&d3dShaderResourceViewDesc, sizeof(D3D12_SHADER_RESOURCE_VIEW_DESC));
 	d3dShaderResourceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
 	int nTextureType = GetTextureType(nIndex);
@@ -680,22 +681,22 @@ CGameObject* CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, I
 
 	while (true)
 	{
-		char token;
+		char token{};
 		fileStream.read((char*)&token, sizeof(char));
 
 		if ('F' == token)
 		{
 			fileStream.read((char*)&pGameObject->m_nFrames, sizeof(int));
 
-			char nStr;
+			char nStr{};
 			char frameName[64] = { 0, };
 			fileStream.read((char*)&nStr, sizeof(char));
 			fileStream.read((char*)&pGameObject->m_pstrFrameName, sizeof(char) * nStr);
 			pGameObject->m_pstrFrameName[nStr] = '\0';
 
 			// Transform
-			XMFLOAT3 xmf3Position, xmf3Rotation, xmf3Scale;
-			XMFLOAT4 xmf4Rotation;
+			XMFLOAT3 xmf3Position{}, xmf3Rotation{}, xmf3Scale{};
+			XMFLOAT4 xmf4Rotation{};
 			fileStream.read((char*)&xmf3Position, sizeof(XMFLOAT3));
 			fileStream.read((char*)&xmf3Rotation, sizeof(XMFLOAT3));
 			fileStream.read((char*)&xmf3Scale, sizeof(XMFLOAT3));
@@ -885,7 +886,7 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 	std::ifstream& fileStream, CGameObject* pObj,CShader* pShader, CMaterial* pMaterial)
 {
 	int nMaterial = 0;
-	char c;
+	char c{};
 
 	fileStream.read((char*)&nMaterial, sizeof(int));
 	fileStream.read((char*)&nMaterial, sizeof(int));
@@ -900,7 +901,7 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 		std::string token;
 		fileStream >> token;
 
-		char whiteSpace;
+		char whiteSpace = 0;
 		fileStream.read((char*)&whiteSpace, sizeof(char));
 
 		if (!token.compare("albedo"))				 // Color
@@ -937,7 +938,7 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 		}
 		else if (!token.compare("<AlbedoMap>"))			// Texture
 		{
-			char c;
+			char c = 0;
 			fileStream.read((char*)&c, sizeof(char));
 
 			fileStream >> pGameObjectMaterial->m_strTextureName;

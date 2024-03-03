@@ -35,14 +35,22 @@ cbuffer cbToLightSpace : register(b6)
 	CB_TO_LIGHT_SPACE	gcbToLightSpaces[MAX_LIGHTS];
 };
 
-// 정점 셰이더의 입력을 위한 구조체를 선언한다.
+Texture2D gtxtTexture : register(t0);
+TextureCube gtxtSkyCubeTexture : register(t1);
+Texture2D gtxtAlbedoTexture : register(t2);
+
+SamplerState gSamplerState : register(s0);
+SamplerState gssClamp : register(s1);
+
+// bullet
+///////////////////////////////////////////////////////////////////////////////////////////////
+
 struct VS_INPUT
 {
 	float3 position : POSITION;
 	float4 color : COLOR;
 };
 
-// 정점 세이더의 출력(픽셀 셰이더의 입력)을 위한 구조체를 선언한다.
 struct VS_OUTPUT
 {
 	float4 position : SV_POSITION;
@@ -50,13 +58,6 @@ struct VS_OUTPUT
 	float4 shadowMapUVs[MAX_LIGHTS] : TEXCOORD;
 };
 
-Texture2D gtxtTexture : register(t0);
-TextureCube gtxtSkyCubeTexture : register(t1);
-Texture2D gtxtAlbedoTexture : register(t2);
-
-SamplerState gSamplerState : register(s0);
-SamplerState gssClamp : register(s1);
-// 정점 셰이더를 정의한다.
 VS_OUTPUT VSDiffused(VS_INPUT input)
 {
 	VS_OUTPUT output = (VS_OUTPUT)0;

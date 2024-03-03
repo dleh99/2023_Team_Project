@@ -58,7 +58,7 @@ public:
 
 	void Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, ComPtr<ID2D1Factory3> m_d2dFactory, ComPtr<IDWriteFactory> m_dWriteFactory, float fTimeElapsed);
 	void RenderTitle(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, ComPtr<ID2D1Factory3> m_d2dFactory, ComPtr<IDWriteFactory> m_dWriteFactory, float fTimeElapsed);
-	void UpdateTitleTexts();
+	//void UpdateTitleTexts();
 	void BuildText(ComPtr<ID2D1DeviceContext2> const m_d2dDeviceContext, ComPtr<ID2D1Factory3> m_d2dFactory, ComPtr<IDWriteFactory> m_dWriteFactory);
 
 	int FindEmptySlot();
@@ -79,7 +79,7 @@ public:
 	int m_nBlock = 0;
 	CPlayer* m_pPlayer= NULL;
 	std::wstring* m_sTitleTexts[3];
-	POINT m_ptWinCursorMouse;
+	POINT m_ptWinCursorMouse{};
 
 	bool GetisEnd() { return isEnd; };
 
@@ -120,7 +120,7 @@ protected:
 	float m_fPlayTime = 120.0f;
 	float m_fBlinkTime = 0;
 
-	CShader* m_pSceneShader;
+	CShader* m_pSceneShader = NULL;
 	CCubeMeshDiffused* pBulletMesh = NULL;
 
 	CSkyBox* m_pSkyBox = NULL;

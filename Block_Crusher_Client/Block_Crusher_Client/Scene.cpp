@@ -8,6 +8,9 @@ CScene::CScene()
 	TitleUI[ID] = {700, 575, 700 + 250, 575 + 30};
 	TitleUI[PW] = {700, 625, 700 + 250, 625 + 30};
 	TitleUI[ServerIP] = { 700, 675, 700 + 250, 675 + 30};
+
+	m_xmf4GlobalAmbient = XMFLOAT4{};
+	::ZeroMemory(m_sTitleTexts, sizeof(std::wstring*) * 3);
 }
 
 CScene::~CScene()
@@ -254,6 +257,8 @@ ComPtr<ID3D12RootSignature> CScene::CreateGraphicsRootSignature(ID3D12Device* pd
 	ComPtr<ID3D12RootSignature> pd3dGraphicsRootSignature = NULL;
 
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRange[4];
+	::ZeroMemory(pd3dDescriptorRange, sizeof(D3D12_DESCRIPTOR_RANGE) * 4);
+
 	pd3dDescriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRange[0].NumDescriptors = 1;
 	pd3dDescriptorRange[0].BaseShaderRegister = 0; //t0: gtxtTexture
@@ -344,8 +349,8 @@ ComPtr<ID3D12RootSignature> CScene::CreateGraphicsRootSignature(ID3D12Device* pd
 		//|D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 
 	D3D12_STATIC_SAMPLER_DESC d3dSamplerDesc[4];
+	::ZeroMemory(d3dSamplerDesc, sizeof(D3D12_STATIC_SAMPLER_DESC) * 4);
 
-	::ZeroMemory(&d3dSamplerDesc, sizeof(D3D12_STATIC_SAMPLER_DESC));
 	d3dSamplerDesc[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	d3dSamplerDesc[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	d3dSamplerDesc[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -492,8 +497,13 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 		m_pInstanceShader->Render(pd3dCommandList, pCamera);
 
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera);
-
-	if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
+	
+	if (m_pShadowMapToViewport)
+	{
+		m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
+		//m_pShadowMapToViewport->SetOtherShadowTexture(m_pDepthRenderShader->GetDepthTexture());
+		//m_pShadowMapToViewport->RenderOtherShadow(pd3dCommandList, pCamera);
+	}
 
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
@@ -687,14 +697,14 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 	float deg = 5.5;
 	float portion = m_pPlayer->m_fBoosterMount / 100.0f;
 	for (int i = 0; i < 50; i++) {
-		D2D1_POINT_2F p1 = { 100 * cos(deg), 100 * sin(deg) };
-		D2D1_POINT_2F p2 = { 100 * cos(deg + 0.03), 100 * sin(deg + 0.03) };
+		D2D1_POINT_2F p1 = { 100 * static_cast<float>(cos(deg)), 100 * static_cast<float>(sin(deg)) };
+		D2D1_POINT_2F p2 = { 100 * static_cast<float>(cos(deg + 0.03)), 100 * static_cast<float>(sin(deg + 0.03)) };
 		m_d2dDeviceContext->DrawLine(p1, p2, SolidColorBrush[8].Get(), 7.0f);
-		int limit = 50.0f * m_pPlayer->m_fBoosterMount / 100.0f;
+		float limit = 50.0f * m_pPlayer->m_fBoosterMount / 100.0f;
 		if (limit > 50 - i) {
 			m_d2dDeviceContext->DrawLine(p1, p2, SolidColorBrush[0].Get(), 7.0f);
 		}
-		deg += 0.03;
+		deg += 0.03f;
 	}
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(560, 300));
 	str = L"연료";

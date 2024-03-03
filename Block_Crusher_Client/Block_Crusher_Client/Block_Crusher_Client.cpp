@@ -128,6 +128,10 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    ShowWindow(hMainWnd, nCmdShow);
    UpdateWindow(hMainWnd);
 
+#ifdef _WITH_SWAPCHAIN_FULLSCREEN_STATE
+   g_GameFramework.ChangeSwapChainState();
+#endif
+
    return TRUE;
 }
 
@@ -143,6 +147,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    int wmId, wmEvent;
+
     switch (message)
     {
     case WM_SIZE:
@@ -158,6 +164,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_KEYUP:
         g_GameFramework.OnProcessingWindowMessage(hWnd, message, wParam, lParam);
         break;
+    case WM_COMMAND:
+    wmId = LOWORD(wParam);
+    wmEvent = HIWORD(wParam);
+    switch (wmId)
+    {
+    case IDM_ABOUT:
+        ::DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+        break;
+    case IDM_EXIT:
+        ::DestroyWindow(hWnd);
+        break;
+    default:
+        return(::DefWindowProc(hWnd, message, wParam, lParam));
+    }
+    break;
     case WM_DESTROY:
         ::PostQuitMessage(0);
         break;
