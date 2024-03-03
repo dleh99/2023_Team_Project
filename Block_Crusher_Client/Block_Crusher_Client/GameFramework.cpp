@@ -642,6 +642,7 @@ void CGameFramework::BuildObjects()
 #endif
 	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
 	m_pScene->m_pPlayer = m_pPlayer;
+	m_pScene->m_vPlayers = m_vEnemyPlayers;
 	m_pPlayer->m_pScene = m_pScene;
 	m_pCamera = m_pPlayer->GetCamera();
 

@@ -78,6 +78,7 @@ public:
 	CGameObject** m_ppObjects = NULL;
 	int m_nBlock = 0;
 	CPlayer* m_pPlayer= NULL;
+	std::vector<CMainPlayer*> m_vPlayers;
 	std::wstring* m_sTitleTexts[3];
 	POINT m_ptWinCursorMouse{};
 
