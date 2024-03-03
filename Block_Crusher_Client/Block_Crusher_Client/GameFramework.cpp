@@ -518,22 +518,23 @@ void CGameFramework::FrameAdvance()
 		D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
 	//렌더링 코드는 여기에 추가될 것이다.
-	if (m_pScene) m_pScene->Render(m_pd3dCommandList.Get(), m_pCamera);
-	
-	if (m_pPlayer)
-		m_pPlayer->Render(m_pd3dCommandList.Get(), m_pCamera);
+	if (m_pScene->m_SceneState == 1) {
+		if (m_pScene) m_pScene->Render(m_pd3dCommandList.Get(), m_pCamera);
+
+		if (m_pPlayer)
+			m_pPlayer->Render(m_pd3dCommandList.Get(), m_pCamera);
 		//if(true == m_pPlayer->GetIsActive())
 
-	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
-		if (m_pPlayer)
-			if (m_pPlayer->GetPlayerId() == i)
-				continue;
+		for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
+			if (m_pPlayer)
+				if (m_pPlayer->GetPlayerId() == i)
+					continue;
 
-		if (m_vEnemyPlayers[i])
-			m_vEnemyPlayers[i]->Render(m_pd3dCommandList.Get(), m_pCamera);
+			if (m_vEnemyPlayers[i])
+				m_vEnemyPlayers[i]->Render(m_pd3dCommandList.Get(), m_pCamera);
 			//if (true == m_vEnemyPlayers[i]->GetIsActive())
+		}
 	}
-
 
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -578,7 +579,10 @@ void CGameFramework::BuildObjects()
 	m_pScene = new CScene();
 	// 이 부분 옮겨야 함(맵)
 	//m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), GetMapKey());
-	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 'c');
+
+	m_pScene->m_pd3dCommandList = m_pd3dCommandList.Get();
+	m_pScene->m_pd3dDevice = m_pd3dDevice.Get();
+
 	m_pScene->BuildText(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory);
 	for (int i = 0; i < 3; i++)
 		m_pScene->m_sTitleTexts[i] = m_sTitleTexts[i];

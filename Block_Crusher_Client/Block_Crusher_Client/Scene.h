@@ -15,7 +15,7 @@ public:
 	bool OnPrecessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	bool OnPrecessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
-	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char mapkey);
+	void BuildObjects(char mapkey);
 	void ReleaseObjects();
 
 	bool ProcessInput(UCHAR* pKeyBuffer);
@@ -29,12 +29,11 @@ public:
 
 	void Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, ComPtr<ID2D1Factory3> m_d2dFactory, ComPtr<IDWriteFactory> m_dWriteFactory, float fTimeElapsed);
 	void RenderTitle(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, ComPtr<ID2D1Factory3> m_d2dFactory, ComPtr<IDWriteFactory> m_dWriteFactory, float fTimeElapsed);
-	void UpdateTitleTexts();
 	void BuildText(ComPtr<ID2D1DeviceContext2> const m_d2dDeviceContext, ComPtr<ID2D1Factory3> m_d2dFactory, ComPtr<IDWriteFactory> m_dWriteFactory);
 
 	int FindEmptySlot();
 	bool BSCollisionCheck(XMFLOAT3 Position1, XMFLOAT3 Position2, float Radius1, float Radius2);
-	int AddBlocksByMapData(CMesh* pMesh, CShader* pShader, CMaterial* pMaterial,int nindex, char mapkey);
+	int AddBlocksByMapData(int nindex, char mapkey);
 	int CCTitleUI();
 	bool IsPointInRectangle(POINT pt, RECT rect) {
 		return (pt.x >= rect.left && pt.x <= rect.right && pt.y >= rect.top && pt.y <= rect.bottom);
@@ -51,6 +50,9 @@ public:
 	// 0 - tile 1 - main
 	int m_SceneState = 0;
 
+	ID3D12Device* m_pd3dDevice =  NULL;
+	ID3D12GraphicsCommandList* m_pd3dCommandList = NULL;
+
 	bool GetisEnd() { return isEnd; };
 
 protected:
@@ -63,9 +65,10 @@ protected:
 
 	float m_fPlayTime = 120.0f;
 	float m_fBlinkTime = 0;
-
+	
 	CShader* m_pSceneShader;
 	CCubeMeshDiffused* pBulletMesh = NULL;
+	CMesh* m_pBlockMesh = NULL;
 
 	CSkyBox* m_pSkyBox = NULL;
 

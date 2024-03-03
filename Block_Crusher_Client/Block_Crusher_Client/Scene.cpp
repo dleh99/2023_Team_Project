@@ -17,53 +17,44 @@ CScene::~CScene()
 
 }
 
-void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char mapkey)
+void CScene::BuildObjects(char mapkey)
 {
-	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(m_pd3dDevice);
 
-
-	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
+	m_pSkyBox = new CSkyBox(m_pd3dDevice, m_pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
 
 	// 가로 x 세로 x 깊이가 12 x 12 x 12인 정육면체 메쉬 생성
-	CCubeMeshTextured* pCubeMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
-	CCubeMeshDiffused* BulletMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 2.0f, 2.0f, 2.0f);
+	CCubeMeshTextured* pCubeMesh = new CCubeMeshTextured(m_pd3dDevice, m_pd3dCommandList, 12.0f, 12.0f, 12.0f);
+	CCubeMeshDiffused* BulletMesh = new CCubeMeshDiffused(m_pd3dDevice, m_pd3dCommandList, 2.0f, 2.0f, 2.0f);
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	//pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/Dia_Cube.dds", RESOURCE_TEXTURE2D, 0);
-	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/rock1.dds", RESOURCE_TEXTURE2D, 0);
+	pTexture->LoadTextureFromDDSFile(m_pd3dDevice, m_pd3dCommandList, L"Textures/rock1.dds", RESOURCE_TEXTURE2D, 0);
 
-	CMaterial* pMaterial = new CMaterial();
-	pMaterial->SetTexture(pTexture);
+	//CMaterial* pMaterial = new CMaterial();
+	//pMaterial->SetTexture(pTexture);
+	AddBlocksByMapData(0, mapkey);
 
-	AddBlocksByMapData(pCubeMesh, m_pInstanceShader, pMaterial, 0, mapkey);
-
-	m_pInstanceShader = new CInstancingShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get(), pCubeMesh, sizeof(Instance), m_nBlock);
-	m_pInstanceShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
-	m_pInstanceShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	m_pInstanceShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-	m_pInstanceShader->CreateShaderResourceViews(pd3dDevice, pTexture, 0, 2);
-
-	//CTexturedShader* pTShader = new CTexturedShader();
-	//pTShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
-	//pTShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	//pTShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-	//pTShader->CreateShaderResourceViews(pd3dDevice, pTexture, 0, 2);
-
-	CDiffusedShader* pShader = new CDiffusedShader();
-	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
-	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	m_pSceneShader = pShader;
-
-	pBulletMesh = BulletMesh;
+	m_pBlockMesh = pCubeMesh;
+	m_pInstanceShader = new CInstancingShader(m_pd3dDevice, m_pd3dGraphicsRootSignature.Get(), pCubeMesh, sizeof(Instance), m_nBlock);
+	m_pInstanceShader->CreateShader(m_pd3dDevice, m_pd3dGraphicsRootSignature.Get());
+	m_pInstanceShader->CreateShaderVariables(m_pd3dDevice, m_pd3dCommandList);
+	m_pInstanceShader->CreateCbvSrvDescriptorHeaps(m_pd3dDevice, 0, 1);
+	m_pInstanceShader->CreateShaderResourceViews(m_pd3dDevice, pTexture, 0, 2);
 
 	m_pInstance = m_pInstanceShader->GetInstancePointer();
-	
+
 	for (int i = 0; i < m_nBlock; ++i) {
 		auto tmp = m_ppObjects[i]->GetWorldMatrix();
 		XMFLOAT4X4 result;
 		XMStoreFloat4x4(&result, XMMatrixTranspose(XMLoadFloat4x4(&tmp)));
 		m_pInstance[i].worldMatrix = result;
 	}
+
+	pBulletMesh = BulletMesh;
+	CDiffusedShader* pShader = new CDiffusedShader();
+	pShader->CreateShader(m_pd3dDevice, m_pd3dGraphicsRootSignature.Get());
+	pShader->CreateShaderVariables(m_pd3dDevice, m_pd3dCommandList);
+	m_pSceneShader = pShader;
 }
 
 void CScene::ReleaseObjects()
@@ -289,6 +280,8 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 { 
+	if (m_SceneState == 0) return;
+
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature.Get());
 
@@ -632,7 +625,7 @@ int CScene::CCTitleUI()
 	return m_flag;
 }
 
-int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMaterial, int nindex, char mapkey)
+int CScene::AddBlocksByMapData(int nindex, char mapkey)
 {
 	std::ifstream in{ "Map/MapData3.bin", std::ios::binary };
 
@@ -694,7 +687,7 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 				XMFLOAT3 position = { -(float)i * 12.0f + 20.0f,
 				 -(float)j * 12.0f , -(float)k * 12.0f + 40.0f };
 				CBlockObject* pBlockObject = new CBlockObject();
-				//pBlockObject->SetMesh(pMesh);
+				pBlockObject->SetMesh(m_pBlockMesh);
 				//pBlockObject->SetShader(pShader);
 				//pBlockObject->SetMaterial(pMaterial);
 				pBlockObject->SetIsActive(true);
@@ -714,7 +707,7 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 				//std::cout << position.x << " " << position.y << " " << position.z << std::endl;
 
 				CBlockObject* pBlockObject = new CBlockObject();
-				//pBlockObject->SetMesh(pMesh);
+				pBlockObject->SetMesh(m_pBlockMesh);
 				//pBlockObject->SetShader(pShader);
 				//pBlockObject->SetMaterial(pMaterial);
 				pBlockObject->SetIsActive(true);
@@ -727,12 +720,13 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 			}
 		}
 
+	std::cout << m_nObjects << "개 블럭 추가" << std::endl;
+	m_nBlock = m_nObjects;
+
 	for (int i = 0; i < 50; ++i) {
 		delete mapdata[i];
 	}
 	delete[] mapdata;
 
-	std::cout << m_nObjects << "개 블럭 추가" << std::endl;
-	m_nBlock = m_nObjects;
 	return m_nObjects;
 }
