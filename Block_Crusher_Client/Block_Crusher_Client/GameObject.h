@@ -32,7 +32,7 @@ private:
 
 	int								m_nTextures = 0;
 	ID3D12Resource** m_ppd3dTextures = NULL;
-	ID3D12Resource** m_ppd3dTextureUploadBuffers;
+	ID3D12Resource** m_ppd3dTextureUploadBuffers = NULL;
 
 	UINT* m_pnResourceTypes = NULL;
 
@@ -464,6 +464,9 @@ public:
 		m_fSpeed = 200.0f;
 		m_fBoundingSph = 2.0f;
 		m_fBlockBoundingRadius = 2.0f;
+
+		player_id = 0;
+		bullet_id = 0;
 	};
 	virtual ~CBulletObject() {};
 

@@ -270,9 +270,12 @@ public:
 	virtual void ReleaseObjects();
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void RenderOtherShadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	void SetOtherShadowTexture(CTexture* pTexture);
 
 protected:
 	CTexture* m_pDepthFromLightTexture = NULL;
+	CTexture* m_pOtherDepthTexture = NULL;
 };
 
 class CInstancingShader : public CShader
@@ -282,7 +285,7 @@ public:
 	virtual ~CInstancingShader();
 
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
-	//virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();
+	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();
 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob);

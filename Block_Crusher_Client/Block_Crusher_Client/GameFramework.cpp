@@ -20,6 +20,11 @@ CGameFramework::CGameFramework()
 		m_nFenceValues[i] = 0;
 	m_pScene = NULL;
 
+	m_ptOldCursorPos.x = 0;
+	m_ptOldCursorPos.y = 0;
+	m_ptWinCursorMouse.x = 0;
+	m_ptWinCursorMouse.y = 0;
+
 	wstring* id = new wstring(L"");
 	wstring* pw = new wstring(L"");
 	wstring* serverip = new wstring(L"127.0.0.1");
@@ -164,6 +169,7 @@ void CGameFramework::CreateDirect3DDevice()
 	}
 
 	D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS d3dMsaaQualityLevels;
+	::ZeroMemory(&d3dMsaaQualityLevels, sizeof(D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS));
 	d3dMsaaQualityLevels.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	d3dMsaaQualityLevels.SampleCount = 4; //Msaa4x 다중 샘플링
 	d3dMsaaQualityLevels.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
@@ -366,6 +372,7 @@ void CGameFramework::CreateRenderTargetViews()
 void CGameFramework::CreateDepthStencilView()
 {
 	D3D12_RESOURCE_DESC d3dResourceDesc;
+	::ZeroMemory(&d3dResourceDesc, sizeof(D3D12_RESOURCE_DESC));
 	d3dResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	d3dResourceDesc.Alignment = 0;
 	d3dResourceDesc.Width = m_nWndClientWidth;
@@ -387,6 +394,7 @@ void CGameFramework::CreateDepthStencilView()
 	d3dHeapProperties.VisibleNodeMask = 1;
 
 	D3D12_CLEAR_VALUE d3dClearValue;
+	::ZeroMemory(&d3dClearValue, sizeof(D3D12_CLEAR_VALUE));
 	d3dClearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	d3dClearValue.DepthStencil.Depth = 1.0f;
 	d3dClearValue.DepthStencil.Stencil = 0;
@@ -508,7 +516,7 @@ void CGameFramework::FrameAdvance()
 	//현재의 렌더 타겟에 해당하는 서술자의 CPU 주소(핸들)를 계산한다. 
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle =
 		m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * m_nRtvDescriptorIncrementSize);
+	d3dRtvCPUDescriptorHandle.ptr += (static_cast<unsigned __int64>(m_nSwapChainBufferIndex) * m_nRtvDescriptorIncrementSize);
 
 	//깊이-스텐실 서술자의 CPU 주소를 계산한다.
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle =
@@ -552,7 +560,7 @@ void CGameFramework::FrameAdvance()
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList.Get() };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 	//2D 오브젝트 랜더링
-	//Render2D();
+	Render2D();
 	//GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
 	WaitForGpuComplete();
 
@@ -577,7 +585,7 @@ void CGameFramework::BuildObjects()
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	d3dRtvCPUDescriptorHandle.ptr += (::gnRtvDescriptorIncrementSize * m_nSwapChainBuffers);
+	d3dRtvCPUDescriptorHandle.ptr += (static_cast<unsigned __int64>(::gnRtvDescriptorIncrementSize) * m_nSwapChainBuffers);
 
 	m_pScene = new CScene();
 	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), GetMapKey());
@@ -634,6 +642,7 @@ void CGameFramework::BuildObjects()
 #endif
 	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
 	m_pScene->m_pPlayer = m_pPlayer;
+	m_pScene->m_vPlayers = m_vEnemyPlayers;
 	m_pPlayer->m_pScene = m_pScene;
 	m_pCamera = m_pPlayer->GetCamera();
 
@@ -823,6 +832,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			m_pScene->m_ptWinCursorMouse.y = HIWORD(lParam);
 			m_flag = m_pScene->CCTitleUI();
 		}
+		[[fallthrough]];
 	case WM_RBUTTONUP:
 		//마우스 캡쳐를 해제한다.
 		::ReleaseCapture();
@@ -846,7 +856,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 
 		}
 		else {
-			char c = wParam;
+			char c = static_cast<char>(wParam);
 			*m_sTitleTexts[m_flag] += c;
 		}
 		break;
@@ -866,7 +876,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		case VK_F9:
 			//“F9” 키가 눌려지면 윈도우 모드와 전체화면 모드의 전환을 처리한다. 
-			ChangeSwapChainState();
+			//ChangeSwapChainState();
 			break;
 		case VK_BACK:
 			if (!m_sTitleTexts[m_flag]->empty()) {
@@ -894,6 +904,14 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 {
 	switch (nMessageID)
 	{
+	/*case WM_ACTIVATE:
+	{
+		if (LOWORD(wParam) == WA_INACTIVE)
+			m_GameTimer.Stop();
+		else
+			m_GameTimer.Start();
+		break;
+	}*/
 	case WM_SIZE:
 	{
 		m_nWndClientWidth = LOWORD(lParam);
@@ -928,6 +946,7 @@ void CGameFramework::ChangeSwapChainState()
 	m_pdxgiSwapChain->SetFullscreenState(!bFullScreenState, NULL);
 
 	DXGI_MODE_DESC dxgiTargetParameters;
+	::ZeroMemory(&dxgiTargetParameters, sizeof(DXGI_MODE_DESC));
 	dxgiTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	dxgiTargetParameters.Width = m_nWndClientWidth;
 	dxgiTargetParameters.Height = m_nWndClientHeight;
