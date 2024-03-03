@@ -88,16 +88,20 @@ bool CollisionCheck_objects(XMFLOAT3 p1, XMFLOAT3 p2, float r1, float r2)
 void checking_room(int key)
 {
 	short room_num = clients_room[key];
+	cout << room_num << endl;
 
-	lock_guard<mutex> ll{ rooms[room_num]._r_lock };
-	if (RS_READY == rooms[room_num].GetRoomState())
 	{
-		rooms[room_num].SetRoomState(RS_INGAME);
-		int* room_mambers = rooms[room_num].GetPlayerId();
-		for (int i{}; i < MAX_PLAYER; ++i) {
-			clients[room_mambers[i]].send_start_packet(rooms[room_num].GetMapKey());
-		}
+		lock_guard<mutex> ll{ rooms[room_num]._r_lock };
+		if (RS_READY != rooms[room_num].GetRoomState()) return;
 	}
+
+	rooms[room_num].SetRoomState(RS_INGAME);
+	int* room_mambers = rooms[room_num].GetPlayerId();
+	//cout << "보낸다" << endl;
+	for (int i{}; i < MAX_PLAYER; ++i) {
+		clients[room_mambers[i]].send_start_packet(rooms[room_num].GetMapKey());
+	}
+
 }
 
 void packet_process(int c_id, char* packet)
@@ -266,7 +270,7 @@ void worker_thread(HANDLE iocp_h)
 					// 상태 변환(접속중)
 					//clients[client_id]._state = US_CONNECTING;
 
-					//cout << "커넥팅" << endl;
+					cout << "커넥팅" << endl;
 
 					CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_c_socket), iocp_h, client_id, 0);
 					clients[client_id].do_recv();
@@ -535,7 +539,7 @@ void do_db()
 			}
 			switch (ev.event_id) {
 			case TRY_LOGIN: {
-				//cout << "로그인 트라이 해본다" << endl;
+				cout << "로그인 트라이 해본다" << endl;
 				int res = db_controll.Search_User(ev._id, ev._password);
 				Overlapped* ov = new Overlapped;
 				if (res == DB_SIGN_UP) {
