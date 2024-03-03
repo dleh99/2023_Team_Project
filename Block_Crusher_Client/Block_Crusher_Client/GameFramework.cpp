@@ -560,7 +560,7 @@ void CGameFramework::FrameAdvance()
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList.Get() };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 	//2D 오브젝트 랜더링
-	//Render2D();
+	Render2D();
 	//GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
 	WaitForGpuComplete();
 
@@ -876,7 +876,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		case VK_F9:
 			//“F9” 키가 눌려지면 윈도우 모드와 전체화면 모드의 전환을 처리한다. 
-			ChangeSwapChainState();
+			//ChangeSwapChainState();
 			break;
 		case VK_BACK:
 			if (!m_sTitleTexts[m_flag]->empty()) {

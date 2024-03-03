@@ -498,12 +498,7 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera);
 	
-	if (m_pShadowMapToViewport)
-	{
-		m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
-		//m_pShadowMapToViewport->SetOtherShadowTexture(m_pDepthRenderShader->GetDepthTexture());
-		//m_pShadowMapToViewport->RenderOtherShadow(pd3dCommandList, pCamera);
-	}
+	//if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
 
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
