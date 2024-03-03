@@ -41,7 +41,6 @@ public:
 
 	ComPtr<ID3D12RootSignature> CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 	ComPtr<ID3D12RootSignature> GetGraphicsRootSignature();
-	void CreateGraphicsRootSignature() { m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(); };
 
 	CGameObject** m_ppObjects = NULL;
 	int m_nBlock = 0;
