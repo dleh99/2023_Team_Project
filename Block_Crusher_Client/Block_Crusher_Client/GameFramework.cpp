@@ -846,6 +846,8 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 
 void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+	if (m_pScene) m_pScene->OnPrecessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+
 	switch (nMessageID)
 	{
 	case WM_CHAR:
@@ -866,6 +868,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
+			::DestroyWindow(hWnd);
 			m_SceneState = 0;
 			break;
 		case VK_RETURN:
