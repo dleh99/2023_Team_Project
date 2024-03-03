@@ -434,7 +434,7 @@ void CGameFramework::Render2D()
 
 	// 2D °´Ã¼ ·£´õ¸µ
 	if (m_pScene) {
-		if(m_SceneState == 0)
+		if(m_pScene->m_SceneState == 0)
 			m_pScene->RenderTitle(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory, m_GameTimer.GetTimeElapsed());
 		else
 			m_pScene->Render2D(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory, m_GameTimer.GetTimeElapsed());
@@ -854,7 +854,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
-			m_SceneState = 0;
 			break;
 		case VK_RETURN: {
 			try {

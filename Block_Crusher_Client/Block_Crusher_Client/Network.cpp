@@ -165,6 +165,7 @@ void ProcessPacket(char* ptr)
 		else if (packet->login_state == LS_LOGIN_SUCCESS) {
 			cout << "로그인 성공" << endl;
 		}
+
 		break;
 	}
 	case SC_LOGIN: {	// 처음 로그인 했을 때 받는 패킷. 아이디를 서버는 클라에게 아이디를 부여한다
@@ -182,6 +183,7 @@ void ProcessPacket(char* ptr)
 		SC_START_PACKET* packet = reinterpret_cast<SC_START_PACKET*>(ptr);
 		m_gameStart = true;
 		m_mapKey = packet->map_key;
+		NetScene->m_SceneState = 1;
 		cout << "시작 패킷 받음" << endl;
 		break;
 	}

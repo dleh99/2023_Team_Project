@@ -48,6 +48,8 @@ public:
 	CPlayer* m_pPlayer= NULL;
 	std::wstring* m_sTitleTexts[3];
 	POINT m_ptWinCursorMouse;
+	// 0 - tile 1 - main
+	int m_SceneState = 0;
 
 	bool GetisEnd() { return isEnd; };
 
