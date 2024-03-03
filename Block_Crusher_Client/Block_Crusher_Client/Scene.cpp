@@ -19,8 +19,6 @@ CScene::~CScene()
 
 void CScene::BuildObjects(char mapkey)
 {
-	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(m_pd3dDevice);
-
 	m_pSkyBox = new CSkyBox(m_pd3dDevice, m_pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
 
 	// 가로 x 세로 x 깊이가 12 x 12 x 12인 정육면체 메쉬 생성
@@ -32,9 +30,10 @@ void CScene::BuildObjects(char mapkey)
 
 	//CMaterial* pMaterial = new CMaterial();
 	//pMaterial->SetTexture(pTexture);
-	AddBlocksByMapData(0, mapkey);
 
 	m_pBlockMesh = pCubeMesh;
+	AddBlocksByMapData(0, mapkey);
+
 	m_pInstanceShader = new CInstancingShader(m_pd3dDevice, m_pd3dGraphicsRootSignature.Get(), pCubeMesh, sizeof(Instance), m_nBlock);
 	m_pInstanceShader->CreateShader(m_pd3dDevice, m_pd3dGraphicsRootSignature.Get());
 	m_pInstanceShader->CreateShaderVariables(m_pd3dDevice, m_pd3dCommandList);
