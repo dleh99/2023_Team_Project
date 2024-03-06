@@ -75,7 +75,6 @@ private:
 
 	long long frame_num = 0;
 	bool isEnd_framework = false;
-	int m_SceneState = 0; // 0 - tile, 1 - playing
 	int m_flag = ID;
 
 public:

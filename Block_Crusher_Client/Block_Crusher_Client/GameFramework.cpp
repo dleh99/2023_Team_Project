@@ -27,11 +27,11 @@ CGameFramework::CGameFramework()
 
 	wstring* id = new wstring(L"");
 	wstring* pw = new wstring(L"");
-	wstring* serverip = new wstring(L"127.0.0.1");
+	wstring* room = new wstring(L"");
 
 	m_sTitleTexts[ID] = id;
 	m_sTitleTexts[PW] = pw;
-	m_sTitleTexts[ServerIP] = serverip;
+	m_sTitleTexts[RoomNumber] = room;
 }
 
 CGameFramework::~CGameFramework()
@@ -61,9 +61,9 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hWnd)
 
 #ifdef USE_SERVER
 	NetworkInit();
-	while (!GetGameState()) {
+	/*while (!GetGameState()) {
 		do_recv();
-	}
+	}*/
 #endif
 	BuildObjects();
 
@@ -446,7 +446,7 @@ void CGameFramework::Render2D()
 
 	// 2D 객체 랜더링
 	if (m_pScene) {
-		if(m_SceneState == 0)
+		if(m_pScene->m_SceneState == 0)
 			m_pScene->RenderTitle(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory, m_GameTimer.GetTimeElapsed());
 		else
 			m_pScene->Render2D(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory, m_GameTimer.GetTimeElapsed());
@@ -588,7 +588,9 @@ void CGameFramework::BuildObjects()
 	d3dRtvCPUDescriptorHandle.ptr += (static_cast<unsigned __int64>(::gnRtvDescriptorIncrementSize) * m_nSwapChainBuffers);
 
 	m_pScene = new CScene();
-	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), GetMapKey());
+	// 이 부분 옮겨야 함(맵)
+	//m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), GetMapKey());
+	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 'c');
 	m_pScene->BuildText(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory);
 	for (int i = 0; i < 3; i++)
 		m_pScene->m_sTitleTexts[i] = m_sTitleTexts[i];
@@ -616,6 +618,7 @@ void CGameFramework::BuildObjects()
 	Pos p = GetStartPos();
 	int id = GetNetworkPlayerId();
 	
+	// 이 부분 옮길까?
 	CMainPlayer* pCubePlayer0 = new CMainPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
 		m_pScene->GetGraphicsRootSignature().Get(), -100.f, 250.f, -440.f, pPlayerShader, pSkinnedPlayerShader, pMat);
 
@@ -748,7 +751,7 @@ void CGameFramework::ProcessInput()
 		z = m_pPlayer->GetPosition().z;
 		//cout << x << ", " << y << ", " << z << endl;
 		//cout << m_pPlayer->GetAniState() << endl;
-		send_move_packet(x, y, z, cxDelta, cyDelta, m_pPlayer->GetAniState());
+		//send_move_packet(x, y, z, cxDelta, cyDelta, m_pPlayer->GetAniState());
 
 		if (y < -150.f && false == m_pPlayer->GetDeath()) {
 			send_fall_packet();
@@ -832,7 +835,6 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			m_pScene->m_ptWinCursorMouse.y = HIWORD(lParam);
 			m_flag = m_pScene->CCTitleUI();
 		}
-		[[fallthrough]];
 	case WM_RBUTTONUP:
 		//마우스 캡쳐를 해제한다.
 		::ReleaseCapture();
@@ -868,12 +870,24 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
-			::DestroyWindow(hWnd);
-			m_SceneState = 0;
 			break;
-		case VK_RETURN:
-			m_SceneState = 1;
+		case VK_RETURN: {
+			try {
+				int num = stoi(*m_sTitleTexts[RoomNumber]);
+				cout << "여기 들어옴" << endl;
+				send_login_packet(*m_sTitleTexts[ID], *m_sTitleTexts[PW], num);
+			}
+			catch (const std::invalid_argument& e) {
+				// stoi를 했을 때 int가 아닌 다른 값이 들어오는 경우 -> 경고 메시지 출력
+				cout << "룸에 이상한 값 넣지 마세요" << endl;
+			}
+			catch (const std::out_of_range& e) {
+				// stoi를 했을 때 범위를 벗어난 값이 들어오는 경우 -> 경고 메시지 출력
+				cout << "0이상 332 이하의 값을 넣어주세요" << endl;
+			}
+			//m_SceneState = 1;
 			break;
+		}
 		case VK_F8:
 			//m_flag += 1;
 			break;

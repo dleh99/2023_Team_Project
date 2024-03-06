@@ -29,6 +29,8 @@ constexpr char CS_FALL = 12;
 constexpr char CS_SCORE = 14;
 
 constexpr char SC_LOGIN = 2;
+constexpr char SC_LOGIN_FAIL = 16;
+constexpr char SC_LOGIN_SUCCESS = 17;
 constexpr char SC_START = 3;
 constexpr char SC_MOVE_PLAYER = 4;
 constexpr char SC_BULLET_ADD = 6;
@@ -56,11 +58,24 @@ enum Animation
 	ANIMATION_SHOOT_BACKWARD,		// assigned 11
 };
 
+enum LOGIN_STATE
+{
+	LS_OUTOFROOM,					// 룸 번호가 엇나감
+	LS_FULLROOM,					// 선택한 룸이 다 참
+	LS_SIGNUP,						// 새로운 id
+	LS_LOGIN_SUCCESS,
+	LS_LOGIN_FAIL,
+	LS_ALREADY_INGAME,
+};
+
 #pragma pack(push, 1)
 
 struct CS_LOGIN_PACKET {
 	unsigned char		size;
 	char				type;
+	wchar_t				id[20];
+	wchar_t				password[20];
+	int					room_num;
 };
 
 struct CS_MOVE_PACKET {
@@ -98,6 +113,18 @@ struct CS_SCORE_PACKET {
 };
 
 //===========================
+struct SC_LOGIN_FAIL_PACKET
+{
+	unsigned char		size;
+	char				type;
+	LOGIN_STATE			login_state;
+};
+struct SC_LOGIN_SUCCESS_PACKET
+{
+	unsigned char		size;
+	char				type;
+	LOGIN_STATE			login_state;
+};
 struct SC_LOGININFO_PACKET
 {
 	unsigned char		size;

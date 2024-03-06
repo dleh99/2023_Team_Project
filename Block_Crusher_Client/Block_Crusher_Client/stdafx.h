@@ -66,7 +66,7 @@ using namespace DirectX;
 using namespace DirectX::PackedVector;
 
 enum Title_Text {
-	ID, PW, ServerIP
+	ID, PW, RoomNumber
 };
 
 // 클라이언트 영역 크기 정의

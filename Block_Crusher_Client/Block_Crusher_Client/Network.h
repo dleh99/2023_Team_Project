@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include "protocol.h"
+#include "..\..\Block_Crusher_Server\protocol.h"
 #include <ws2tcpip.h> 
 #include <winsock2.h> 
 #include "stdafx.h"
@@ -25,7 +25,7 @@ struct Mouse {
 
 int NetworkInit();
 void NetCleanup();
-void send_login_packet();
+void send_login_packet(wstring i_id, wstring i_password, int i_room);
 void send_move_packet(float x, float y, float z, float cx, float cy, Animation dwDirection);
 void send_bullet_add_packet(XMFLOAT3 pos, XMFLOAT3 vec, int bullet_id);
 void send_fall_packet();
