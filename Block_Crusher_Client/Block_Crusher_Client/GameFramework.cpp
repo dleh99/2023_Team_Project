@@ -887,7 +887,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				// stoi를 했을 때 범위를 벗어난 값이 들어오는 경우 -> 경고 메시지 출력
 				cout << "0이상 332 이하의 값을 넣어주세요" << endl;
 			}
-			m_pScene->m_SceneState = 1;
 			break;
 		}
 		case VK_F8:

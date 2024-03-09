@@ -912,8 +912,6 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 					XMFLOAT3 position = { -(float)i * 12.0f + 20.0f,
 					(float)y * 12.0f + 12.0f, -(float)k * 12.0f + 40.0f };
 
-					cout << typeid(m_ppObjects[cnt]).name() << endl;
-
 					CBlockObject* pBlockObject = new CBlockObject();
 					pBlockObject->SetMesh(m_pBlockMesh);
 					pBlockObject->SetIsActive(true);
