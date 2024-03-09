@@ -139,7 +139,7 @@ struct SC_START_PACKET
 	unsigned char		size;
 	char				type;
 	char				map_key;
-	// 초기 지형 위치
+	int					player_id;
 };
 
 struct SC_MOVE_PACKET {

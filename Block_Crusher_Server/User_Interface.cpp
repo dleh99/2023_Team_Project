@@ -67,12 +67,13 @@ void User_Interface::send_login_info_packet()
 	do_send(&p);
 }
 
-void User_Interface::send_start_packet(char mapkey)
+void User_Interface::send_start_packet(char mapkey, int input_id)
 {
 	SC_START_PACKET p;
 	p.size = sizeof(SC_START_PACKET);
 	p.type = SC_START;
 	p.map_key = mapkey;
+	p.player_id = input_id;
 	//std::cout << mapkey << "¸¦ º¸³¿" << std::endl;
 	do_send(&p);
 }
