@@ -751,7 +751,8 @@ void CGameFramework::ProcessInput()
 		z = m_pPlayer->GetPosition().z;
 		//cout << x << ", " << y << ", " << z << endl;
 		//cout << m_pPlayer->GetAniState() << endl;
-		//send_move_packet(x, y, z, cxDelta, cyDelta, m_pPlayer->GetAniState());
+		if (m_pScene->m_SceneState == 1)
+			send_move_packet(x, y, z, cxDelta, cyDelta, m_pPlayer->GetAniState());
 
 		if (y < -150.f && false == m_pPlayer->GetDeath()) {
 			send_fall_packet();
@@ -859,7 +860,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		if (wParam == VK_RETURN) {
 
 		}
-		else {
+		else if(m_pScene->m_SceneState == 0) {
 			char c = static_cast<char>(wParam);
 			*m_sTitleTexts[m_flag] += c;
 		}
