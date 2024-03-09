@@ -77,6 +77,8 @@ private:
 	bool isEnd_framework = false;
 	int m_flag = ID;
 
+	bool m_Buildingflag = false;
+
 public:
 	CGameFramework();
 	~CGameFramework();
@@ -97,6 +99,7 @@ public:
 	void CreateDepthStencilView();
 
 	void BuildObjects();
+	void BuildPlayer();
 	void ReleaseObjects();
 
 	void ProcessInput();

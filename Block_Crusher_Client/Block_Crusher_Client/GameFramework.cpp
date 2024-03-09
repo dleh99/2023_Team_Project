@@ -471,6 +471,12 @@ void CGameFramework::FrameAdvance()
 #ifdef USE_SERVER
 	do_recv();
 
+	if(!m_Buildingflag)
+		if (m_pScene->m_SceneState == 1) {
+			m_Buildingflag = true;
+			if (m_Buildingflag) BuildPlayer();
+		}
+
 	for (int i{}; i < m_vEnemyPlayers.size(); ++i) {
 		if (i == m_pPlayer->GetPlayerId()) continue;
 		Pos otherPlayerPos = GetOtherPlayerPos(i);
@@ -487,7 +493,8 @@ void CGameFramework::FrameAdvance()
 				m_pPlayer->SetDeath(m_vEnemyPlayers[i]->GetDeath());
 	}
 
-	ProcessInput();
+	if(m_pScene->m_SceneState == 1)
+		ProcessInput();
 
 	AnimateObjects();
 
@@ -632,9 +639,10 @@ void CGameFramework::BuildObjects()
 	m_vEnemyPlayers.push_back(pCubePlayer1);
 	m_vEnemyPlayers.push_back(pCubePlayer2);
 
+	for (int i = 0; i < m_vEnemyPlayers.size(); ++i)
+		m_vEnemyPlayers[i]->SetPlayerId(i);
+
 	SetPlayers(m_vEnemyPlayers);
-	SetGamePlayer(m_pPlayer);
-	SetCamera(m_pCamera);
 
 	m_pPlayer = m_vEnemyPlayers[id];
 #else
@@ -670,6 +678,21 @@ void CGameFramework::BuildObjects()
 	//if (m_pScene)m_pScene->ReleaseUploadBuffers();
 
 	m_GameTimer.Reset();
+}
+
+void CGameFramework::BuildPlayer()
+{
+	int id = GetNetworkPlayerId();
+
+	m_pPlayer = m_vEnemyPlayers[id];
+
+	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
+	m_pPlayer->SetBlockNum(m_pScene->m_nBlock);
+	m_pPlayer->m_pScene = m_pScene;
+
+	m_pScene->m_pPlayer = m_pPlayer;
+
+	m_pCamera = m_pPlayer->GetCamera();
 }
 
 void CGameFramework::ReleaseObjects()
@@ -803,7 +826,8 @@ void CGameFramework::AnimateObjects()
 
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
 
-	m_pPlayer->Animate(fTimeElapsed);
+	if (m_pPlayer)
+		m_pPlayer->Animate(fTimeElapsed);
 
 	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
 		if (m_pPlayer)
