@@ -644,13 +644,13 @@ void CGameFramework::BuildObjects()
 	m_pPlayer->SetMaterial(pMaterial);
 #endif
 	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
+	m_pPlayer->SetBlockNum(m_pScene->m_nBlock);
+	m_pPlayer->m_pScene = m_pScene;
+
 	m_pScene->m_pPlayer = m_pPlayer;
 	m_pScene->m_vPlayers = m_vEnemyPlayers;
-	m_pPlayer->m_pScene = m_pScene;
-	m_pCamera = m_pPlayer->GetCamera();
 
-	m_pPlayer->SetBlockNum(m_pScene->m_nBlock);
-	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
+	m_pCamera = m_pPlayer->GetCamera();
 
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed(), NULL);
 
@@ -857,8 +857,11 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		if (wParam == 32) {  //입력한 문자에 따른 메세지 처리
 				
 		}
-		if (wParam == VK_RETURN) {
+		else if (wParam == VK_RETURN) {
 
+		}
+		else if (wParam == VK_TAB) {
+			m_flag = m_pScene->m_flag = (m_flag + 1) % 3;
 		}
 		else if(m_pScene->m_SceneState == 0) {
 			char c = static_cast<char>(wParam);
@@ -959,9 +962,9 @@ void CGameFramework::ChangeSwapChainState()
 {
 	WaitForGpuComplete();
 
-	BOOL bFullScreenState = FALSE;
-	m_pdxgiSwapChain->GetFullscreenState(&bFullScreenState, NULL);
-	m_pdxgiSwapChain->SetFullscreenState(!bFullScreenState, NULL);
+	//BOOL bFullScreenState = FALSE;
+	//m_pdxgiSwapChain->GetFullscreenState(&bFullScreenState, NULL);
+	//m_pdxgiSwapChain->SetFullscreenState(!bFullScreenState, NULL);
 
 	DXGI_MODE_DESC dxgiTargetParameters;
 	::ZeroMemory(&dxgiTargetParameters, sizeof(DXGI_MODE_DESC));

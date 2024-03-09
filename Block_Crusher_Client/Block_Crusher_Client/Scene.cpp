@@ -752,7 +752,7 @@ void CScene::RenderTitle(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, 
 
 	// BackGround
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(0, 0));
-	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT), SolidColorBrush[9].Get());
+	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT), SolidColorBrush[6].Get());
 
 	// Room 입력란
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(590, 665));
@@ -819,6 +819,14 @@ void CScene::RenderTitle(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, 
 	str = L"Block Crusher";
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
 		pTextFormat[1].Get(), D2D1::RectF(0, 0, 450, 300), SolidColorBrush[0].Get());
+
+	//팝업 메세지창
+	//if (1) {
+	//	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(705, 715));
+	//	str = L"비밀번호가 다릅니다";
+	//	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+	//		pTextFormat[4].Get(), D2D1::RectF(0, 0, 300, 50), SolidColorBrush[1].Get());
+	//}
 }
 
 int CScene::CCTitleUI()
