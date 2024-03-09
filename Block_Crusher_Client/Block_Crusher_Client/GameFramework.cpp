@@ -636,7 +636,7 @@ void CGameFramework::BuildObjects()
 	SetGamePlayer(m_pPlayer);
 	SetCamera(m_pCamera);
 
-	//m_pPlayer = m_vEnemyPlayers[id];
+	m_pPlayer = m_vEnemyPlayers[id];
 #else
 	CMainPlayer* pCubePlayer = new CMainPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
 		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 0.0f, pPlayerShader, pSkinnedPlayerShader, pMat);
@@ -645,16 +645,16 @@ void CGameFramework::BuildObjects()
 	CMaterial* pMaterial = new CMaterial;
 	m_pPlayer->SetMaterial(pMaterial);
 #endif
-	//m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
-	//m_pPlayer->SetBlockNum(m_pScene->m_nBlock);
-	//m_pPlayer->m_pScene = m_pScene;
+	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
+	m_pPlayer->SetBlockNum(m_pScene->m_nBlock);
+	m_pPlayer->m_pScene = m_pScene;
 
-	//m_pScene->m_pPlayer = m_pPlayer;
-	//m_pScene->m_vPlayers = m_vEnemyPlayers;
+	m_pScene->m_pPlayer = m_pPlayer;
+	m_pScene->m_vPlayers = m_vEnemyPlayers;
 
-	//m_pCamera = m_pPlayer->GetCamera();
+	m_pCamera = m_pPlayer->GetCamera();
 
-	//m_pPlayer->Update(m_GameTimer.GetTimeElapsed(), NULL);
+	m_pPlayer->Update(m_GameTimer.GetTimeElapsed(), NULL);
 
 	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
 		if(m_vEnemyPlayers[i])
