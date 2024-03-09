@@ -636,7 +636,7 @@ void CGameFramework::BuildObjects()
 	SetGamePlayer(m_pPlayer);
 	SetCamera(m_pCamera);
 
-	m_pPlayer = m_vEnemyPlayers[id];
+	//m_pPlayer = m_vEnemyPlayers[id];
 #else
 	CMainPlayer* pCubePlayer = new CMainPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
 		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 0.0f, pPlayerShader, pSkinnedPlayerShader, pMat);
@@ -645,16 +645,16 @@ void CGameFramework::BuildObjects()
 	CMaterial* pMaterial = new CMaterial;
 	m_pPlayer->SetMaterial(pMaterial);
 #endif
-	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
-	m_pPlayer->SetBlockNum(m_pScene->m_nBlock);
-	m_pPlayer->m_pScene = m_pScene;
+	//m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
+	//m_pPlayer->SetBlockNum(m_pScene->m_nBlock);
+	//m_pPlayer->m_pScene = m_pScene;
 
-	m_pScene->m_pPlayer = m_pPlayer;
-	m_pScene->m_vPlayers = m_vEnemyPlayers;
+	//m_pScene->m_pPlayer = m_pPlayer;
+	//m_pScene->m_vPlayers = m_vEnemyPlayers;
 
-	m_pCamera = m_pPlayer->GetCamera();
+	//m_pCamera = m_pPlayer->GetCamera();
 
-	m_pPlayer->Update(m_GameTimer.GetTimeElapsed(), NULL);
+	//m_pPlayer->Update(m_GameTimer.GetTimeElapsed(), NULL);
 
 	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
 		if(m_vEnemyPlayers[i])
@@ -879,6 +879,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			//::DestroyWindow(0);
 			break;
 		case VK_RETURN: {
+#ifdef USE_SERVER			
 			try {
 				int num = stoi(*m_sTitleTexts[RoomNumber]);
 				cout << "여기 들어옴" << endl;
@@ -892,6 +893,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				// stoi를 했을 때 범위를 벗어난 값이 들어오는 경우 -> 경고 메시지 출력
 				cout << "0이상 332 이하의 값을 넣어주세요" << endl;
 			}
+#else
+			m_pScene->m_SceneState = 1;
+#endif
 			break;
 		}
 		case VK_F8:

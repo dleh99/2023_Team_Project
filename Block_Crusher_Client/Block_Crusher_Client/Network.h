@@ -49,4 +49,4 @@ void SetScene(CScene* Scene);
 void SetPlayers(vector<CMainPlayer*> players);
 void SetFrame(long long input);
 void SetCamera(CCamera* pCamera);
-void SetGamePlayer(CMainPlayer* pCamera);
+void SetGamePlayer(CMainPlayer* pPlayer);

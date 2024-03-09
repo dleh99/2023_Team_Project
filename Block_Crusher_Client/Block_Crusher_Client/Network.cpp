@@ -157,6 +157,8 @@ void ProcessPacket(char* ptr)
 		else if (packet->login_state == LS_ALREADY_INGAME) {
 			cout << "입력하신 ID의 계정이 이미 게임 실행 중입니다" << endl;
 		}
+		NetScene->m_TitleError = packet->login_state;
+
 		break;
 	}
 	case SC_LOGIN_SUCCESS: {
@@ -167,7 +169,7 @@ void ProcessPacket(char* ptr)
 		else if (packet->login_state == LS_LOGIN_SUCCESS) {
 			cout << "로그인 성공" << endl;
 		}
-
+		NetScene->m_TitleError = packet->login_state;
 		break;
 	}
 	case SC_LOGIN: {	// 처음 로그인 했을 때 받는 패킷. 아이디를 서버는 클라에게 아이디를 부여한다
@@ -193,9 +195,9 @@ void ProcessPacket(char* ptr)
 		pGamePlayer->m_ppObjects = NetScene->m_ppObjects;
 		pGamePlayer->SetBlockNum(NetScene->m_nBlock);
 		pGamePlayer->m_pScene = NetScene;
+		pGamePlayer->SetPlayerId(id);
 
 		NetScene->m_pPlayer = pGamePlayer;
-		NetScene->m_vPlayers = Netplayers;
 
 		GameCamera = pGamePlayer->GetCamera();
 

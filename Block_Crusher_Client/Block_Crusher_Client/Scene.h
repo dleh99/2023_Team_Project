@@ -86,6 +86,7 @@ public:
 	POINT m_ptWinCursorMouse;
 	// 0 - tile 1 - main
 	int m_SceneState = 0;
+	int m_TitleError = -1;
 	int m_flag = ID;
 	bool GetisEnd() { return isEnd; };
 
