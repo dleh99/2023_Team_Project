@@ -815,18 +815,34 @@ void CScene::RenderTitle(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, 
 	}
 
 	//타이틀
-	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(300, 150));
 	str = L"Block Crusher";
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(300, 150));
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
 		pTextFormat[1].Get(), D2D1::RectF(0, 0, 450, 300), SolidColorBrush[0].Get());
 
 	//팝업 메세지창
-	//if (1) {
-	//	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(705, 715));
-	//	str = L"비밀번호가 다릅니다";
-	//	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
-	//		pTextFormat[4].Get(), D2D1::RectF(0, 0, 300, 50), SolidColorBrush[1].Get());
-	//}
+	str = L"  ";
+	if (m_TitleError == LS_OUTOFROOM) {
+		str = L"룸 번호는 0이상, 332 이하여야 합니다";
+	}
+	else if (m_TitleError == LS_FULLROOM) {
+		str = L"선택하신 룸에서 게임이 진행중입니다";
+	}
+	else if (m_TitleError == LS_LOGIN_FAIL) {
+		str = L"입력하신 ID 또는 비밀번호가 틀렸습니다";
+	}
+	else if (m_TitleError == LS_ALREADY_INGAME) {
+		str = L"입력하신 ID의 계정이 이미 게임 실행 중입니다";
+	}
+	else if (m_TitleError == LS_SIGNUP) {
+		str = L"새로 입력하신 ID. 자동으로 회완가입 되어 게임에 진입합니다";
+	}
+	else if (m_TitleError == LS_LOGIN_SUCCESS) {
+		str = L"로그인 성공";
+	}
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(705, 715));
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat[4].Get(), D2D1::RectF(0, 0, 300, 50), SolidColorBrush[1].Get());
 }
 
 int CScene::CCTitleUI()

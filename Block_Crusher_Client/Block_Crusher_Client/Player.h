@@ -148,6 +148,7 @@ public:
 	CCamera* GetCamera() { return(m_pCamera); }
 	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; }
 	int GetPlayerId() { return m_playerNetworkId; }
+	void SetPlayerId(int id) { m_playerNetworkId = id; }
 
 	//플레이어를 이동하는 함수이다.
 	void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
