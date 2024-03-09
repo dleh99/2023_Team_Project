@@ -190,19 +190,7 @@ void ProcessPacket(char* ptr)
 		NetScene->AddBlocksByMapData(0, m_mapKey,false);
 		id = packet->player_id;
 
-		pGamePlayer = Netplayers[id];
-
-		pGamePlayer->m_ppObjects = NetScene->m_ppObjects;
-		pGamePlayer->SetBlockNum(NetScene->m_nBlock);
-		pGamePlayer->m_pScene = NetScene;
-		pGamePlayer->SetPlayerId(id);
-
-		NetScene->m_pPlayer = pGamePlayer;
-
-		GameCamera = pGamePlayer->GetCamera();
-
 		NetScene->m_SceneState = 1;
-		cout << id << endl;
 		cout << "시작 패킷 받음" << endl;
 		break;
 	}
@@ -595,7 +583,7 @@ void SetCamera(CCamera* pCamera)
 	GameCamera = pCamera;
 }
 
-void SetGamePlayer(CMainPlayer* pPlayer)
+void SetGamePlayer(CMainPlayer* &pPlayer)
 {
 	pGamePlayer = pPlayer;
 }
