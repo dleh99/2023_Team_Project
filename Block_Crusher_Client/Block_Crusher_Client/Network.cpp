@@ -200,6 +200,7 @@ void ProcessPacket(char* ptr)
 		GameCamera = pGamePlayer->GetCamera();
 
 		NetScene->m_SceneState = 1;
+		cout << id << endl;
 		cout << "시작 패킷 받음" << endl;
 		break;
 	}
@@ -259,7 +260,7 @@ void ProcessPacket(char* ptr)
 		//cout << packet->bullet_id << ", " << packet->player_id << endl;
 		NetScene->DisableBullet(packet->bullet_id, packet->player_id);
 
-		//cout << packet->player_id << "가 " << packet->enemy_id << "를 " << packet->bullet_id << "번 총알로 맞춤" << endl;
+		cout << packet->player_id << "가 " << packet->enemy_id << "를 " << packet->bullet_id << "번 총알로 맞춤" << endl;
 		if (id == packet->enemy_id) {
 			int UpdatedHP = Netplayers[id]->GetPlayerHP() - 10;
 			Netplayers[id]->SetPlayerHP(UpdatedHP);

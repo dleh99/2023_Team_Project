@@ -63,6 +63,7 @@ void disconnect(int c_id)
 	// 나가면 출력되지 않게도 해야지
 	lock_guard<mutex> ll{ clients[c_id]._s_lock };
 	clients[c_id]._state = US_EMPTY;
+	clients[c_id]._room_id = -1;
 }
 
 bool CollisionCheck_Person(XMFLOAT3 bullet, XMFLOAT3 player, float bullet_r, float player_r)
@@ -101,11 +102,13 @@ void checking_room(int key)
 	//cout << "보낸다" << endl;
 	for (int i{}; i < MAX_PLAYER; ++i) {
 		if (room_mambers[i] != -1) {
-			cout << rooms[room_num].GetMapKey() << endl;
+			//cout << rooms[room_num].GetMapKey() << endl;
 			{
 				lock_guard<mutex> ll{ clients[room_mambers[i]]._s_lock };
 				clients[room_mambers[i]]._state = US_INGAME;
 			}
+			clients[room_mambers[i]]._room_id = i;
+			//cout << room_mambers[i] << "에게 id 보냄 : " << i << endl;
 			clients[room_mambers[i]].send_start_packet(rooms[room_num].GetMapKey(), i);
 		}
 	}
@@ -443,7 +446,7 @@ void Physics_Calculation_thread()
 						if (CollisionCheck_objects(clients[check_id].bullet[bullet_num].GetPosition(), r.map_information.Map_Block[map_block_num].GetPosition(),
 							clients[check_id].bullet[bullet_num].GetRadius(), r.map_information.Map_Block[map_block_num].GetRadius())) {
 							// 충돌했다면 총알, 블록 비활성화, 충돌했음을 알림
-							cout << "충돌함" << endl;
+							//cout << "충돌함" << endl;
 							clients[check_id].bullet[bullet_num].SetisActive(false);
 							r.map_information.Map_Block[map_block_num].SetisActive(false);
 
@@ -467,6 +470,7 @@ void Physics_Calculation_thread()
 						if (CollisionCheck_Person(clients[check_id].bullet[bullet_num].GetPosition(), clients[other_id].pos,
 							clients[check_id].bullet[bullet_num].GetRadius(), clients[other_id]._player_radius)) {
 							// 총알을 비활성화, hp 하락
+							//cout << "플레이어 [" << clients[check_id]._id << "] 와 플레이어 [" << clients[other_id]._id << "] 가 충돌하였습니다" << endl;
 							clients[check_id].bullet[bullet_num].SetisActive(false);
 							clients[other_id].hp -= 1;
 							
@@ -475,7 +479,7 @@ void Physics_Calculation_thread()
 								for (int send_round{}; send_round < MAX_PLAYER; ++send_round) {
 									int send_id = room_player_ids[send_round];
 									if (send_id == -1) continue;
-									clients[send_id].send_hit_packet(clients[check_id].bullet[bullet_num].GetbulletId(), clients[check_id]._id, clients[other_id]._id);
+									clients[send_id].send_hit_packet(clients[check_id].bullet[bullet_num].GetbulletId(), clients[check_id]._room_id, clients[other_id]._room_id);
 								}
 							}
 							else {
@@ -485,7 +489,7 @@ void Physics_Calculation_thread()
 								for (int send_round{}; send_round < MAX_PLAYER; ++send_round) {
 									int send_id = room_player_ids[send_round];
 									if (send_id == -1) continue;
-									clients[send_id].send_dead_packet(clients[check_id].bullet[bullet_num].GetbulletId(), clients[check_id]._id, clients[other_id]._id);
+									clients[send_id].send_dead_packet(clients[check_id].bullet[bullet_num].GetbulletId(), clients[check_id]._room_id, clients[other_id]._room_id);
 								}
 							}
 						}

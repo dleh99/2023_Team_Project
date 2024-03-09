@@ -16,6 +16,7 @@ User_Interface::User_Interface()
 	score = -1;
 	isWin = false;
 	login_id = L"";
+	_room_id = -1;
 }
 
 User_Interface::~User_Interface()

@@ -36,6 +36,8 @@ public:
 	std::mutex			_s_lock;				// state lock
 	std::wstring		login_id;
 
+	int				_room_id;					// ·ë ¾È¿¡¼­ÀÇ id
+
 
 public:
 	User_Interface();
