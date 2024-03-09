@@ -19,6 +19,8 @@ Mouse otherPlayerMouse[3];
 Animation otherPlayerAni[3];
 CScene* NetScene = NULL;
 vector<CMainPlayer*> Netplayers;
+CCamera* GameCamera = NULL;
+CMainPlayer* pGamePlayer = NULL;
 
 long long game_frame;
 
@@ -185,6 +187,18 @@ void ProcessPacket(char* ptr)
 		m_mapKey = packet->map_key;
 		NetScene->AddBlocksByMapData(0, m_mapKey,false);
 		id = packet->player_id;
+
+		pGamePlayer = Netplayers[id];
+
+		pGamePlayer->m_ppObjects = NetScene->m_ppObjects;
+		pGamePlayer->SetBlockNum(NetScene->m_nBlock);
+		pGamePlayer->m_pScene = NetScene;
+
+		NetScene->m_pPlayer = pGamePlayer;
+		NetScene->m_vPlayers = Netplayers;
+
+		GameCamera = pGamePlayer->GetCamera();
+
 		NetScene->m_SceneState = 1;
 		cout << "시작 패킷 받음" << endl;
 		break;
@@ -571,4 +585,14 @@ void SetPlayers(vector<CMainPlayer*> players)
 void SetFrame(long long input)
 {
 	game_frame = input;
+}
+
+void SetCamera(CCamera* pCamera)
+{
+	GameCamera = pCamera;
+}
+
+void SetGamePlayer(CMainPlayer* pPlayer)
+{
+	pGamePlayer = pPlayer;
 }

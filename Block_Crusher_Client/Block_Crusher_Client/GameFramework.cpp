@@ -633,6 +633,8 @@ void CGameFramework::BuildObjects()
 	m_vEnemyPlayers.push_back(pCubePlayer2);
 
 	SetPlayers(m_vEnemyPlayers);
+	SetGamePlayer(m_pPlayer);
+	SetCamera(m_pCamera);
 
 	m_pPlayer = m_vEnemyPlayers[id];
 #else
