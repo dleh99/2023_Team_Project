@@ -190,6 +190,9 @@ void ProcessPacket(char* ptr)
 		NetScene->AddBlocksByMapData(0, m_mapKey,false);
 		id = packet->player_id;
 
+		XMFLOAT3 pos = { packet->start_x ,packet->start_y ,packet->start_z };
+		Netplayers[id]->SetPosition(pos);
+
 		NetScene->m_SceneState = 1;
 		cout << "시작 패킷 받음" << endl;
 		break;
