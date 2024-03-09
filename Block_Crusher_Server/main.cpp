@@ -88,18 +88,26 @@ bool CollisionCheck_objects(XMFLOAT3 p1, XMFLOAT3 p2, float r1, float r2)
 void checking_room(int key)
 {
 	short room_num = clients_room[key];
-	cout << room_num << endl;
 
 	{
 		lock_guard<mutex> ll{ rooms[room_num]._r_lock };
 		if (RS_READY != rooms[room_num].GetRoomState()) return;
 	}
 
+	cout << room_num  << "번 방 인원 다 참" << endl;
+
 	rooms[room_num].SetRoomState(RS_INGAME);
 	int* room_mambers = rooms[room_num].GetPlayerId();
 	//cout << "보낸다" << endl;
 	for (int i{}; i < MAX_PLAYER; ++i) {
-		clients[room_mambers[i]].send_start_packet(rooms[room_num].GetMapKey());
+		if (room_mambers[i] != -1) {
+			cout << rooms[room_num].GetMapKey() << endl;
+			{
+				lock_guard<mutex> ll{ clients[room_mambers[i]]._s_lock };
+				clients[room_mambers[i]]._state = US_INGAME;
+			}
+			clients[room_mambers[i]].send_start_packet(rooms[room_num].GetMapKey(), i);
+		}
 	}
 
 }
@@ -169,6 +177,7 @@ void packet_process(int c_id, char* packet)
 					//cout << player_id << endl;
 					if (player_id == -1) continue;
 					if (player_id == c_id) continue;
+					//cout << player_id << "가 총을 쐈음" << endl;
 					clients[player_id].send_bullet_add_packet(clients.data(), c_id, i);
 				}
 				break;
@@ -187,11 +196,10 @@ void packet_process(int c_id, char* packet)
 			int* same_room_player = rooms[room_number].GetPlayerId();
 
 			for (int round{}; round < MAX_PLAYER; ++round) {
-				int player_id = *same_room_player;
+				int player_id = same_room_player[round];
 				if (player_id == -1) continue;
 				if (player_id == c_id) continue;
 				clients[player_id].send_fall_packet(c_id);
-				same_room_player += 1;
 			}
 		}
 		break;
@@ -335,10 +343,10 @@ void worker_thread(HANDLE iocp_h)
 				int* same_room_player = rooms[room_number].GetPlayerId();
 
 				for (int round{}; round < MAX_PLAYER; ++round) {
-					int player_id = *same_room_player;
+					int player_id = same_room_player[round];
 					if (player_id == -1) continue;
+					cout << player_id << "에게 " << key << "가 살아났음을 알림" << endl;
 					clients[player_id].send_respawn_packet(random_pos.x, random_pos.y, random_pos.z, key);
-					same_room_player += 1;
 				}
 				delete ex_over;
 				break;
@@ -435,6 +443,7 @@ void Physics_Calculation_thread()
 						if (CollisionCheck_objects(clients[check_id].bullet[bullet_num].GetPosition(), r.map_information.Map_Block[map_block_num].GetPosition(),
 							clients[check_id].bullet[bullet_num].GetRadius(), r.map_information.Map_Block[map_block_num].GetRadius())) {
 							// 충돌했다면 총알, 블록 비활성화, 충돌했음을 알림
+							cout << "충돌함" << endl;
 							clients[check_id].bullet[bullet_num].SetisActive(false);
 							r.map_information.Map_Block[map_block_num].SetisActive(false);
 
