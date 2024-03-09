@@ -26,34 +26,31 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	BuildLightsAndMaterials();
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	//
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
 
 	// 가로 x 세로 x 깊이가 12 x 12 x 12인 정육면체 메쉬 생성
 	CCubeMeshTextured* pCubeMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
 	CCubeMeshDiffused* BulletMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 2.0f, 2.0f, 2.0f);
+	m_pBlockMesh = pCubeMesh;
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	//pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/Dia_Cube.dds", RESOURCE_TEXTURE2D, 0);
 	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/rock1.dds", RESOURCE_TEXTURE2D, 0);
 
 	CMaterial* pMaterial = new CMaterial();
 	pMaterial->SetTexture(pTexture);
 
-	AddBlocksByMapData(pCubeMesh, m_pInstanceShader, pMaterial, 0, mapkey);
+	m_nObjects = 50 * 50 * 10 + 2000;
+	m_ppObjects = new CGameObject * [m_nObjects + 4000];
+	m_nBlock = m_nObjects;
 
-	m_pInstanceShader = new CInstancingShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get(), pCubeMesh, sizeof(Instance), m_nBlock);
+	m_pInstanceShader = new CInstancingShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get(), m_pBlockMesh, sizeof(Instance), m_nBlock);
 	m_pInstanceShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
 	m_pInstanceShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	m_pInstanceShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
 	m_pInstanceShader->CreateShaderResourceViews(pd3dDevice, pTexture, 0, 2);
 
-	//CTexturedShader* pTShader = new CTexturedShader();
-	//pTShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
-	//pTShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	//pTShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-	//pTShader->CreateShaderResourceViews(pd3dDevice, pTexture, 0, 2);
+	AddBlocksByMapData(0, mapkey,true);
 
 	CDiffusedShader* pShader = new CDiffusedShader();
 	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
@@ -81,16 +78,6 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pShadowMapToViewport->BuildObjects(pd3dDevice, pd3dCommandList, m_pDepthRenderShader->GetDepthTexture());
 
 	m_pInstanceShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pDepthRenderShader->GetDepthTexture());
-
-	//AddBlocksByMapData(pCubeMesh, m_pShadowShader, pMaterial, 0, mapkey);
-	m_pInstance = m_pInstanceShader->GetInstancePointer();
-	
-	for (int i = 0; i < m_nBlock; ++i) {
-		auto tmp = m_ppObjects[i]->GetWorldMatrix();
-		XMFLOAT4X4 result;
-		XMStoreFloat4x4(&result, XMMatrixTranspose(XMLoadFloat4x4(&tmp)));
-		m_pInstance[i].worldMatrix = result;
-	}
 }
 
 void CScene::ReleaseObjects()
@@ -849,7 +836,7 @@ int CScene::CCTitleUI()
 	return m_flag;
 }
 
-int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMaterial, int nindex, char mapkey)
+int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 {
 	std::ifstream in{ "Map/MapData3.bin", std::ios::binary };
 
@@ -895,61 +882,111 @@ int CScene::AddBlocksByMapData(CMesh* pMesh, CShader* pShader,CMaterial* pMateri
 			if (x >= 50) {
 				break;
 			}
-
-			m_nblock += num;
 		}
 	}
-	
-	m_nObjects = 50 * 50 * 10 + m_nblock;
-	m_ppObjects = new CGameObject * [m_nObjects + 4000];
 
 	int cnt = nindex;
 
-	for (int i = 0; i < 50; ++i)
-		for (int j = 0; j < 10; ++j)
+	if (first == true) {
+
+		for (int i = 0; i < 50; ++i)
+			for (int j = 0; j < 10; ++j)
+				for (int k = 0; k < 50; ++k) {
+					XMFLOAT3 position = { -(float)i * 12.0f + 20.0f,
+					 -(float)j * 12.0f , -(float)k * 12.0f + 40.0f };
+					CBlockObject* pBlockObject = new CBlockObject();
+					pBlockObject->SetMesh(m_pBlockMesh);
+					pBlockObject->SetIsActive(true);
+					pBlockObject->SetObjectType(TYPE_BLOCK);
+
+					m_ppObjects[cnt] = pBlockObject;
+					m_ppObjects[cnt]->SetPosition(position);
+
+					cnt++;
+				}
+
+		for (int i = 0; i < 50; ++i)
 			for (int k = 0; k < 50; ++k) {
-				XMFLOAT3 position = { -(float)i * 12.0f + 20.0f,
-				 -(float)j * 12.0f , -(float)k * 12.0f + 40.0f };
-				CBlockObject* pBlockObject = new CBlockObject();
-				pBlockObject->SetMesh(pMesh);
-				//pBlockObject->SetShader(pShader);
-				//pBlockObject->SetMaterial(pMaterial);
-				pBlockObject->SetIsActive(true);
+				for (int y = 0; y < mapdata[i][k]; ++y) {
 
-				m_ppObjects[cnt] = pBlockObject;
-				m_ppObjects[cnt]->SetPosition(position);
+					XMFLOAT3 position = { -(float)i * 12.0f + 20.0f,
+					(float)y * 12.0f + 12.0f, -(float)k * 12.0f + 40.0f };
 
-				cnt++;
+					cout << typeid(m_ppObjects[cnt]).name() << endl;
+
+					CBlockObject* pBlockObject = new CBlockObject();
+					pBlockObject->SetMesh(m_pBlockMesh);
+					pBlockObject->SetIsActive(true);
+					pBlockObject->SetObjectType(TYPE_BLOCK);
+
+					m_ppObjects[cnt] = pBlockObject;
+					m_ppObjects[cnt]->SetPosition(position);
+
+					cnt++;
+				}
 			}
+		m_nActiveBlock = cnt;
 
-	for (int i = 0; i < 50; ++i)
-		for (int k = 0; k < 50; ++k) {
-			for (int y = 0; y < mapdata[i][k]; ++y) {
-				XMFLOAT3 position = { -(float)i * 12.0f + 20.0f,
-				(float)y * 12.0f + 12.0f, -(float)k * 12.0f + 40.0f };
+		for (int i = cnt; i < m_nObjects; ++i) {
+			CBlockObject* pBlockObject = new CBlockObject();
+			pBlockObject->SetMesh(m_pBlockMesh);
 
-				//std::cout << position.x << " " << position.y << " " << position.z << std::endl;
+			pBlockObject->SetIsActive(true);
+			pBlockObject->SetObjectType(TYPE_BLOCK);
 
-				CBlockObject* pBlockObject = new CBlockObject();
-				pBlockObject->SetMesh(pMesh);
-				//pBlockObject->SetShader(pShader);
-				//pBlockObject->SetMaterial(pMaterial);
-				pBlockObject->SetIsActive(true);
-
-				m_ppObjects[cnt] = pBlockObject;
-				m_ppObjects[cnt]->SetPosition(position);
-				
-				
-				cnt++;
-			}
+			m_ppObjects[i] = pBlockObject;
 		}
+	}
+	else {
+
+		for (int i = 0; i < 50; ++i)
+			for (int j = 0; j < 10; ++j)
+				for (int k = 0; k < 50; ++k) {
+					XMFLOAT3 position = { -(float)i * 12.0f + 20.0f,
+					 -(float)j * 12.0f , -(float)k * 12.0f + 40.0f };
+
+					m_ppObjects[cnt]->SetPosition(position);
+					m_ppObjects[cnt]->SetIsActive(true);
+
+					cnt++;
+				}
+
+		for (int i = 0; i < 50; ++i)
+			for (int k = 0; k < 50; ++k) {
+				for (int y = 0; y < mapdata[i][k]; ++y) {
+
+					XMFLOAT3 position = { -(float)i * 12.0f + 20.0f,
+					(float)y * 12.0f + 12.0f, -(float)k * 12.0f + 40.0f };
+
+					m_ppObjects[cnt]->SetPosition(position);
+					m_ppObjects[cnt]->SetIsActive(true);
+
+					cnt++;
+				}
+			}
+		m_nActiveBlock = cnt;
+
+		for (int i = cnt; i < m_nBlock; ++i) {
+			m_ppObjects[i]->SetPosition(99999, 99999, 99999);
+			m_ppObjects[i]->SetIsActive(false);
+		}
+	}
+
+	m_pInstance = m_pInstanceShader->GetInstancePointer();
+
+	for (int i = 0; i < m_nBlock; ++i) {
+		auto tmp = m_ppObjects[i]->GetWorldMatrix();
+		XMFLOAT4X4 result;
+		XMStoreFloat4x4(&result, XMMatrixTranspose(XMLoadFloat4x4(&tmp)));
+		m_pInstance[i].worldMatrix = result;
+	}
 
 	for (int i = 0; i < 50; ++i) {
 		delete mapdata[i];
 	}
 	delete[] mapdata;
 
-	std::cout << m_nObjects << "개 블럭 추가" << std::endl;
-	m_nBlock = m_nObjects;
-	return m_nObjects;
+	std::cout << m_nActiveBlock << "개 블럭 추가" << std::endl;
+
+	return m_nActiveBlock;
 }

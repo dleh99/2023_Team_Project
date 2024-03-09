@@ -183,6 +183,7 @@ void ProcessPacket(char* ptr)
 		SC_START_PACKET* packet = reinterpret_cast<SC_START_PACKET*>(ptr);
 		m_gameStart = true;
 		m_mapKey = packet->map_key;
+		NetScene->AddBlocksByMapData(0, m_mapKey,false);
 		NetScene->m_SceneState = 1;
 		cout << "시작 패킷 받음" << endl;
 		break;

@@ -63,7 +63,7 @@ public:
 
 	int FindEmptySlot();
 	bool BSCollisionCheck(XMFLOAT3 Position1, XMFLOAT3 Position2, float Radius1, float Radius2);
-	int AddBlocksByMapData(CMesh* pMesh, CShader* pShader, CMaterial* pMaterial,int nindex, char mapkey);
+	int AddBlocksByMapData(int nindex, char mapkey, bool first);
 	int CCTitleUI();
 	bool IsPointInRectangle(POINT pt, RECT rect) {
 		return (pt.x >= rect.left && pt.x <= rect.right && pt.y >= rect.top && pt.y <= rect.bottom);
@@ -75,8 +75,11 @@ public:
 	ComPtr<ID3D12RootSignature> GetGraphicsRootSignature();
 	
 	int m_nObjects = 0;
-	CGameObject** m_ppObjects = NULL;
 	int m_nBlock = 0;
+	int m_nActiveBlock = 0;
+	CMesh* m_pBlockMesh = NULL;
+	CGameObject** m_ppObjects = NULL;
+
 	CPlayer* m_pPlayer= NULL;
 	std::vector<CMainPlayer*> m_vPlayers;
 	std::wstring* m_sTitleTexts[3];
@@ -116,8 +119,7 @@ public:
 protected:
 	/*CShader** m_ppShaders = NULL;
 	int m_nShaders = 0;*/
-	
-	int m_nblock = 0;
+
 	int m_nRandObject = 0;
 
 	float m_fPlayTime = 120.0f;
