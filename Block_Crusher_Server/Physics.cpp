@@ -49,3 +49,44 @@ XMFLOAT3 Physics::PickPos()
 
     return pos;
 }
+
+XMFLOAT3 Physics::StartPos(int key)
+{
+    XMFLOAT3 pos;
+
+    switch (key)
+    {
+    case 0:
+    {
+        pos = { -100.f, 250.f, -80.f };
+        break;
+    }
+    case 1:
+    {
+        pos = { -100.f, 250.f, -260.f };
+        break;
+    }
+    case 2:
+    {
+        pos = { -100.f, 250.f, -440.f };
+        break;
+    }
+    case 3:
+    {
+        pos = { -460.f, 250.f, -80.f };
+        break;
+    }
+    case 4:
+    {
+        pos = { -460.f, 250.f, -260.f };
+        break;
+    }
+    case 5:
+    {
+        pos = { -460.f, 250.f, -440.f };
+        break;
+    }
+    }
+
+    return pos;
+}

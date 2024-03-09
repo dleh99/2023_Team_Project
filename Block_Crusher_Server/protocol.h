@@ -140,6 +140,9 @@ struct SC_START_PACKET
 	char				type;
 	char				map_key;
 	int					player_id;
+	float				start_x;
+	float				start_y;
+	float				start_z;
 };
 
 struct SC_MOVE_PACKET {
