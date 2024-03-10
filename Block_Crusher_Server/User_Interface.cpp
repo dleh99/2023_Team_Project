@@ -87,7 +87,7 @@ void User_Interface::send_move_packet(User_Interface* clients, int c_id, Animati
 	SC_MOVE_PACKET p;
 	p.size = sizeof(SC_MOVE_PACKET);
 	p.type = SC_MOVE_PLAYER;
-	p.id = c_id;
+	p.id = clients[c_id]._room_id;
 	p.x = clients[c_id].pos.x;
 	p.y = clients[c_id].pos.y;
 	p.z = clients[c_id].pos.z;

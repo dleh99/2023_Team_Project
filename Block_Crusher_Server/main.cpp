@@ -355,7 +355,7 @@ void worker_thread(HANDLE iocp_h)
 					int player_id = same_room_player[round];
 					if (player_id == -1) continue;
 					cout << player_id << "에게 " << key << "가 살아났음을 알림" << endl;
-					clients[player_id].send_respawn_packet(random_pos.x, random_pos.y, random_pos.z, key);
+					clients[player_id].send_respawn_packet(random_pos.x, random_pos.y, random_pos.z, clients[key]._room_id);
 				}
 				delete ex_over;
 				break;
@@ -467,7 +467,7 @@ void Physics_Calculation_thread()
 								if (room_player_ids[round] == -1) continue;
 								clients[room_player_ids[round]].send_bullet_collision_packet(clients[check_id].bullet[bullet_num].GetbulletId(),
 									r.map_information.Map_Block[map_block_num].GetId(),
-									clients[check_id]._id,
+									clients[check_id]._room_id,
 									r.map_information.Map_Block[map_block_num].GetBlockType());
 							}
 						}
@@ -492,7 +492,7 @@ void Physics_Calculation_thread()
 								for (int send_round{}; send_round < MAX_PLAYER; ++send_round) {
 									int send_id = room_player_ids[send_round];
 									if (send_id == -1) continue;
-									clients[send_id].send_hit_packet(clients[check_id].bullet[bullet_num].GetbulletId(), clients[check_id]._id, clients[other_id]._id);
+									clients[send_id].send_hit_packet(clients[check_id].bullet[bullet_num].GetbulletId(), clients[check_id]._room_id, clients[other_id]._room_id);
 								}
 							}
 							else {
@@ -502,8 +502,8 @@ void Physics_Calculation_thread()
 								for (int send_round{}; send_round < MAX_PLAYER; ++send_round) {
 									int send_id = room_player_ids[send_round];
 									if (send_id == -1) continue;
-									cout << "플레이어 [" << clients[other_id]._id << "] 가 죽었다는 걸 플레이어 [" << clients[send_id]._id << "] 에게 보냄" << endl;
-									clients[send_id].send_dead_packet(clients[check_id].bullet[bullet_num].GetbulletId(), clients[check_id]._id, clients[other_id]._id);
+									cout << "플레이어 [" << clients[other_id]._room_id << "] 가 죽었다는 걸 플레이어 [" << clients[send_id]._room_id << "] 에게 보냄" << endl;
+									clients[send_id].send_dead_packet(clients[check_id].bullet[bullet_num].GetbulletId(), clients[check_id]._room_id, clients[other_id]._room_id);
 								}
 							}
 						}

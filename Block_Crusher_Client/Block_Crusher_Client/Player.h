@@ -53,6 +53,9 @@ protected:
 	// 블록의 수
 	int m_nBlock = 0;
 
+	XMFLOAT3 m_xmf3FirstLook = { 0,0,1 };
+	float m_fcosTheta = 0;
+
 	//플레이어의 이동 속도를 나타내는 벡터이다.
 	XMFLOAT3 m_xmf3Velocity;
 
@@ -99,6 +102,7 @@ public:
 	int GetBulletNum() { return m_nBullet; };
 	bool GetDeath() { return m_bDeath; };
 	int GetBlockNum() { return m_nBlock; };
+	float GetRotationRadian() { return m_fcosTheta;  }
 	bool GetPlayerReloading() { return m_bReloading; };
 	bool GetIsShoot() { return m_bIsShoot; }
 
@@ -162,6 +166,7 @@ public:
 
 	//플레이어를 회전하는 함수이다.
 	void Rotate(float x, float y, float z);
+	void Rotate(float radian);
 
 	//플레이어의 위치와 회전 정보를 경과 시간에 따라 갱신하는 함수이다.
 	void Update(float fTimeElapsed);

@@ -482,7 +482,7 @@ void CGameFramework::FrameAdvance()
 		Pos otherPlayerPos = GetOtherPlayerPos(i);
 		Mouse otherPlayerMouse = GetOtherPlayerMouse(i);
 		//cout << "[" << i << "] " << otherPlayerPos.x << ", " << otherPlayerPos.y << ", " << otherPlayerPos.z << ", " << otherPlayerMouse.cx << ", " << otherPlayerMouse.cy << endl;
-		m_vEnemyPlayers[i]->Rotate(otherPlayerMouse.cy, otherPlayerMouse.cx, 0.f);
+		m_vEnemyPlayers[i]->Rotate(otherPlayerMouse.cx);
 		m_vEnemyPlayers[i]->SetPosition(XMFLOAT3(otherPlayerPos.x, otherPlayerPos.y, otherPlayerPos.z));
 	}
 #endif
@@ -776,8 +776,9 @@ void CGameFramework::ProcessInput()
 		z = m_pPlayer->GetPosition().z;
 		//cout << x << ", " << y << ", " << z << endl;
 		//cout << m_pPlayer->GetAniState() << endl;
+
 		if (m_pScene->m_SceneState == 1)
-			send_move_packet(x, y, z, cxDelta, cyDelta, m_pPlayer->GetAniState());
+			send_move_packet(x, y, z, m_pPlayer->GetRotationRadian(), cyDelta, m_pPlayer->GetAniState());
 
 		if (y < -150.f && false == m_pPlayer->GetDeath()) {
 			send_fall_packet();
