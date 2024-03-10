@@ -76,7 +76,7 @@ int DB::Search_User(std::wstring id, std::wstring password)
 
 	memset(wstr, 0, sizeof(wstr));
 	//std::wcout << "아이디 : " << id << ", 비밀번호 : " << password << std::endl;
-	//wsprintf(wstr, L"EXEC Login %ls, %ls", id.c_str(), password.c_str());
+	wsprintf(wstr, L"EXEC Login %ls, %ls", id.c_str(), password.c_str());
 	//std::wcout << wstr << std::endl;
 
 	// Allocate statement handle  
