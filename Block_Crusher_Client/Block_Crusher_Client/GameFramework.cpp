@@ -902,7 +902,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		{
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
-			m_SceneState = 0;
+			m_pScene->m_SceneState = 0;
 			break;
 		case VK_RETURN: {
 #ifdef USE_SERVER			
