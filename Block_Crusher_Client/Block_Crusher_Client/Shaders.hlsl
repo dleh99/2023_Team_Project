@@ -81,7 +81,7 @@ float4 PSDiffused(VS_OUTPUT input) : SV_TARGET
 	float4 color = {1,0,0,1};
 	float3 normalW = { 1, 0, 0 };
 
-	float4 cIllumination = Lighting(input.position.xyz, normalW, true, input.shadowMapUVs);
+	float4 cIllumination = Lighting(input.position.xyz, normalW, false, input.shadowMapUVs);
 
 	//return color;
 	return lerp(color, cIllumination, 0.4f);
@@ -184,7 +184,7 @@ float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 	float4 cColor = gtxtTexture.Sample(gSamplerState, input.uv);
 	float3 normalW = normalize(input.normal);
 
-	float4 cIllumination = Lighting(input.position.xyz, normalW, true, input.shadowMapUVs);
+	float4 cIllumination = Lighting(input.position.xyz, normalW, false, input.shadowMapUVs);
 
 	return lerp(cColor, cIllumination, 0.5f);
 
@@ -312,6 +312,14 @@ struct VS_LIGHTING_OUTPUT
 	float3 normalW : NORMAL;
 };
 
+struct VS_SKINNED_LIGHTING_INPUT
+{
+	float3 position : POSITION;
+	float3 normal : NORMAL;
+	int4 indices : BONEINDEX;
+	float4 weights : BONEWEIGHT;
+};
+
 struct PS_DEPTH_OUTPUT
 {
 	float fzPosition : SV_Target;
@@ -327,6 +335,24 @@ VS_LIGHTING_OUTPUT VSLighting(VS_LIGHTING_INPUT input)
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 
 	return(output);
+}
+
+VS_LIGHTING_OUTPUT VSSkinnedAnimationShadow(VS_SKINNED_LIGHTING_INPUT input)
+{
+	VS_LIGHTING_OUTPUT output = (VS_LIGHTING_OUTPUT)0;
+
+	float4x4 mtxVertexToBoneWorld = (float4x4)0.0f;
+
+	for (int i = 0; i < MAX_VERTEX_INFLUENCES; ++i)
+	{
+		mtxVertexToBoneWorld += input.weights[i] * mul(gpmtxBoneOffsets[input.indices[i]], gpmtxBoneTransforms[input.indices[i]]);
+	}
+
+	output.positionW = mul(float4(input.position, 1.0f), mtxVertexToBoneWorld).xyz;
+	output.normalW = mul(input.normal, (float3x3)gmtxWorld);
+	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+
+	return output;
 }
 
 PS_DEPTH_OUTPUT PSDepthWriteShader(VS_LIGHTING_OUTPUT input)

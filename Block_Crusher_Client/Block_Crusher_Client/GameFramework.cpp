@@ -542,7 +542,7 @@ void CGameFramework::FrameAdvance()
 
 	//렌더링 코드는 여기에 추가될 것이다.
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList.Get(), m_pCamera);
-	
+
 	if (m_pPlayer)
 		m_pPlayer->Render(m_pd3dCommandList.Get(), m_pCamera);
 
@@ -608,14 +608,16 @@ void CGameFramework::BuildObjects()
 	CPlayerShader* pPlayerShader = new CPlayerShader();
 	pPlayerShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature().Get());
 	pPlayerShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
-	pPlayerShader->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 1);
-	pPlayerShader->CreateShaderResourceViews(m_pd3dDevice.Get(), pTexture, 0, 4);
+	//pPlayerShader->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 1);
+	//pPlayerShader->CreateShaderResourceViews(m_pd3dDevice.Get(), pTexture, 0, 4);
+	CScene::CreateShaderResourceViews(m_pd3dDevice.Get(), pTexture, 0, 4);
 
 	CSkinnedAnimationPlayerShader* pSkinnedPlayerShader = new CSkinnedAnimationPlayerShader();
 	pSkinnedPlayerShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature().Get());
 	pSkinnedPlayerShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
-	pSkinnedPlayerShader->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 1);
-	pSkinnedPlayerShader->CreateShaderResourceViews(m_pd3dDevice.Get(), pTexture, 0, 4);
+	//pSkinnedPlayerShader->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 1);
+	//pSkinnedPlayerShader->CreateShaderResourceViews(m_pd3dDevice.Get(), pTexture, 0, 4);
+	CScene::CreateShaderResourceViews(m_pd3dDevice.Get(), pTexture, 0, 4);
 
 	CMaterial* pMat = new CMaterial();
 	pMat->SetTexture(pTexture);
@@ -898,10 +900,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 	case WM_KEYUP:
 		switch (wParam)
 		{
-			
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
-			//::DestroyWindow(0);
+			m_SceneState = 0;
 			break;
 		case VK_RETURN: {
 #ifdef USE_SERVER			

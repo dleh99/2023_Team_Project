@@ -3,6 +3,18 @@
 #include "Player.h"
 #include "Network.h"
 
+ID3D12DescriptorHeap* CScene::m_pd3dCbvSrvDescriptorHeap = NULL;
+
+D3D12_CPU_DESCRIPTOR_HANDLE	CScene::m_d3dCbvCPUDescriptorStartHandle;
+D3D12_GPU_DESCRIPTOR_HANDLE	CScene::m_d3dCbvGPUDescriptorStartHandle;
+D3D12_CPU_DESCRIPTOR_HANDLE	CScene::m_d3dSrvCPUDescriptorStartHandle;
+D3D12_GPU_DESCRIPTOR_HANDLE	CScene::m_d3dSrvGPUDescriptorStartHandle;
+
+D3D12_CPU_DESCRIPTOR_HANDLE	CScene::m_d3dCbvCPUDescriptorNextHandle;
+D3D12_GPU_DESCRIPTOR_HANDLE	CScene::m_d3dCbvGPUDescriptorNextHandle;
+D3D12_CPU_DESCRIPTOR_HANDLE	CScene::m_d3dSrvCPUDescriptorNextHandle;
+D3D12_GPU_DESCRIPTOR_HANDLE	CScene::m_d3dSrvGPUDescriptorNextHandle;
+
 CScene::CScene()
 {
 	TitleUI[ID] = {700, 575, 700 + 250, 575 + 30};
@@ -21,6 +33,8 @@ CScene::~CScene()
 void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char mapkey)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 5);
 
 	// 조명
 	BuildLightsAndMaterials();
@@ -47,8 +61,10 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pInstanceShader = new CInstancingShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get(), m_pBlockMesh, sizeof(Instance), m_nBlock);
 	m_pInstanceShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
 	m_pInstanceShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	m_pInstanceShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-	m_pInstanceShader->CreateShaderResourceViews(pd3dDevice, pTexture, 0, 2);
+	//m_pInstanceShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
+	//m_pInstanceShader->CreateShaderResourceViews(pd3dDevice, pTexture, 0, 2);
+	m_pInstanceShader->SetTexture(pTexture);
+	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 2);
 
 	AddBlocksByMapData(0, mapkey,true);
 
@@ -82,6 +98,9 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 void CScene::ReleaseObjects()
 {
+	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
+	if (m_pd3dCbvSrvDescriptorHeap) m_pd3dCbvSrvDescriptorHeap->Release();
+
 	if(m_pSkyBox) m_pSkyBox->Release();
 		
 	if (m_ppObjects)
@@ -243,6 +262,49 @@ void CScene::ReleaseShaderVariables()
 		m_pd3dcbMaterials->Unmap(0, NULL);
 		m_pd3dcbMaterials->Release();
 	}
+}
+
+void CScene::CreateCbvSrvDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews)
+{
+	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
+	::ZeroMemory(&d3dDescriptorHeapDesc, sizeof(D3D12_DESCRIPTOR_HEAP_DESC));
+	d3dDescriptorHeapDesc.NumDescriptors = nConstantBufferViews + nShaderResourceViews; //CBVs + SRVs 
+	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	d3dDescriptorHeapDesc.NodeMask = 0;
+	pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dCbvSrvDescriptorHeap);
+
+	m_d3dCbvCPUDescriptorStartHandle = m_pd3dCbvSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	m_d3dCbvGPUDescriptorStartHandle = m_pd3dCbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	m_d3dSrvCPUDescriptorStartHandle.ptr = m_d3dCbvCPUDescriptorStartHandle.ptr + (static_cast<unsigned __int64>(::gnCbvSrvDescriptorIncrementSize) * nConstantBufferViews);
+	m_d3dSrvGPUDescriptorStartHandle.ptr = m_d3dCbvGPUDescriptorStartHandle.ptr + (static_cast<unsigned __int64>(::gnCbvSrvDescriptorIncrementSize) * nConstantBufferViews);
+
+	m_d3dSrvCPUDescriptorNextHandle = m_d3dSrvCPUDescriptorStartHandle;
+	m_d3dSrvGPUDescriptorNextHandle = m_d3dSrvGPUDescriptorStartHandle;
+}
+
+void CScene::CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex)
+{
+	m_d3dSrvCPUDescriptorNextHandle.ptr += (static_cast<unsigned __int64>(::gnCbvSrvDescriptorIncrementSize) * nDescriptorHeapIndex);
+	m_d3dSrvGPUDescriptorNextHandle.ptr += (static_cast<unsigned __int64>(::gnCbvSrvDescriptorIncrementSize) * nDescriptorHeapIndex);
+
+	//m_ptexture = pTexture;
+
+	if (pTexture)
+	{
+		int nTextures = pTexture->GetTextures();
+		for (int i = 0; i < nTextures; i++)
+		{
+			ID3D12Resource* pShaderResource = pTexture->GetResource(i);
+			D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc = pTexture->GetShaderResourceViewDesc(i);
+			pd3dDevice->CreateShaderResourceView(pShaderResource, &d3dShaderResourceViewDesc, m_d3dSrvCPUDescriptorNextHandle);
+			m_d3dSrvCPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
+			pTexture->SetGpuDescriptorHandle(i, m_d3dSrvGPUDescriptorNextHandle);
+			m_d3dSrvGPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
+		}
+	}
+	int nRootParameters = pTexture->GetRootParameters();
+	for (int i = 0; i < nRootParameters; i++) pTexture->SetRootParameterIndex(i, nRootParameterStartIndex + i);
 }
 
 ComPtr<ID3D12RootSignature> CScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
@@ -494,8 +556,10 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 { 
-	m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
+	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
 
+	m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
+	
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 
@@ -506,11 +570,11 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 		m_pInstanceShader->Render(pd3dCommandList, pCamera);
 
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera);
-	
-	//if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
+
+	/*if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
 
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
-	pCamera->UpdateShaderVariables(pd3dCommandList);
+	pCamera->UpdateShaderVariables(pd3dCommandList);*/
 }
 
 void CScene::AddObjects(int type,XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector, int p_id, int b_id)

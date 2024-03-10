@@ -54,8 +54,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // 기본 메시지 루프입니다:
     while (1)
     {
-        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+        if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
         {
+            if (msg.message == WM_QUIT) break;
             if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
             {
                 TranslateMessage(&msg);
@@ -173,7 +174,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         ::DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
         break;
     case IDM_EXIT:
-        ::DestroyWindow(hWnd);
+        //::DestroyWindow(hWnd);
         break;
     default:
         return(::DefWindowProc(hWnd, message, wParam, lParam));

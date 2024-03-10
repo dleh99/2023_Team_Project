@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "Shader.h"
 #include "Scene.h"
+#include "Player.h"
 
 CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootParameters)
 {
@@ -78,6 +79,26 @@ void CTexture::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 		for (int i = 0; i < m_nRootParameters; i++)
 		{
 			pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[i], m_pd3dSrvGpuDescriptorHandles[i]);
+		}
+	}
+	else
+	{
+		//if (m_pd3dSrvGpuDescriptorHandles[0].ptr) pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[0], m_pd3dSrvGpuDescriptorHandles[0]);
+		pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[0], m_pd3dSrvGpuDescriptorHandles[0]);
+	}
+}
+
+void CTexture::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_GPU_DESCRIPTOR_HANDLE SrvHandle)
+{
+	if (m_nRootParameters == m_nTextures)
+	{
+		/*for (int i = 0; i < m_nRootParameters; i++)
+		{
+			if (m_pd3dSrvGpuDescriptorHandles[i].ptr && (m_pnRootParameterIndices[i] != -1)) pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[i], m_pd3dSrvGpuDescriptorHandles[i]);
+		}*/
+		for (int i = 0; i < m_nRootParameters; i++)
+		{
+			pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[i], SrvHandle);
 		}
 	}
 	else
@@ -377,6 +398,13 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 	OnPrepareRender();
 
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
+
+	if (m_pShader)
+	{
+		//m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+		//if (!m_bShadow)
+		m_pShader->Render(pd3dCommandList, pCamera);
+	}
 
 	if (m_pMesh)
 	{
@@ -1030,8 +1058,9 @@ CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	CSkyBoxShader* pSkyBoxShader = new CSkyBoxShader();
 	pSkyBoxShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
 	pSkyBoxShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	pSkyBoxShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-	pSkyBoxShader->CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture, 0, 3);
+	//pSkyBoxShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+	//pSkyBoxShader->CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture, 0, 3);
+	CScene::CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture, 0, 3);
 	SetShader(pSkyBoxShader);
 
 	CMaterial* pSkyBoxMaterial = new CMaterial();
