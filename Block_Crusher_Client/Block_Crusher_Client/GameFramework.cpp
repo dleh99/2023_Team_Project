@@ -776,6 +776,9 @@ void CGameFramework::ProcessInput()
 		z = m_pPlayer->GetPosition().z;
 		//cout << x << ", " << y << ", " << z << endl;
 		//cout << m_pPlayer->GetAniState() << endl;
+		
+		m_pPlayer->GetRotationRadian();
+
 		if (m_pScene->m_SceneState == 1)
 			send_move_packet(x, y, z, cxDelta, cyDelta, m_pPlayer->GetAniState());
 
