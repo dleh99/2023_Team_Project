@@ -322,12 +322,20 @@ void CPlayer::Rotate(float x, float y, float z)
 	float v1Length = XMVectorGetX(XMVector3Length(xmvVector1));
 	float v2Length = XMVectorGetX(XMVector3Length(xmvVector2));
 
-	m_fcosTheta = dotProduct / (v1Length * v2Length);
+	float cos = dotProduct / (v1Length * v2Length);
 
-	//cout << XMConvertToDegrees(acosf(m_fcosTheta)) << endl;
-	//cout << m_xmf3Look.x << " ";
-	//cout << m_xmf3Look.z << endl;
+	float angle = XMConvertToDegrees(acosf(cos));
+	if (m_xmf3Look.x < 0) {
+		angle = 360.0f - angle;
+	}
+	m_fcosTheta = angle;
 
+	//float angle = XMConvertToDegrees(acosf(m_fcosTheta));
+	//if (m_xmf3Look.x < 0) {
+	//	angle = 360.0f - angle;
+	//}
+
+	//cout << angle << endl;
 
 	/*플레이어를 회전한다. 1인칭 카메라 또는 3인칭 카메라에서 플레이어의 회전은 로컬 y-축에서만 일어난다.
 	플레이어의 로컬 y-축(Up 벡터)을 기준으로 로컬 z-축(Look 벡터)와 로컬 x-축(Right 벡터)을 회전시킨다.
@@ -350,10 +358,8 @@ void CPlayer::Rotate(float x, float y, float z)
 void CPlayer::Rotate(float radian)
 {
 
-	float angle = XMConvertToDegrees(acosf(m_fcosTheta));
-	if (m_xmf3Look.x < 0) {
-		angle = 360.0f - angle;
-	}
+
+	cout << angle << endl;
 
 	m_xmf3Look = { 0,0,1 };
 	m_xmf3Right = Vector3::CrossProduct(m_xmf3Up, m_xmf3Look, true);
