@@ -76,7 +76,7 @@ int DB::Search_User(std::wstring id, std::wstring password)
 
 	memset(wstr, 0, sizeof(wstr));
 	//std::wcout << "아이디 : " << id << ", 비밀번호 : " << password << std::endl;
-	//wsprintf(wstr, L"EXEC Login %ls, %ls", id.c_str(), password.c_str());
+	wsprintf(wstr, L"EXEC Login %ls, %ls", id.c_str(), password.c_str());
 	//std::wcout << wstr << std::endl;
 
 	// Allocate statement handle  
@@ -184,7 +184,7 @@ void DB::Update_score(std::wstring id, int score)
 
 	memset(wstr, 0, sizeof(wstr));
 	wsprintf(wstr, L"EXEC update_score %ls, %d", id.c_str(), score);
-	std::wcout << wstr << std::endl;
+	//std::wcout << wstr << std::endl;
 
 	// Allocate statement handle  
 	retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
