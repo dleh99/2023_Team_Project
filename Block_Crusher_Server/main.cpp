@@ -213,6 +213,10 @@ void packet_process(int c_id, char* packet)
 		CS_SCORE_PACKET* p = reinterpret_cast<CS_SCORE_PACKET*>(packet);
 		short room_num = clients_room[c_id];
 		clients[c_id].score = p->score;
+		
+		DB_EVENT ev{ clients[c_id]._id, chrono::system_clock::now(), UPDATE_SCORE, clients[c_id].login_id, clients[c_id].score };
+		db_queue.push(ev);
+		
 		if (-1 != rooms[room_num].scoreCalculate(clients[c_id].score)) {
 			int* room_member = rooms[room_num].GetPlayerId();
 			for (int i{}; i < MAX_PLAYER; ++i) {
@@ -399,6 +403,13 @@ void worker_thread(HANDLE iocp_h)
 			case OT_DISCONNECT:
 			{
 				cout << "DB에서 login state 변경 완료" << endl;
+				delete ex_over;
+				break;
+			}
+			case OT_UPDATE_SCORE:
+			{
+				cout << "DB에서 [" << key << "]의 스코어 업데이트 완료" << endl;
+				delete ex_over;
 				break;
 			}
 		}
@@ -555,7 +566,7 @@ void do_db()
 			}
 			switch (ev.event_id) {
 			case TRY_LOGIN: {
-				cout << "로그인 트라이 해본다" << endl;
+				cout << "로그인 시도" << endl;
 				int res = db_controll.Search_User(ev._id, ev._password);
 				Overlapped* ov = new Overlapped;
 				if (res == DB_SIGN_UP) {
@@ -578,6 +589,13 @@ void do_db()
 				db_controll.Disconnect_User(ev._id);
 				Overlapped* ov = new Overlapped;
 				ov->_overlapped_type = OT_DISCONNECT;
+				PostQueuedCompletionStatus(iocp_h, 1, ev.obj_id, &ov->_over);
+				break;
+			}
+			case UPDATE_SCORE: {
+				db_controll.Update_score(ev._id, ev._score);
+				Overlapped* ov = new Overlapped;
+				ov->_overlapped_type = OT_UPDATE_SCORE;
 				PostQueuedCompletionStatus(iocp_h, 1, ev.obj_id, &ov->_over);
 				break;
 			}

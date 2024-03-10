@@ -13,6 +13,15 @@ DB_EVENT::DB_EVENT(int ob_id, std::chrono::system_clock::time_point time, DB_EVE
 	_password = password;
 }
 
+DB_EVENT::DB_EVENT(int ob_id, std::chrono::system_clock::time_point time, DB_EVENT_TYPE et, std::wstring id, int score)
+{
+	obj_id = ob_id;
+	wakeup_time = time;
+	event_id = et;
+	_id = id;
+	_score = score;
+}
+
 void DB::InitDB()
 {
 	SQLRETURN retcode;
@@ -67,7 +76,7 @@ int DB::Search_User(std::wstring id, std::wstring password)
 
 	memset(wstr, 0, sizeof(wstr));
 	//std::wcout << "아이디 : " << id << ", 비밀번호 : " << password << std::endl;
-	wsprintf(wstr, L"EXEC Login %ls, %ls", id.c_str(), password.c_str());
+	//wsprintf(wstr, L"EXEC Login %ls, %ls", id.c_str(), password.c_str());
 	//std::wcout << wstr << std::endl;
 
 	// Allocate statement handle  
@@ -155,6 +164,52 @@ void DB::Disconnect_User(std::wstring id)
 		else {
 			show_error(hstmt, SQL_HANDLE_STMT, retcode);
 		}
+	}
+
+	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+		SQLCancel(hstmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+	}
+}
+
+void DB::Update_score(std::wstring id, int score)
+{
+	SQLHSTMT hstmt = 0;
+	SQLRETURN retcode;
+
+	SQLWCHAR wstr[100];
+	SQLWCHAR user_id[20];
+	SQLINTEGER user_score;
+	SQLLEN len[2];
+
+	memset(wstr, 0, sizeof(wstr));
+	wsprintf(wstr, L"EXEC update_score %ls, %d", id.c_str(), score);
+	std::wcout << wstr << std::endl;
+
+	// Allocate statement handle  
+	retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+	retcode = SQLExecDirect(hstmt, (SQLWCHAR*)wstr, SQL_NTS);
+
+	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+		retcode = SQLBindCol(hstmt, 1, SQL_C_WCHAR, &user_id, 20, &len[0]);
+		retcode = SQLBindCol(hstmt, 2, SQL_INTEGER, &user_score, 4, &len[1]);
+
+		retcode = SQLFetch(hstmt);
+		if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO) {
+			show_error(hstmt, SQL_HANDLE_STMT, retcode);
+		}
+		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+			std::cout << "DB 스코어 갱신 완료" << std::endl;
+			SQLCancel(hstmt);
+			SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+		}
+		else {
+			show_error(hstmt, SQL_HANDLE_STMT, retcode);
+		}
+	}
+	else
+	{
+		show_error(hstmt, SQL_HANDLE_STMT, retcode);
 	}
 
 	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {

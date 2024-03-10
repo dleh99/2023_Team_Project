@@ -1,7 +1,7 @@
 #pragma once
 #include "header.h"
 
-enum DB_EVENT_TYPE { TRY_LOGIN, LOGIN_DISCONNECT };
+enum DB_EVENT_TYPE { TRY_LOGIN, LOGIN_DISCONNECT, UPDATE_SCORE };
 
 constexpr int DB_SIGN_UP = 1;
 constexpr int DB_LOGIN_SUCCESS = 2;
@@ -18,20 +18,23 @@ public:
 	void ReleaseDB();
 	int Search_User(std::wstring id, std::wstring password);
 	void Disconnect_User(std::wstring id);
+	void Update_score(std::wstring id, int score);
 	void show_error(SQLHANDLE hHandle, SQLSMALLINT hType, RETCODE RetCode);
 };
 
 class DB_EVENT
 {
 public:
-	int obj_id;
+	int											obj_id;
 	std::chrono::system_clock::time_point		wakeup_time;
-	DB_EVENT_TYPE event_id;
-	std::wstring _id;
-	std::wstring _password;
+	DB_EVENT_TYPE								event_id;
+	std::wstring								_id;
+	std::wstring								_password;
+	int											_score;
 public:
 	DB_EVENT();
 	DB_EVENT(int ob_id, std::chrono::system_clock::time_point time, DB_EVENT_TYPE et, std::wstring id, std::wstring password);
+	DB_EVENT(int ob_id, std::chrono::system_clock::time_point time, DB_EVENT_TYPE et, std::wstring id, int score);
 	constexpr bool operator < (const DB_EVENT& L) const
 	{
 		return (wakeup_time > L.wakeup_time);
