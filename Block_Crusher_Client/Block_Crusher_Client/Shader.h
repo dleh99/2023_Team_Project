@@ -178,6 +178,8 @@ public:
 	CDepthRenderShader(CScene* pScene, LIGHT* pLights);
 	virtual ~CDepthRenderShader();
 
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat);
+
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
 	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
@@ -195,6 +197,13 @@ public:
 	void PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, std::vector<CMainPlayer*> vPlayers);
 
 	virtual void ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, std::vector<CMainPlayer*> vPlayers);
+
+	virtual D3D12_INPUT_LAYOUT_DESC CreateAnimationShadowInputLayout();
+	virtual D3D12_SHADER_BYTECODE CreateAnimationShadowVertexShader(ID3DBlob** ppd3dShaderBlob);
+
+	virtual void PrepareAnimationShadowRender(ID3D12GraphicsCommandList* pd3dCommandList);
+
+	virtual void AnimationObjectShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 protected:
 	CTexture* m_pDepthFromLightTexture = NULL;

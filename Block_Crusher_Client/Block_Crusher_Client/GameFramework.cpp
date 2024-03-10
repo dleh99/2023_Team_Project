@@ -560,7 +560,7 @@ void CGameFramework::FrameAdvance()
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList.Get() };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 	//2D 오브젝트 랜더링
-	//Render2D();
+	Render2D();
 	//GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
 	WaitForGpuComplete();
 
@@ -867,10 +867,8 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 	case WM_KEYUP:
 		switch (wParam)
 		{
-			
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
-			::DestroyWindow(hWnd);
 			m_SceneState = 0;
 			break;
 		case VK_RETURN:

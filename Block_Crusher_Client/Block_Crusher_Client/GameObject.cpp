@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "Shader.h"
 #include "Scene.h"
+#include "Player.h"
 
 CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootParameters)
 {
@@ -395,6 +396,13 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 	OnPrepareRender();
 
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
+
+	if (m_pShader)
+	{
+		//m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+		//if (!m_bShadow)
+		m_pShader->Render(pd3dCommandList, pCamera);
+	}
 
 	if (m_pMesh)
 	{
