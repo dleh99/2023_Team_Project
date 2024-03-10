@@ -56,6 +56,7 @@ public:
 
 	void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, int nParameterIndex, int nTextureIndex);
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_GPU_DESCRIPTOR_HANDLE SrvHandle);
 	void ReleaseShaderVariables();
 
 	void LoadTextureFromDDSFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* pszFileName, UINT nResourceType, UINT nIndex);

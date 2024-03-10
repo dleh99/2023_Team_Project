@@ -4,6 +4,8 @@
 #include "Scene.h"
 #include "Player.h"
 
+bool noTextureUpdate = false;
+
 CShader::CShader()
 {
 	m_d3dSrvCPUDescriptorStartHandle.ptr = NULL;
@@ -289,9 +291,9 @@ void CShader::ReleaseShaderVariables()
 void CShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	if(m_ppd3dPipelineStates) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[0]);
-	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
+	//if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
 
-	UpdateShaderVariables(pd3dCommandList);
+	//UpdateShaderVariables(pd3dCommandList);
 }
 
 void CShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -486,7 +488,7 @@ void CPlayerShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* 
 void CPlayerShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	if (m_ppd3dPlayerPipelineStates) pd3dCommandList->SetPipelineState(m_ppd3dPlayerPipelineStates[0]);
-	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
+	//if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
 }
 
 void CPlayerShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -655,7 +657,7 @@ void CSkinnedAnimationPlayerShader::CreateShader(ID3D12Device* pd3dDevice, ID3D1
 void CSkinnedAnimationPlayerShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	if (m_ppd3dSkinnedPlayerPipelineStates) pd3dCommandList->SetPipelineState(m_ppd3dSkinnedPlayerPipelineStates[0]);
-	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
+	//if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
 }
 
 void CSkinnedAnimationPlayerShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -866,8 +868,9 @@ void CDepthRenderShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		m_ppDepthRenderCameras[i]->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	}
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, m_pDepthFromLightTexture->GetTextures());
-	CreateShaderResourceViews(pd3dDevice, m_pDepthFromLightTexture, 0, 10);
+	//CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);// m_pDepthFromLightTexture->GetTextures());
+	//CreateShaderResourceViews(pd3dDevice, m_pDepthFromLightTexture, 1, 10);
+	CScene::CreateShaderResourceViews(pd3dDevice, m_pDepthFromLightTexture, 0, 10);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -955,8 +958,8 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 {
 	//BoundingBox xmBoundingBox = m_pObjectsShader->CalculateBoundingBox();
 
-	XMFLOAT3 center = { -245, 0, -225 };	// -282 -22 -225
-	XMFLOAT3 extentes = { 300, 300, 300 };	// 590
+	XMFLOAT3 center = { -245, 0, -225 };	// -245, 0, -225
+	XMFLOAT3 extentes = { 300, 300, 300 };	// 300
 	BoundingBox xmBoundingBox = BoundingBox{ center, extentes };
 
 	for (int j = 0; j < MAX_LIGHTS; j++)
@@ -1340,18 +1343,20 @@ void CInstancingShader::CreateInstanceBuffer(ID3D12Device* device)
 void CInstancingShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	if (m_ppd3dPipelineStates) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[0]);
-	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
+	//if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
 }
 
 void CInstancingShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	OnPrepareRender(pd3dCommandList);
 
-	// ±×¸²ÀÚ ¸Ê ½¦ÀÌ´õ·Î Update
+	if (m_ptexture)
+		m_ptexture->UpdateShaderVariables(pd3dCommandList);
+
+	// ±×¸²ÀÚ ¸Ê ½¦ÀÌ´õ·Î Update, ¾ê°¡ ÀÌ»óÇÑ °É ³Ö´Â´Ù.
 	UpdateShaderVariables(pd3dCommandList);
 
-	if (m_ptexture) 
-		m_ptexture->UpdateShaderVariables(pd3dCommandList);
+	
 	
 	if(m_mesh)
 		m_mesh->Render(pd3dCommandList, m_instanceBufferView);

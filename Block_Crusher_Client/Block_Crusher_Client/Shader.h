@@ -58,7 +58,10 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 	void CreateCbvSrvDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews);
-	void CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex);	
+	void CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex);
+	void SetSbvSrvDescriptorHeap(ID3D12DescriptorHeap* DescriptorHeap);
+
+	void SetTexture(CTexture* pTexture) { m_ptexture = pTexture; }
 
 protected:
 	ID3D12PipelineState** m_ppd3dPipelineStates = NULL;
