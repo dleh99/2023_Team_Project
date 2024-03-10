@@ -357,14 +357,10 @@ void CPlayer::Rotate(float x, float y, float z)
 //플레이어를 로컬 x-축, y-축, z-축을 중심으로 회전한다.
 void CPlayer::Rotate(float radian)
 {
-
-
-	cout << angle << endl;
-
 	m_xmf3Look = { 0,0,1 };
 	m_xmf3Right = Vector3::CrossProduct(m_xmf3Up, m_xmf3Look, true);
 
-	XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(angle));
+	XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(radian));
 	m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 	m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
 
