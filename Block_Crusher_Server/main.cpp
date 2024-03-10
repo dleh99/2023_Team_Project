@@ -95,7 +95,7 @@ void checking_room(int key)
 		if (RS_READY != rooms[room_num].GetRoomState()) return;
 	}
 
-	cout << room_num  << "번 방 인원 다 참" << endl;
+	//cout << room_num  << "번 방 인원 다 참" << endl;
 
 	rooms[room_num].SetRoomState(RS_INGAME);
 	int* room_mambers = rooms[room_num].GetPlayerId();
@@ -124,7 +124,7 @@ void packet_process(int c_id, char* packet)
 	case CS_LOGIN: {
 		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
 		//cout <<  packet[0] << ", ";
-		wcout << "ID : " << p->id << ", PW : " << p->password << ", RN : " << p->room_num << endl;
+		//wcout << "ID : " << p->id << ", PW : " << p->password << ", RN : " << p->room_num << endl;
 		//clients[c_id].send_login_info_packet();
 
 		if (p->room_num > 332 || p->room_num < 0) {
@@ -287,7 +287,7 @@ void worker_thread(HANDLE iocp_h)
 					// 상태 변환(접속중)
 					//clients[client_id]._state = US_CONNECTING;
 
-					cout << "커넥팅" << endl;
+					cout << "접속 감지" << endl;
 
 					CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_c_socket), iocp_h, client_id, 0);
 					clients[client_id].do_recv();
@@ -354,7 +354,7 @@ void worker_thread(HANDLE iocp_h)
 				for (int round{}; round < MAX_PLAYER; ++round) {
 					int player_id = same_room_player[round];
 					if (player_id == -1) continue;
-					cout << player_id << "에게 " << key << "가 살아났음을 알림" << endl;
+					//cout << player_id << "에게 " << key << "가 살아났음을 알림" << endl;
 					clients[player_id].send_respawn_packet(random_pos.x, random_pos.y, random_pos.z, clients[key]._room_id);
 				}
 				delete ex_over;
@@ -483,7 +483,7 @@ void Physics_Calculation_thread()
 						if (CollisionCheck_Person(clients[check_id].bullet[bullet_num].GetPosition(), clients[other_id].pos,
 							clients[check_id].bullet[bullet_num].GetRadius(), clients[other_id]._player_radius)) {
 							// 총알을 비활성화, hp 하락
-							cout << "플레이어 [" << clients[check_id]._id << "] 의 총알이 플레이어 [" << clients[other_id]._id << "] 를 맞췄습니다" << endl;
+							//cout << "플레이어 [" << clients[check_id]._id << "] 의 총알이 플레이어 [" << clients[other_id]._id << "] 를 맞췄습니다" << endl;
 							clients[check_id].bullet[bullet_num].SetisActive(false);
 							clients[other_id].hp -= 1;
 							
@@ -502,7 +502,7 @@ void Physics_Calculation_thread()
 								for (int send_round{}; send_round < MAX_PLAYER; ++send_round) {
 									int send_id = room_player_ids[send_round];
 									if (send_id == -1) continue;
-									cout << "플레이어 [" << clients[other_id]._room_id << "] 가 죽었다는 걸 플레이어 [" << clients[send_id]._room_id << "] 에게 보냄" << endl;
+									//cout << "플레이어 [" << clients[other_id]._room_id << "] 가 죽었다는 걸 플레이어 [" << clients[send_id]._room_id << "] 에게 보냄" << endl;
 									clients[send_id].send_dead_packet(clients[check_id].bullet[bullet_num].GetbulletId(), clients[check_id]._room_id, clients[other_id]._room_id);
 								}
 							}
