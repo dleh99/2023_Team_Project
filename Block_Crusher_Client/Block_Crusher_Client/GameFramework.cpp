@@ -901,8 +901,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		switch (wParam)
 		{
 		case VK_ESCAPE:
-			::PostQuitMessage(0);
 			m_pScene->m_SceneState = 0;
+			::ShowCursor(true);
+			::PostQuitMessage(0);
 			break;
 		case VK_RETURN: {
 #ifdef USE_SERVER			
@@ -922,6 +923,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 #else
 			m_pScene->m_SceneState = 1;
 #endif
+			::ShowCursor(false);
 			break;
 		}
 		case VK_F8:
@@ -994,9 +996,9 @@ void CGameFramework::ChangeSwapChainState()
 {
 	WaitForGpuComplete();
 
-	//BOOL bFullScreenState = FALSE;
-	//m_pdxgiSwapChain->GetFullscreenState(&bFullScreenState, NULL);
-	//m_pdxgiSwapChain->SetFullscreenState(!bFullScreenState, NULL);
+	BOOL bFullScreenState = FALSE;
+	m_pdxgiSwapChain->GetFullscreenState(&bFullScreenState, NULL);
+	m_pdxgiSwapChain->SetFullscreenState(!bFullScreenState, NULL);
 
 	DXGI_MODE_DESC dxgiTargetParameters;
 	::ZeroMemory(&dxgiTargetParameters, sizeof(DXGI_MODE_DESC));
