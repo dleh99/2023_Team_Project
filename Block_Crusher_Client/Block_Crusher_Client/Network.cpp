@@ -79,16 +79,15 @@ int NetworkInit()
 //	send(g_socket, p, sizeof(p), 0);
 //}
 
-void send_login_packet(wstring i_id, wstring i_password, int i_room)
+void send_login_packet(wstring i_id, wstring i_password)
 {
 	CS_LOGIN_PACKET p{};
 	p.size = sizeof(CS_LOGIN_PACKET);
 	p.type = CS_LOGIN;
 	memcpy(p.id, i_id.c_str(), sizeof(p.id));
 	memcpy(p.password, i_password.c_str(), sizeof(p.password));
-	p.room_num = i_room;
 	//wcout << L"아이디 : " << i_id << L", 비밀번호 : " << i_password << L", 방 번호 : " << i_room << endl;
-	wcout << i_id << ", " << i_password << ", " << i_room << endl;
+	wcout << i_id << ", " << i_password << endl;
 	cout << "데이터 크기 : " << p.size << endl;
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }

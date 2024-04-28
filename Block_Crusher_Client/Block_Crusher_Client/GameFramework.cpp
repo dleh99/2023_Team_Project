@@ -907,19 +907,20 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		case VK_RETURN: {
 #ifdef USE_SERVER			
-			try {
-				int num = stoi(*m_sTitleTexts[RoomNumber]);
-				cout << "여기 들어옴" << endl;
-				send_login_packet(*m_sTitleTexts[ID], *m_sTitleTexts[PW], num);
-			}
-			catch (const std::invalid_argument& e) {
-				// stoi를 했을 때 int가 아닌 다른 값이 들어오는 경우 -> 경고 메시지 출력
-				cout << "룸에 이상한 값 넣지 마세요" << endl;
-			}
-			catch (const std::out_of_range& e) {
-				// stoi를 했을 때 범위를 벗어난 값이 들어오는 경우 -> 경고 메시지 출력
-				cout << "0이상 332 이하의 값을 넣어주세요" << endl;
-			}
+			//try {
+			//	int num = stoi(*m_sTitleTexts[RoomNumber]);
+			//	cout << "여기 들어옴" << endl;
+			//	send_login_packet(*m_sTitleTexts[ID], *m_sTitleTexts[PW], num);
+			//}
+			//catch (const std::invalid_argument& e) {
+			//	// stoi를 했을 때 int가 아닌 다른 값이 들어오는 경우 -> 경고 메시지 출력
+			//	cout << "룸에 이상한 값 넣지 마세요" << endl;
+			//}
+			//catch (const std::out_of_range& e) {
+			//	// stoi를 했을 때 범위를 벗어난 값이 들어오는 경우 -> 경고 메시지 출력
+			//	cout << "0이상 332 이하의 값을 넣어주세요" << endl;
+			//}
+			send_login_packet(*m_sTitleTexts[ID], *m_sTitleTexts[PW]);
 #else
 			m_pScene->m_SceneState = 1;
 #endif

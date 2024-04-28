@@ -75,7 +75,6 @@ struct CS_LOGIN_PACKET {
 	char				type;
 	wchar_t				id[20];
 	wchar_t				password[20];
-	int					room_num;
 };
 
 struct CS_MOVE_PACKET {
