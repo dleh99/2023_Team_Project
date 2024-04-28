@@ -55,6 +55,9 @@ void disconnect(int c_id)
 		if (rooms[room_num].PlayerOut(c_id))
 			cout << "[" << c_id << "] 룸에서 탈퇴 완료" << endl;
 	}
+
+	// 룸 번호 저장소 초기화
+	clients_room[c_id] = -1;
 	
 	// 소켓 해제
 	closesocket(clients[c_id]._socket);
@@ -114,7 +117,17 @@ void checking_room(int key)
 			clients[room_mambers[i]].send_start_packet(rooms[room_num].GetMapKey(), i, start_pos.x, start_pos.y, start_pos.z);
 		}
 	}
+}
 
+void FindEmptyRoom(int c_id)
+{
+	for (auto& r : rooms) {
+		if (r.GetRoomState() == RS_INGAME) continue; 
+		if (false == r.PlayerIn(c_id)) continue;
+		clients_room[c_id] = r.GetRoomNum();
+		cout << clients_room[c_id] << "번 룸에 접속함" << endl;
+		break;
+	}
 }
 
 void packet_process(int c_id, char* packet)
@@ -127,23 +140,36 @@ void packet_process(int c_id, char* packet)
 		//wcout << "ID : " << p->id << ", PW : " << p->password << ", RN : " << p->room_num << endl;
 		//clients[c_id].send_login_info_packet();
 
-		if (p->room_num > 332 || p->room_num < 0) {
-			clients[c_id].send_login_fail_packet(LS_OUTOFROOM);
-		}
-		else {
-			if (false == rooms[p->room_num].PlayerIn(c_id)) {
-				clients[c_id].send_login_fail_packet(LS_FULLROOM);
-			}
-			else {
-				//cout << "몇번 들어와" << endl;
-				//wcout << L"아이디 : " << p->id << L", 비밀번호 : " << p->password << L", 방 번호 : " << p->room_num << endl;
-				//cout << rooms[p->room_num].GetRoomNum() << "번 방 인원수 : " << rooms[p->room_num].clients_number << endl;
-				clients_room[c_id] = p->room_num;
- 				clients[c_id].login_id = p->id;
-				DB_EVENT ev{ clients[c_id]._id, chrono::system_clock::now(), TRY_LOGIN, p->id, p->password };
-				db_queue.push(ev);
-			}
-		}
+		/*
+		룸 번호 입력하면 로그인 되게끔 하는 부분
+
+		//if (p->room_num > 332 || p->room_num < 0) {
+		//	clients[c_id].send_login_fail_packet(LS_OUTOFROOM);
+		//}
+		//else {
+		//	if (false == rooms[p->room_num].PlayerIn(c_id)) {
+		//		clients[c_id].send_login_fail_packet(LS_FULLROOM);
+		//	}
+		//	else {
+		//		//cout << "몇번 들어와" << endl;
+		//		//wcout << L"아이디 : " << p->id << L", 비밀번호 : " << p->password << L", 방 번호 : " << p->room_num << endl;
+		//		//cout << rooms[p->room_num].GetRoomNum() << "번 방 인원수 : " << rooms[p->room_num].clients_number << endl;
+		//		clients_room[c_id] = p->room_num;
+ 	//			clients[c_id].login_id = p->id;
+		//		DB_EVENT ev{ clients[c_id]._id, chrono::system_clock::now(), TRY_LOGIN, p->id, p->password };
+		//		db_queue.push(ev);
+		//	}
+		//}
+		*/
+
+		// DB에서 로그인 시도
+		clients[c_id].login_id = p->id;
+		DB_EVENT ev{ clients[c_id]._id, chrono::system_clock::now(), TRY_LOGIN, p->id, p->password };
+		db_queue.push(ev);
+
+		// 비어 있는 방 찾기
+		FindEmptyRoom(c_id);
+
 		break;
 	}
 	case CS_MOVE: {
