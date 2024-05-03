@@ -818,25 +818,27 @@ void CScene::RenderTitle(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, 
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(0, 0));
 	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT), SolidColorBrush[6].Get());
 
-	// Room 입력란
-	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(590, 665));
-	std::wstring str = L"Room Number";
-	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
-		pTextFormat[3].Get(), D2D1::RectF(0, 0, 100, 50), SolidColorBrush[0].Get());
+	std::wstring str;
 
-	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(700, 675));
-	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 250, 30), SolidColorBrush[0].Get());
+	//// Room 입력란
+	//m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(590, 665));
+	//std::wstring str = L"Room Number";
+	//m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+	//	pTextFormat[3].Get(), D2D1::RectF(0, 0, 100, 50), SolidColorBrush[0].Get());
 
-	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(705, 665));
-	str = *m_sTitleTexts[RoomNumber];
-	if (m_flag == RoomNumber) {
-		m_d2dDeviceContext->DrawText(karrotstr.c_str(), static_cast<UINT32>(karrotstr.size()),
-			pTextFormat[4].Get(), D2D1::RectF(0, 0, 300, 50), SolidColorBrush[7].Get());
-	}
-	else {
-		m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
-			pTextFormat[4].Get(), D2D1::RectF(0, 0, 300, 50), SolidColorBrush[7].Get());
-	}
+	//m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(700, 675));
+	//m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 250, 30), SolidColorBrush[0].Get());
+
+	//m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(705, 665));
+	//str = *m_sTitleTexts[RoomNumber];
+	//if (m_flag == RoomNumber) {
+	//	m_d2dDeviceContext->DrawText(karrotstr.c_str(), static_cast<UINT32>(karrotstr.size()),
+	//		pTextFormat[4].Get(), D2D1::RectF(0, 0, 300, 50), SolidColorBrush[7].Get());
+	//}
+	//else {
+	//	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+	//		pTextFormat[4].Get(), D2D1::RectF(0, 0, 300, 50), SolidColorBrush[7].Get());
+	//}
 
 	// ID 입력란
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(590, 565));
@@ -907,6 +909,43 @@ void CScene::RenderTitle(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, 
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(705, 715));
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
 		pTextFormat[4].Get(), D2D1::RectF(0, 0, 300, 50), SolidColorBrush[1].Get());
+}
+
+void CScene::RenderLobby(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, ComPtr<ID2D1Factory3> m_d2dFactory,
+	ComPtr<IDWriteFactory> m_dWriteFactory, float fTimeElapsed)
+{
+	// BackGround
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(0, 0));
+	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT), SolidColorBrush[6].Get());
+
+	// Matching Button
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(50, 650));
+	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 300, 75), SolidColorBrush[0].Get());
+
+	std::wstring str = L"Matching Start";
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(50, 660));
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat[3].Get(), D2D1::RectF(0, 0, 300, 50), SolidColorBrush[6].Get());
+
+	// Ranking
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(50, 50));
+	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 200, 75), SolidColorBrush[0].Get());
+
+	str = L"Ranking";
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(50, 60));
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat[3].Get(), D2D1::RectF(0, 0, 200, 50), SolidColorBrush[6].Get());
+
+	//Weapon Select
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 200));
+	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
+
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 350));
+	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
+
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 500));
+	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
+
 }
 
 int CScene::CCTitleUI()

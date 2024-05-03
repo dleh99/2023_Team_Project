@@ -448,8 +448,10 @@ void CGameFramework::Render2D()
 	if (m_pScene) {
 		if(m_pScene->m_SceneState == 0)
 			m_pScene->RenderTitle(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory, m_GameTimer.GetTimeElapsed());
-		else
+		else if(m_pScene->m_SceneState == 1)
 			m_pScene->Render2D(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory, m_GameTimer.GetTimeElapsed());
+		else if (m_pScene->m_SceneState == 2)
+			m_pScene->RenderLobby(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory, m_GameTimer.GetTimeElapsed());
 	}
 		
 	m_d2dDeviceContext->EndDraw();
@@ -920,11 +922,26 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			//	// stoi를 했을 때 범위를 벗어난 값이 들어오는 경우 -> 경고 메시지 출력
 			//	cout << "0이상 332 이하의 값을 넣어주세요" << endl;
 			//}
-			send_login_packet(*m_sTitleTexts[ID], *m_sTitleTexts[PW]);
+
+			// 타이틀일 때
+			if (m_pScene->m_SceneState == 0) { 
+				send_login_packet(*m_sTitleTexts[ID], *m_sTitleTexts[PW]);
+			}
+			// 로비일 때
+			else if (m_pScene->m_SceneState == 2) {
+				//m_pScene->m_SceneState = 1;
+				::ShowCursor(false);
+				// 매칭시작 패킷
+			}
 #else
-			m_pScene->m_SceneState = 1;
+			if (m_pScene->m_SceneState == 0) {
+				m_pScene->m_SceneState = 2;
+			}
+			else if(m_pScene->m_SceneState == 2) {
+				m_pScene->m_SceneState = 1;
+				::ShowCursor(false);
+			}
 #endif
-			::ShowCursor(false);
 			break;
 		}
 		case VK_F8:

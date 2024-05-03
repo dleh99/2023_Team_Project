@@ -169,6 +169,7 @@ void ProcessPacket(char* ptr)
 			cout << "로그인 성공" << endl;
 		}
 		NetScene->m_TitleError = packet->login_state;
+		NetScene->m_SceneState = 2;
 		break;
 	}
 	case SC_LOGIN: {	// 처음 로그인 했을 때 받는 패킷. 아이디를 서버는 클라에게 아이디를 부여한다
