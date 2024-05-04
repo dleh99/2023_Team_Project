@@ -92,6 +92,14 @@ void send_login_packet(wstring i_id, wstring i_password)
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
+void send_match_packet()
+{
+	CS_MATCH_PACKET p{};
+	p.size = sizeof(CS_MATCH_PACKET);
+	p.type = CS_MATCH;
+	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
+}
+
 void send_move_packet(float x, float y, float z, float cx, float cy, Animation animation_state)
 {
 	CS_MOVE_PACKET p{};
@@ -181,6 +189,11 @@ void ProcessPacket(char* ptr)
 		start_x = packet->x;
 		start_y = packet->y;
 		start_z = packet->z;
+		break;
+	}
+	case SC_MATCH_FINISH: {
+		SC_MATCH_FINISH_PACKET* packet = reinterpret_cast<SC_MATCH_FINISH_PACKET*>(ptr);
+		cout << packet->room_num << "방에 입장" << endl;
 		break;
 	}
 	case SC_START: {	// 게임 시작 조건이 달성되면(6명) 게임을 시작함. 초기 지형 위치 보냄

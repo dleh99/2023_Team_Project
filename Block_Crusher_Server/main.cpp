@@ -167,9 +167,12 @@ void packet_process(int c_id, char* packet)
 		DB_EVENT ev{ clients[c_id]._id, chrono::system_clock::now(), TRY_LOGIN, p->id, p->password };
 		db_queue.push(ev);
 
+		break;
+	}
+	case CS_MATCH: {
 		// 비어 있는 방 찾기
 		FindEmptyRoom(c_id);
-
+		clients[c_id].send_match_finish_packet(clients_room[c_id]);
 		break;
 	}
 	case CS_MOVE: {

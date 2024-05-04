@@ -68,6 +68,15 @@ void User_Interface::send_login_info_packet()
 	do_send(&p);
 }
 
+void User_Interface::send_match_finish_packet(short i_room_num)
+{
+	SC_MATCH_FINISH_PACKET p;
+	p.size = sizeof(SC_MATCH_FINISH_PACKET);
+	p.type = SC_MATCH_FINISH;
+	p.room_num = i_room_num;
+	do_send(&p);
+}
+
 void User_Interface::send_start_packet(char mapkey, int input_id, float x, float y, float z)
 {
 	SC_START_PACKET p;

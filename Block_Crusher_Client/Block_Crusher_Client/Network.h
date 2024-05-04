@@ -26,6 +26,7 @@ struct Mouse {
 int NetworkInit();
 void NetCleanup();
 void send_login_packet(wstring i_id, wstring i_password);
+void send_match_packet();
 void send_move_packet(float x, float y, float z, float cx, float cy, Animation dwDirection);
 void send_bullet_add_packet(XMFLOAT3 pos, XMFLOAT3 vec, int bullet_id);
 void send_fall_packet();

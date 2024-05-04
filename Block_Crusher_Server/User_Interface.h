@@ -49,6 +49,7 @@ public:
 	void send_login_fail_packet(LOGIN_STATE ls);
 	void send_login_success_packet(LOGIN_STATE ls);
 	void send_login_info_packet();
+	void send_match_finish_packet(short i_room_num);
 	void send_start_packet(char mapkey, int input_id, float x, float y, float z);
 	void send_move_packet(User_Interface* clients, int c_id, Animation animation_state);
 	void send_bullet_add_packet(User_Interface* clients, int c_id, int bullet_num);

@@ -931,6 +931,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			else if (m_pScene->m_SceneState == 2) {
 				//m_pScene->m_SceneState = 1;
 				::ShowCursor(false);
+				send_match_packet();
 				// 매칭시작 패킷
 			}
 #else

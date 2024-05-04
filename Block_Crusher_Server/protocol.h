@@ -27,6 +27,7 @@ constexpr char CS_MOVE = 1;
 constexpr char CS_BULLET_ADD = 5;
 constexpr char CS_FALL = 12;
 constexpr char CS_SCORE = 14;
+constexpr char CS_MATCH = 18;
 
 constexpr char SC_LOGIN = 2;
 constexpr char SC_LOGIN_FAIL = 16;
@@ -41,6 +42,7 @@ constexpr char SC_DEATH = 10;
 constexpr char SC_RESPAWN = 11;
 constexpr char SC_FALL = 13;
 constexpr char SC_RESULT = 15;
+constexpr char SC_MATCH_FINISH = 19;
 
 enum Animation
 {
@@ -75,6 +77,11 @@ struct CS_LOGIN_PACKET {
 	char				type;
 	wchar_t				id[20];
 	wchar_t				password[20];
+};
+
+struct CS_MATCH_PACKET {
+	unsigned char		size;
+	char				type;
 };
 
 struct CS_MOVE_PACKET {
@@ -132,6 +139,12 @@ struct SC_LOGININFO_PACKET
 	float				x;
 	float				y;
 	float				z;
+};
+struct SC_MATCH_FINISH_PACKET
+{
+	unsigned char		size;
+	char				type;
+	short				room_num;
 };
 struct SC_START_PACKET
 {
