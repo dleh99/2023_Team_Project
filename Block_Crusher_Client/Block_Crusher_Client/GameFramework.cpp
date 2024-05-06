@@ -446,7 +446,7 @@ void CGameFramework::Render2D()
 
 	// 2D °´Ã¼ ·£´õ¸µ
 	if (m_pScene) {
-		if(m_pScene->m_SceneState == 0)
+		if (m_pScene->m_SceneState == 0)
 			m_pScene->RenderTitle(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory, m_GameTimer.GetTimeElapsed());
 		else
 			m_pScene->Render2D(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory, m_GameTimer.GetTimeElapsed());
@@ -654,6 +654,10 @@ void CGameFramework::BuildObjects()
 	m_pPlayer = pCubePlayer;
 	CMaterial* pMaterial = new CMaterial;
 	m_pPlayer->SetMaterial(pMaterial);
+
+	m_pPlayer->SearchRifle(&(m_pPlayer->m_pRifle));
+	m_pPlayer->SearchShotgun(&(m_pPlayer->m_pShotgun));
+	m_pPlayer->SearchPistol(&(m_pPlayer->m_pPistol));
 #endif
 	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
 	m_pPlayer->SetBlockNum(m_pScene->m_nBlock);
@@ -724,6 +728,10 @@ void CGameFramework::ProcessInput()
 				dwDirection |= KEY_SHOOT;
 				m_pPlayer->SetIsShoot(true);
 			}
+
+			if (pKeyBuffer[0x31] & 0xF0) m_pPlayer->ActiveRifle();				// 1
+			if (pKeyBuffer[0x32] & 0xF0) m_pPlayer->ActiveShotgun();			// 2
+			if (pKeyBuffer[0x33] & 0xF0) m_pPlayer->ActivePistol();				// 3
 		}
 
 		float cxDelta = 0.0f, cyDelta = 0.0f;

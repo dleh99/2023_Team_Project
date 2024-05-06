@@ -94,6 +94,11 @@ public:
 	CGameObject** m_ppObjects = NULL;
 	CScene* m_pScene = NULL;
 
+	// 플레이어 총 오브젝트
+	CGameObject* m_pRifle = NULL;
+	CGameObject* m_pShotgun = NULL;
+	CGameObject* m_pPistol = NULL;
+
 	CPlayer();
 	virtual ~CPlayer();
 
@@ -202,6 +207,10 @@ public:
 	void SetBulletId(int x) { bullet_id = x; };
 	int GetBulletId() { return bullet_id; };
 	Animation GetAniState() { return m_ani_state; };
+
+	void ActiveRifle();
+	void ActiveShotgun();
+	void ActivePistol();
 };
 
 class CCubePlayer : public CPlayer

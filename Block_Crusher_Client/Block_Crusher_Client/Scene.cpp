@@ -42,6 +42,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
+	m_pSkyBox->SetIsActive(true);
 
 	// 가로 x 세로 x 깊이가 12 x 12 x 12인 정육면체 메쉬 생성
 	CCubeMeshTextured* pCubeMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);

@@ -552,6 +552,27 @@ bool CPlayer::GetIsRotate()
 	return isRotate;
 }
 
+void CPlayer::ActiveRifle()
+{
+	if (m_pRifle) m_pRifle->SetIsActive(true);
+	if (m_pShotgun) m_pShotgun->SetIsActive(false);
+	if (m_pPistol) m_pPistol->SetIsActive(false);
+}
+
+void CPlayer::ActiveShotgun()
+{
+	if (m_pRifle) m_pRifle->SetIsActive(false);
+	if (m_pShotgun) m_pShotgun->SetIsActive(true);
+	if (m_pPistol) m_pPistol->SetIsActive(false);
+}
+
+void CPlayer::ActivePistol()
+{
+	if (m_pRifle) m_pRifle->SetIsActive(false);
+	if (m_pShotgun) m_pShotgun->SetIsActive(false);
+	if (m_pPistol) m_pPistol->SetIsActive(true);
+}
+
 CCubePlayer::CCubePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z, int id)
 {
