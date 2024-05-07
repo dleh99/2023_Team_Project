@@ -95,6 +95,7 @@ public:
 	CScene* m_pScene = NULL;
 
 	// 플레이어 총 오브젝트
+	int m_nGunType = 0;					// 0: Rifle, 1: Shotgun, 2: Pistol
 	CGameObject* m_pRifle = NULL;
 	CGameObject* m_pShotgun = NULL;
 	CGameObject* m_pPistol = NULL;

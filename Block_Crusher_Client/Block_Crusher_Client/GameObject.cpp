@@ -695,11 +695,11 @@ CLoadedModelInfo* CGameObject::LoadModelAndAnimationFromFile(ID3D12Device* pd3dD
 		int nFramesPerSecond = pWalkAnimationSet->m_nFramePerSecond;
 		int nKeyFrames = pWalkAnimationSet->m_nKeyFrames;
 
-		pLoadedModel->m_pAnimationSets->m_pAnimationSets[8 + k] =
+		pLoadedModel->m_pAnimationSets->m_pAnimationSets[14 + k] =
 			new CAnimationSet(fLength, nFramesPerSecond, nKeyFrames, pLoadedModel->m_pAnimationSets->m_nBoneFrames,
 				token);
 
-		CAnimationSet* pAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[8 + k];		
+		CAnimationSet* pAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[14 + k];		
 
 		for (int i = 0; i < nKeyFrames; ++i)
 		{
