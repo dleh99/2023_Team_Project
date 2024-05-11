@@ -82,7 +82,8 @@ void Map::CreateMap()
 		for (int j = 0; j < 10; ++j)
 			for (int k = 0; k < 50; ++k) {
 				XMFLOAT3 position = { -(float)i * 12.0f + 20.0f, -(float)j * 12.0f , -(float)k * 12.0f + 40.0f };
-				Map_Block.emplace_back(cnt, position);
+				//Map_Block.emplace_back(cnt, position);
+				Map_B[k + 50 * i][9 - j].Init_Block(cnt, position, TYPE_NORMAL);
 				cnt++;
 			}
 
@@ -90,7 +91,8 @@ void Map::CreateMap()
 		for (int k = 0; k < 50; ++k) {
 			for (int y = 0; y < mapdata[i][k]; ++y) {
 				XMFLOAT3 position = { -(float)i * 12.0f + 20.0f, (float)y * 12.0f + 12.0f, -(float)k * 12.0f + 40.0f };
-				Map_Block.emplace_back(cnt, position);
+				//Map_Block.emplace_back(cnt, position);
+				Map_B[k + 50 * i][10 + y].Init_Block(cnt, position, TYPE_NORMAL);
 				cnt++;
 			}
 		}
@@ -98,5 +100,16 @@ void Map::CreateMap()
 
 void Map::ClearMap()
 {
-	Map_Block.clear();
+	//Map_Block.clear();
 }
+
+/*
+	맵 크기
+	-568.f - 6.f(블록 크기 반) <= x <= 20.f + 6.f(블록 크기 반)
+	-108.f - 6.f <= y <= 120.f + 6.f
+	-548.f - 6.f <= z <= 40.f + 6.f
+
+	즉, Map_B[0] -> x도 0, z도 0 인 구역 x는 14.f ~ 26.f, z는 34.f ~ 46.f
+	0~49
+	0~49
+*/

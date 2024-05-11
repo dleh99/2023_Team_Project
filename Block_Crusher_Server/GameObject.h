@@ -23,6 +23,8 @@ public:
 	void SetRadius(float rad) { ObjectBoundingRadius = rad; };
 	float GetRadius() { return ObjectBoundingRadius; };
 
+	Range_Pos Convert_index(float x, float y, float z);
+
 	XMFLOAT3 GetPosition();
 	void SetPosition(float x, float y, float z);
 };
@@ -37,6 +39,7 @@ public:
 	~Block();
 
 	int GetBlockType() { return type; };
+	void Init_Block(int input_id, XMFLOAT3 input_pos, int input_type);
 };
 
 class BulletObject : public GameObject
@@ -47,15 +50,21 @@ private:
 	float bullet_speed;
 
 	int bullet_id;
+
+	int bullet_x_range;
+	int bullet_y_range;
+	int bullet_z_range;
 public:
 	BulletObject();
 	~BulletObject();
 
-	XMFLOAT3 GetBulletVec();
+	XMFLOAT3 GetBulletVec() { return bullet_vec; };
 	void SetBulletVec(float x, float y, float z);
 
 	void Move(float fTimeElapsed);
 
 	void SetBulletId(int x) { bullet_id = x; };
 	int GetbulletId() { return bullet_id; };
+	void SetBulletRange(float x, float y, float z);
+	Range_Pos GetBulletRange() { return Range_Pos{ bullet_x_range, bullet_y_range, bullet_z_range }; };
 };

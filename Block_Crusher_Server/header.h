@@ -21,3 +21,9 @@ struct XMFLOAT3 {
 	float y;
 	float z;
 };
+
+struct Range_Pos {
+	int x;
+	int y;
+	int z;
+};

@@ -125,6 +125,7 @@ void FindEmptyRoom(int c_id)
 		if (r.GetRoomState() == RS_INGAME) continue; 
 		if (false == r.PlayerIn(c_id)) continue;
 		clients_room[c_id] = r.GetRoomNum();
+		checking_room(c_id);
 		cout << clients_room[c_id] << "번 룸에 접속함" << endl;
 		break;
 	}
@@ -202,6 +203,7 @@ void packet_process(int c_id, char* packet)
 				clients[c_id].bullet[i].SetPosition(p->s_x, p->s_y, p->s_z);
 				clients[c_id].bullet[i].SetBulletVec(p->b_x, p->b_y, p->b_z);
 				clients[c_id].bullet[i].SetBulletId(p->bullet_id);
+				clients[c_id].bullet[i].SetBulletRange(p->s_x, p->s_y, p->s_z);
 
 				short room_number = clients_room[c_id];
 				int* same_room_player = rooms[room_number].GetPlayerId();
@@ -393,7 +395,7 @@ void worker_thread(HANDLE iocp_h)
 			{
 				cout << "worker thread에서 새로운 아이디" << endl;
 				clients[key].send_login_success_packet(LS_SIGNUP);
-				checking_room(key);
+				//checking_room(key);
 				delete ex_over;
 				break;
 			}
@@ -401,7 +403,7 @@ void worker_thread(HANDLE iocp_h)
 			{
 				cout << "worker thread에서 로그인 성공" << endl;
 				clients[key].send_login_success_packet(LS_LOGIN_SUCCESS);
-				checking_room(key);
+				//checking_room(key);
 				delete ex_over;
 				break;
 			}
@@ -483,21 +485,47 @@ void Physics_Calculation_thread()
 					if (false == clients[check_id].bullet[bullet_num].GetisActive()) continue;
 					// 총알, 블록 충돌 처리
 					// 우선은 모든 총알, 블록 충돌 처리함, 최적화 필요
-					for (int map_block_num{}; map_block_num < r.map_information.block_num; ++map_block_num) {
-						if (false == r.map_information.Map_Block[map_block_num].GetisActive()) continue;
-						if (CollisionCheck_objects(clients[check_id].bullet[bullet_num].GetPosition(), r.map_information.Map_Block[map_block_num].GetPosition(),
-							clients[check_id].bullet[bullet_num].GetRadius(), r.map_information.Map_Block[map_block_num].GetRadius())) {
-							// 충돌했다면 총알, 블록 비활성화, 충돌했음을 알림
-							//cout << "충돌함" << endl;
-							clients[check_id].bullet[bullet_num].SetisActive(false);
-							r.map_information.Map_Block[map_block_num].SetisActive(false);
+					{
+						//for (int map_block_num{}; map_block_num < r.map_information.block_num; ++map_block_num) {
+						//	if (false == r.map_information.Map_Block[map_block_num].GetisActive()) continue;
+						//	if (CollisionCheck_objects(clients[check_id].bullet[bullet_num].GetPosition(), r.map_information.Map_Block[map_block_num].GetPosition(),
+						//		clients[check_id].bullet[bullet_num].GetRadius(), r.map_information.Map_Block[map_block_num].GetRadius())) {
+						//		// 충돌했다면 총알, 블록 비활성화, 충돌했음을 알림
+						//		//cout << "충돌함" << endl;
+						//		clients[check_id].bullet[bullet_num].SetisActive(false);
+						//		r.map_information.Map_Block[map_block_num].SetisActive(false);
 
-							for (int round{}; round < MAX_PLAYER; ++round) {
-								if (room_player_ids[round] == -1) continue;
-								clients[room_player_ids[round]].send_bullet_collision_packet(clients[check_id].bullet[bullet_num].GetbulletId(),
-									r.map_information.Map_Block[map_block_num].GetId(),
-									clients[check_id]._room_id,
-									r.map_information.Map_Block[map_block_num].GetBlockType());
+						//		for (int round{}; round < MAX_PLAYER; ++round) {
+						//			if (room_player_ids[round] == -1) continue;
+						//			clients[room_player_ids[round]].send_bullet_collision_packet(clients[check_id].bullet[bullet_num].GetbulletId(),
+						//				r.map_information.Map_Block[map_block_num].GetId(),
+						//				clients[check_id]._room_id,
+						//				r.map_information.Map_Block[map_block_num].GetBlockType());
+						//		}
+						//	}
+						//}
+					}
+
+					// 총알이 속해 있는 범위 검색
+					Range_Pos temp = clients[check_id].bullet[bullet_num].GetBulletRange();
+
+					// 그 범위에 블록이 있냐? 없으면 넘어가
+					if (0 <= temp.x && temp.x < 50 && 0 <= temp.y && temp.y < 20 && 0 <= temp.z && temp.z < 50) {
+						if (true == r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetisActive()) {
+							//cout << temp.x << ", " << temp.y << ", " << temp.z << endl;
+							if (CollisionCheck_objects(clients[check_id].bullet[bullet_num].GetPosition(), r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetPosition(),
+								clients[check_id].bullet[bullet_num].GetRadius(), r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetRadius())) {
+								clients[check_id].bullet[bullet_num].SetisActive(false);
+								r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].SetisActive(false);
+
+								for (int round{}; round < MAX_PLAYER; ++round) {
+									if (room_player_ids[round] == -1) continue;
+									clients[room_player_ids[round]].send_bullet_collision_packet(clients[check_id].bullet[bullet_num].GetbulletId(),
+										r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetId(),
+										clients[check_id]._room_id,
+										r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetBlockType());
+								}
+
 							}
 						}
 					}

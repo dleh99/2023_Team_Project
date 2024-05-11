@@ -15,6 +15,17 @@ GameObject::~GameObject()
 {
 }
 
+Range_Pos GameObject::Convert_index(float x, float y, float z)
+{
+	Range_Pos temp;
+
+	temp.x = ((x - 26) / 12) * (-1);
+	temp.y = ((y + 114) / 12);
+	temp.z = ((z - 46) / 12) * (-1);
+
+	return temp;
+}
+
 XMFLOAT3 GameObject::GetPosition()
 {
 	return pos;
@@ -39,11 +50,6 @@ BulletObject::BulletObject()
 
 BulletObject::~BulletObject()
 {
-}
-
-XMFLOAT3 BulletObject::GetBulletVec()
-{
-	return bullet_vec;
 }
 
 void BulletObject::SetBulletVec(float x, float y, float z)
@@ -79,7 +85,16 @@ void BulletObject::Move(float fTimeElapsed)
 		return;
 	}
 
+	SetBulletRange(position.x, position.y, position.z);
 	SetPosition(position.x, position.y, position.z);
+}
+
+void BulletObject::SetBulletRange(float x, float y, float z)
+{
+	Range_Pos temp = Convert_index(x, y, z);
+	bullet_x_range = temp.x;
+	bullet_y_range = temp.y;
+	bullet_z_range = temp.z;
 }
 
 Block::Block()
@@ -105,4 +120,14 @@ Block::Block(int input_id, XMFLOAT3 input_pos)
 Block::~Block()
 {
 	
+}
+
+void Block::Init_Block(int input_id, XMFLOAT3 input_pos, int input_type)
+{
+	SetId(input_id);
+	SetPosition(input_pos.x, input_pos.y, input_pos.z);
+	float rad = sqrt(144.f * 3.f) / 2.f;
+	SetRadius(rad);
+	SetisActive(true);
+	type = input_type;
 }
