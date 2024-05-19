@@ -377,7 +377,7 @@ void CPlayer::Update(float fTimeElapsed)
 	m_fEtime = fTimeElapsed;
 	m_fKeyDownTime += fTimeElapsed;
 	//cout << m_bPlayerGravity << " ";
-	if (m_fKeyDownTime > 2.0f) {
+	if (m_fKeyDownTime > 2.0f) {		// 재장전 시간
 		m_bReloading = false;
 		m_fKeyDownTime = 0.f;
 		m_nBullet = 30;
@@ -654,7 +654,7 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 		"Models/player model data.bin", "Models/player animation data.bin", pPlayerShader, pSkinnedPlayerShader, pMaterial);
 	SetChild(pPlayerModel->m_pModelRootObject);
 
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 18, pPlayerModel);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 23, pPlayerModel);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);	// Rifle_Idle
 	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);	// Rifle_Run_Forward
 	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);	// Rifle_Run_Left
@@ -669,10 +669,15 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	m_pSkinnedAnimationController->SetTrackAnimationSet(11, 11);	// Pistol_Run_Right
 	m_pSkinnedAnimationController->SetTrackAnimationSet(12, 12);	// Pistol_Run_Back
 	m_pSkinnedAnimationController->SetTrackAnimationSet(13, 13);	// Pistol_Damaged_Motion
-	m_pSkinnedAnimationController->SetTrackAnimationSet(14, 14);	// Forward + Fire
-	m_pSkinnedAnimationController->SetTrackAnimationSet(15, 15);	// Left + Fire
-	m_pSkinnedAnimationController->SetTrackAnimationSet(16, 16);	// Right + Fire
-	m_pSkinnedAnimationController->SetTrackAnimationSet(17, 17);	// Back + Fire
+	m_pSkinnedAnimationController->SetTrackAnimationSet(14, 14);	// Pistol_Fire_Bullet
+	m_pSkinnedAnimationController->SetTrackAnimationSet(15, 15);	// Rifle_Forward + Fire
+	m_pSkinnedAnimationController->SetTrackAnimationSet(16, 16);	// Rifle_Left + Fire
+	m_pSkinnedAnimationController->SetTrackAnimationSet(17, 17);	// Rifle_Right + Fire
+	m_pSkinnedAnimationController->SetTrackAnimationSet(18, 18);	// Rifle_Back + Fire
+	m_pSkinnedAnimationController->SetTrackAnimationSet(19, 19);	// Pistol_Forward + Fire
+	m_pSkinnedAnimationController->SetTrackAnimationSet(20, 20);	// Pistol_Left + Fire
+	m_pSkinnedAnimationController->SetTrackAnimationSet(21, 21);	// Pistol_Right + Fire
+	m_pSkinnedAnimationController->SetTrackAnimationSet(22, 22);	// Pistol_Back + Fire
 	m_pSkinnedAnimationController->m_pAnimationTracks[6].m_nType = ANIMATION_TYPE_ONCE;
 	m_pSkinnedAnimationController->m_pAnimationTracks[7].m_nType = ANIMATION_TYPE_ONCE;
 	m_pSkinnedAnimationController->m_pAnimationTracks[13].m_nType = ANIMATION_TYPE_ONCE;
@@ -693,6 +698,11 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	m_pSkinnedAnimationController->SetTrackEnable(15, false);
 	m_pSkinnedAnimationController->SetTrackEnable(16, false);
 	m_pSkinnedAnimationController->SetTrackEnable(17, false);
+	m_pSkinnedAnimationController->SetTrackEnable(18, false);
+	m_pSkinnedAnimationController->SetTrackEnable(19, false);
+	m_pSkinnedAnimationController->SetTrackEnable(20, false);
+	m_pSkinnedAnimationController->SetTrackEnable(21, false);
+	m_pSkinnedAnimationController->SetTrackEnable(22, false);
 
 	//SetMaterial(pMaterial);
 
@@ -778,19 +788,19 @@ void CMainPlayer::OtherPlayerAnimationUpdate(Animation dwOtherPlayerDirection)
 			break;
 		}
 		case ANIMATION_SHOOT_FORWARD: {
-			m_pSkinnedAnimationController->SetTracksEnable(14);
-			break;
-		}
-		case ANIMATION_SHOOT_LEFT: {
 			m_pSkinnedAnimationController->SetTracksEnable(15);
 			break;
 		}
-		case ANIMATION_SHOOT_RIGHT: {
+		case ANIMATION_SHOOT_LEFT: {
 			m_pSkinnedAnimationController->SetTracksEnable(16);
 			break;
 		}
-		case ANIMATION_SHOOT_BACKWARD: {
+		case ANIMATION_SHOOT_RIGHT: {
 			m_pSkinnedAnimationController->SetTracksEnable(17);
+			break;
+		}
+		case ANIMATION_SHOOT_BACKWARD: {
+			m_pSkinnedAnimationController->SetTracksEnable(18);
 			break;
 		}
 		}
@@ -821,7 +831,7 @@ void CMainPlayer::OtherPlayerAnimationUpdate(Animation dwOtherPlayerDirection)
 			break;
 		}
 		case ANIMATION_SHOOT: {
-			m_pSkinnedAnimationController->SetTracksEnable(5);
+			m_pSkinnedAnimationController->SetTracksEnable(14);
 			break;
 		}
 		case ANIMATION_DAMAGED: {
@@ -833,19 +843,19 @@ void CMainPlayer::OtherPlayerAnimationUpdate(Animation dwOtherPlayerDirection)
 			break;
 		}
 		case ANIMATION_SHOOT_FORWARD: {
-			m_pSkinnedAnimationController->SetTracksEnable(14);
+			m_pSkinnedAnimationController->SetTracksEnable(19);
 			break;
 		}
 		case ANIMATION_SHOOT_LEFT: {
-			m_pSkinnedAnimationController->SetTracksEnable(15);
+			m_pSkinnedAnimationController->SetTracksEnable(20);
 			break;
 		}
 		case ANIMATION_SHOOT_RIGHT: {
-			m_pSkinnedAnimationController->SetTracksEnable(16);
+			m_pSkinnedAnimationController->SetTracksEnable(21);
 			break;
 		}
 		case ANIMATION_SHOOT_BACKWARD: {
-			m_pSkinnedAnimationController->SetTracksEnable(17);
+			m_pSkinnedAnimationController->SetTracksEnable(22);
 			break;
 		}
 		}
@@ -861,10 +871,15 @@ void CMainPlayer::SetWalkAnimationSpeed(float fSpeed)
 		m_pSkinnedAnimationController->SetTrackSpeed(3, fSpeed);
 		m_pSkinnedAnimationController->SetTrackSpeed(4, fSpeed);
 
-		m_pSkinnedAnimationController->SetTrackSpeed(14, fSpeed);
 		m_pSkinnedAnimationController->SetTrackSpeed(15, fSpeed);
 		m_pSkinnedAnimationController->SetTrackSpeed(16, fSpeed);
 		m_pSkinnedAnimationController->SetTrackSpeed(17, fSpeed);
+		m_pSkinnedAnimationController->SetTrackSpeed(18, fSpeed);
+		
+		m_pSkinnedAnimationController->SetTrackSpeed(19, fSpeed);
+		m_pSkinnedAnimationController->SetTrackSpeed(20, fSpeed);
+		m_pSkinnedAnimationController->SetTrackSpeed(21, fSpeed);
+		m_pSkinnedAnimationController->SetTrackSpeed(22, fSpeed);
 	}
 }
 
@@ -889,19 +904,18 @@ void CMainPlayer::Update(float fTimeElapsed, DWORD dwDirection)
 				{
 					if (m_nGunType == 2)
 					{
-						m_pSkinnedAnimationController->SetTrackEnable(8, false);
+						m_pSkinnedAnimationController->SetTrackEnable(8, false);	// Idle
 						m_pSkinnedAnimationController->SetTrackPosition(8, 0.0f);
+
+						m_pSkinnedAnimationController->SetTrackEnable(14, true);	// Fire
 					}
 					else
 					{
-						m_pSkinnedAnimationController->SetTrackEnable(0, false);
+						m_pSkinnedAnimationController->SetTrackEnable(0, false);	// Idle
 						m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
-					}
 
-					if (m_nGunType == 2)
-						m_pSkinnedAnimationController->SetTrackEnable(14, true);
-					else
-						m_pSkinnedAnimationController->SetTrackEnable(5, true);
+						m_pSkinnedAnimationController->SetTrackEnable(5, true);		// Fire
+					}
 					m_ani_state = ANIMATION_SHOOT;
 				}
 			}
@@ -946,29 +960,58 @@ void CMainPlayer::Move(DWORD dwDirection, float fDistance, bool bVelocity)
 		{
 			if (GetIsShoot())	// Shoot
 			{
-				/*m_pSkinnedAnimationController->SetTracksEnable(5);
+				/*if (m_nGunType == 2)
+					m_pSkinnedAnimationController->SetTracksEnable(14);
+				else
+					m_pSkinnedAnimationController->SetTracksEnable(5);
 				m_ani_state = ANIMATION_SHOOT;*/
 
 				// Shoot And Move
-				if (dwDirection & DIR_FORWARD)
+				if (m_nGunType == 2)
 				{
-					m_pSkinnedAnimationController->SetTracksEnable(14);
-					m_ani_state = ANIMATION_SHOOT_FORWARD;
+					if (dwDirection & DIR_FORWARD)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(19);
+						m_ani_state = ANIMATION_SHOOT_FORWARD;
+					}
+					else if (dwDirection & DIR_LEFT)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(20);
+						m_ani_state = ANIMATION_SHOOT_LEFT;
+					}
+					else if (dwDirection & DIR_RIGHT)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(21);
+						m_ani_state = ANIMATION_SHOOT_RIGHT;
+					}
+					else if (dwDirection & DIR_BACKWARD)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(22);
+						m_ani_state = ANIMATION_SHOOT_BACKWARD;
+					}
 				}
-				else if (dwDirection & DIR_LEFT)
+				else
 				{
-					m_pSkinnedAnimationController->SetTracksEnable(15);
-					m_ani_state = ANIMATION_SHOOT_LEFT;
-				}
-				else if (dwDirection & DIR_RIGHT)
-				{
-					m_pSkinnedAnimationController->SetTracksEnable(16);
-					m_ani_state = ANIMATION_SHOOT_RIGHT;
-				}
-				else if (dwDirection & DIR_BACKWARD)
-				{
-					m_pSkinnedAnimationController->SetTracksEnable(17);
-					m_ani_state = ANIMATION_SHOOT_BACKWARD;
+					if (dwDirection & DIR_FORWARD)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(15);
+						m_ani_state = ANIMATION_SHOOT_FORWARD;
+					}
+					else if (dwDirection & DIR_LEFT)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(16);
+						m_ani_state = ANIMATION_SHOOT_LEFT;
+					}
+					else if (dwDirection & DIR_RIGHT)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(17);
+						m_ani_state = ANIMATION_SHOOT_RIGHT;
+					}
+					else if (dwDirection & DIR_BACKWARD)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(18);
+						m_ani_state = ANIMATION_SHOOT_BACKWARD;
+					}
 				}
 			}
 			else				// Don't Shoot
@@ -999,7 +1042,7 @@ void CMainPlayer::Move(DWORD dwDirection, float fDistance, bool bVelocity)
 					else			// Move & Don't Shoot
 					{
 						/*if (m_nGunType == 2)
-							m_pSkinnedAnimationController->SetTracksEnable(14);
+							m_pSkinnedAnimationController->SetTracksEnable(15);
 						else*/
 						m_pSkinnedAnimationController->SetTracksEnable(0);
 						m_ani_state = ANIMATION_IDLE;
@@ -1030,7 +1073,7 @@ void CMainPlayer::Move(DWORD dwDirection, float fDistance, bool bVelocity)
 					else			// Move & Don't Shoot
 					{
 						/*if (m_nGunType == 2)
-							m_pSkinnedAnimationController->SetTracksEnable(14);
+							m_pSkinnedAnimationController->SetTracksEnable(15);
 						else*/
 						m_pSkinnedAnimationController->SetTracksEnable(0);
 						m_ani_state = ANIMATION_IDLE;

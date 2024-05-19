@@ -685,6 +685,7 @@ CLoadedModelInfo* CGameObject::LoadModelAndAnimationFromFile(ID3D12Device* pd3dD
 	char token[64] = { 0, };
 	//strcpy(token, "ForwardAndShoot");
 
+	// Rifle
 	CAnimationSet* pShootAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[5];
 
 	for (int k = 0; k < 4; ++k)
@@ -695,11 +696,11 @@ CLoadedModelInfo* CGameObject::LoadModelAndAnimationFromFile(ID3D12Device* pd3dD
 		int nFramesPerSecond = pWalkAnimationSet->m_nFramePerSecond;
 		int nKeyFrames = pWalkAnimationSet->m_nKeyFrames;
 
-		pLoadedModel->m_pAnimationSets->m_pAnimationSets[14 + k] =
+		pLoadedModel->m_pAnimationSets->m_pAnimationSets[15 + k] =
 			new CAnimationSet(fLength, nFramesPerSecond, nKeyFrames, pLoadedModel->m_pAnimationSets->m_nBoneFrames,
 				token);
 
-		CAnimationSet* pAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[14 + k];		
+		CAnimationSet* pAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[15 + k];		
 
 		for (int i = 0; i < nKeyFrames; ++i)
 		{
@@ -738,6 +739,124 @@ CLoadedModelInfo* CGameObject::LoadModelAndAnimationFromFile(ID3D12Device* pd3dD
 				{
 					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
 						= pShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 27][j];
+				}
+			}
+		}
+	}
+
+	// Rifle
+	CAnimationSet* pRifleShootAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[5];
+
+	for (int k = 0; k < 4; ++k)
+	{
+		CAnimationSet* pWalkAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[1 + k];
+
+		float fLength = pWalkAnimationSet->m_fLength;
+		int nFramesPerSecond = pWalkAnimationSet->m_nFramePerSecond;
+		int nKeyFrames = pWalkAnimationSet->m_nKeyFrames;
+
+		pLoadedModel->m_pAnimationSets->m_pAnimationSets[15 + k] =
+			new CAnimationSet(fLength, nFramesPerSecond, nKeyFrames, pLoadedModel->m_pAnimationSets->m_nBoneFrames,
+				token);
+
+		CAnimationSet* pAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[15 + k];		
+
+		for (int i = 0; i < nKeyFrames; ++i)
+		{
+			pAnimationSet->m_pKeyFrameTimes[i] = pWalkAnimationSet->m_pKeyFrameTimes[i];
+
+			for (int j = 0; j < 12; ++j)
+			{
+				if (j == 2)			// Pelvis
+				{
+					if (i < pRifleShootAnimationSet->m_nKeyFrames)
+					{
+						pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+							= pRifleShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
+					}
+					else
+					{
+						pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+							= pRifleShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 27][j];
+					}
+				}
+				else
+				{
+					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+						= pWalkAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
+				}
+			}
+
+			for (int j = 12; j < pLoadedModel->m_pAnimationSets->m_nBoneFrames; ++j)
+			{
+				if (i < pRifleShootAnimationSet->m_nKeyFrames)
+				{
+					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+						= pRifleShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
+				}
+				else
+				{
+					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+						= pRifleShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 27][j];
+				}
+			}
+		}
+	}
+
+	// Pistol
+	CAnimationSet* pPistolShootAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[14];
+
+	for (int k = 0; k < 4; ++k)
+	{
+		CAnimationSet* pWalkAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[10 + k];
+
+		float fLength = pWalkAnimationSet->m_fLength;
+		int nFramesPerSecond = pWalkAnimationSet->m_nFramePerSecond;
+		int nKeyFrames = pWalkAnimationSet->m_nKeyFrames;
+
+		pLoadedModel->m_pAnimationSets->m_pAnimationSets[19 + k] =
+			new CAnimationSet(fLength, nFramesPerSecond, nKeyFrames, pLoadedModel->m_pAnimationSets->m_nBoneFrames,
+				token);
+
+		CAnimationSet* pAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[19 + k];
+
+		for (int i = 0; i < nKeyFrames; ++i)
+		{
+			pAnimationSet->m_pKeyFrameTimes[i] = pWalkAnimationSet->m_pKeyFrameTimes[i];
+
+			for (int j = 0; j < 12; ++j)
+			{
+				if (j == 2)			// Pelvis
+				{
+					if (i < pPistolShootAnimationSet->m_nKeyFrames)
+					{
+						pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+							= pPistolShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
+					}
+					else
+					{
+						pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+							= pPistolShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 20][j];
+					}
+				}
+				else
+				{
+					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+						= pWalkAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
+				}
+			}
+
+			for (int j = 12; j < pLoadedModel->m_pAnimationSets->m_nBoneFrames; ++j)
+			{
+				if (i < pPistolShootAnimationSet->m_nKeyFrames)
+				{
+					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+						= pPistolShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
+				}
+				else
+				{
+					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+						= pPistolShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 20][j];
 				}
 			}
 		}

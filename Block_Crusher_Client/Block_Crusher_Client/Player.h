@@ -37,6 +37,7 @@ protected:
 	bool m_bDeath = false;
 	bool m_bOnAir = false;
 	bool m_bIsShoot = false;
+	std::chrono::high_resolution_clock m_cGunDelayClock;
 
 	// 플레이어 부스터
 	float m_fJumpTime = 0;
