@@ -52,8 +52,10 @@ void disconnect(int c_id)
 	// 룸에서도 빠져나가게 해야함
 	short room_num = clients_room[c_id];
 	if (room_num != -1) {
-		if (rooms[room_num].PlayerOut(c_id))
+		if (rooms[room_num].PlayerOut(c_id)) {
+			if (rooms[room_num].clients_number == 0) rooms[room_num].SettingRoom();
 			cout << "[" << c_id << "] 룸에서 탈퇴 완료" << endl;
+		}
 	}
 
 	// 룸 번호 저장소 초기화
@@ -466,14 +468,37 @@ void Physics_Calculation_thread()
 			}
 		}
 
-		// 총알과 충돌 처리
-		/*
-		* 클라이언트 전체를 돌아서 인게임 중인 클라이언트의 총알들과 맵의 충돌을 검사하고
-		* 충돌했다면 Active를 false 시키고 모든 클라이언트들에게 충돌했다는 패킷을 보낸다
-		*/
-
 		for (auto& r : rooms) {
 			if (r.GetRoomState() != RS_INGAME) continue;
+
+			// 블록 생성하기
+			r.AddTime(server_timer.GetTimeElapsed());
+			if (r.GetTime() > 10.f) {
+				// 룸 블록 생성
+				r.SpawnBlock();
+
+				int* room_player_ids = r.GetPlayerId();
+
+				// 룸에 들어있는 플레이어들에게 생성 블록 좌표, id 주기
+				for (int i{}; i < MAX_PLAYER; ++i) {
+					int check_id = room_player_ids[i];
+					if (check_id == -1) continue;
+					int input_id = r.GetMapBlockNum();
+					for (const auto& pos : r.Block_Spawn_Pos) {
+						clients[check_id].send_add_block_packet(-pos.x * 12.0f + 20.0f, -(float)pos.z * 12.0f + 40.0f, input_id);
+						input_id++;
+					}
+				}
+
+				r.AddMapBlockNum(r.Block_Spawn_Pos.size());
+			}
+			
+			// 총알과 충돌 처리
+			/*
+			* 클라이언트 전체를 돌아서 인게임 중인 클라이언트의 총알들과 맵의 충돌을 검사하고
+			* 충돌했다면 Active를 false 시키고 모든 클라이언트들에게 충돌했다는 패킷을 보낸다
+			*/
+
 			int* room_player_ids = r.GetPlayerId();
 
 			for (int i{}; i < MAX_PLAYER; ++i) {

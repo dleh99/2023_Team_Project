@@ -195,3 +195,14 @@ void User_Interface::send_result_packet()
 	p.result = isWin;
 	do_send(&p);
 }
+
+void User_Interface::send_add_block_packet(float input_x, float input_z, int input_id)
+{
+	SC_ADD_BLOCK_PACKET p;
+	p.size = sizeof(SC_ADD_BLOCK_PACKET);
+	p.type = SC_ADD_BLOCK;
+	p.block_x = input_x;
+	p.block_z = input_z;
+	p.block_id = input_id;
+	do_send(&p);
+}

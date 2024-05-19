@@ -2,6 +2,7 @@
 #include "header.h"
 
 constexpr int TYPE_NORMAL = 1;
+constexpr int TYPE_AIR = 2;
 
 class GameObject
 {

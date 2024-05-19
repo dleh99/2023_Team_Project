@@ -43,6 +43,7 @@ constexpr char SC_RESPAWN = 11;
 constexpr char SC_FALL = 13;
 constexpr char SC_RESULT = 15;
 constexpr char SC_MATCH_FINISH = 19;
+constexpr char SC_ADD_BLOCK = 20;
 
 enum Animation
 {
@@ -233,6 +234,14 @@ struct SC_RESULT_PACKET {
 	unsigned char		size;
 	char				type;
 	bool				result;
+};
+
+struct SC_ADD_BLOCK_PACKET {
+	unsigned char		size;
+	char				type;
+	float				block_x;
+	float				block_z;
+	int					block_id;
 };
 
 #pragma pack(pop)

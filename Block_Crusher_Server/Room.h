@@ -5,19 +5,34 @@
 constexpr int MAX_PLAYER = 3;
 enum ROOM_STATE { RS_WAITING, RS_READY, RS_INGAME };
 
+struct Block_pos {
+	int x;
+	int z;
+
+	bool operator<(const Block_pos& other) const {
+		if (x == other.x) {
+			return z < other.z;
+		}
+		return x < other.x;
+	}
+};
+
 class Room
 {
 private:
-	int					clients_id[MAX_PLAYER];		// 룸에 참가중인 클라이언트들의 id
-	int					room_num;					// 룸 번호
-	ROOM_STATE			room_state;					// 룸의 상태
-	std::atomic_int		score_person;				// 스코어에 참여한 수
+	int						clients_id[MAX_PLAYER];		// 룸에 참가중인 클라이언트들의 id
+	int						room_num;					// 룸 번호
+	ROOM_STATE				room_state;					// 룸의 상태
+	std::atomic_int			score_person;				// 스코어에 참여한 수
+	float					block_spawn_time;			// 블록 생성 시계
+	int						map_block_num;				// 맵 블록 개수
 public:
-	std::mutex			_r_lock;					// 
-	Map					map_information;			// 룸의 맵
-	std::atomic_int		max_score;					// 최대 스코어
+	std::mutex				_r_lock;					// 
+	Map						map_information;			// 룸의 맵
+	std::atomic_int			max_score;					// 최대 스코어
 
-	std::atomic_int		clients_number;				// 참가중인 클라이언트의 수
+	std::atomic_int			clients_number;				// 참가중인 클라이언트의 수
+	std::set<Block_pos>		Block_Spawn_Pos;			// 블록 생성 좌표들
 public:
 	Room();
 	~Room();
@@ -32,4 +47,9 @@ public:
 	int FindPlayer(int p_id);
 	void SetRoomState(ROOM_STATE rs);
 	int scoreCalculate(int i_score);
+	void AddTime(float input_time);
+	float GetTime() { return block_spawn_time; };
+	void SpawnBlock();
+	int GetMapBlockNum() { return map_block_num; };
+	void AddMapBlockNum(int input_num);
 };

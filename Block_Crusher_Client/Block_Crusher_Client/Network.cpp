@@ -306,6 +306,14 @@ void ProcessPacket(char* ptr)
 		else cout << "졌다" << endl;
 		break;
 	}
+	case SC_ADD_BLOCK: {
+		SC_ADD_BLOCK_PACKET* packet = reinterpret_cast<SC_ADD_BLOCK_PACKET*>(ptr);
+		//cout << "x = " << packet->block_x << ", z = " << packet->block_z << ", id = " << packet->block_id << endl;
+		/*
+		* y 좌표는 240.f 하면 될듯?
+		*/
+		break;
+	}
 	default:
 		cout << "Unknown Packet type " << ptr[1] << endl;
 	}

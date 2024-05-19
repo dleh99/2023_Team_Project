@@ -60,4 +60,5 @@ public:
 	void send_respawn_packet(float x, float y, float z, int player_id);
 	void send_fall_packet(int fall_id);
 	void send_result_packet();
+	void send_add_block_packet(float input_x, float input_z, int input_id);
 };
