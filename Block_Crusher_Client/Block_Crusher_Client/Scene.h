@@ -166,6 +166,5 @@ public:
 	CDepthRenderShader* m_pDepthRenderShader = NULL;
 	CShadowMapShader* m_pShadowShader = NULL;
 	CTextureToViewportShader* m_pShadowMapToViewport = NULL;
-	CParticle* m_pTestParticle;
 };
 

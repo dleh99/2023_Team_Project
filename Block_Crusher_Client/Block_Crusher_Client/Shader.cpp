@@ -1221,6 +1221,12 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 
 	//UpdateShaderVariables(pd3dCommandList);
 
+	for (int i = 0; i < m_pObjectsScene->m_nBlock; i++) {
+		if (m_pObjectsScene->m_ppObjects[i] && m_pObjectsScene->m_ppObjects[i]->m_bParticleActive) {
+			m_pObjectsScene->m_ppObjects[i]->RenderParticles(pd3dCommandList, pCamera);
+		}
+	}
+
 	for (int i = m_pObjectsScene->m_nBlock; i < m_pObjectsScene->m_nObjects; i++)
 	{
 		if (m_pObjectsScene->m_ppObjects[i] && m_pObjectsScene->m_ppObjects[i]->GetIsActive() &&
@@ -1229,7 +1235,6 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 			m_pObjectsScene->m_ppObjects[i]->Render(pd3dCommandList, pCamera);
 		}
 	}
-	m_pObjectsScene->m_pTestParticle->Render(pd3dCommandList, pCamera);
 
 	/*m_pObjectsScene->m_pDirectionalLight->UpdateShaderVariables(pd3dCommandList);
 	m_pObjectsScene->m_pDirectionalLight->Render(pd3dCommandList, pCamera);*/

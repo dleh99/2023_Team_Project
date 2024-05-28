@@ -355,6 +355,7 @@ public:
 
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void RenderParticles(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	virtual void ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 	// 상수 버퍼를 생성한다.

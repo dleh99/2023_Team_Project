@@ -75,16 +75,6 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	pBulletMesh = BulletMesh;
 
-	CTriangleMesh* TriMesh = new CTriangleMesh(pd3dDevice, pd3dCommandList);
-
-	m_pTestParticle = new CParticle();
-	m_pTestParticle->SetMesh(BulletMesh);
-	m_pTestParticle->SetShader(pShader);
-
-	XMFLOAT3 dir = { 1,1,1 };
-
-	m_pTestParticle->SetDiretion(dir);
-
 	//AddBlocksByMapData(pCubeMesh, pTShader, pMaterial, 0, mapkey);
 
 	m_pDepthRenderShader = new CDepthRenderShader(this, m_pLights->m_pLights);
@@ -1043,11 +1033,14 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 					pBlockObject->SetIsActive(true);
 					pBlockObject->SetObjectType(TYPE_BLOCK);
 
+					// 파티클 빌드
 					pBlockObject->m_pParticles = new CGameObject * [pBlockObject->m_nParticle];
 					for (int p = 0; p < pBlockObject->m_nParticle; ++p) {
 						CParticle* pParticle = new CParticle();
 						pBlockObject->m_pParticles[p] = pParticle;
 						pBlockObject->m_pParticles[p]->SetPosition(position);
+						pBlockObject->m_pParticles[p]->SetMesh(pBulletMesh);
+						pBlockObject->m_pParticles[p]->SetShader(m_pSceneShader);
 					}
 
 					m_ppObjects[cnt] = pBlockObject;
@@ -1068,11 +1061,14 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 					pBlockObject->SetIsActive(true);
 					pBlockObject->SetObjectType(TYPE_BLOCK);
 
+					//파티클 빌드
 					pBlockObject->m_pParticles = new CGameObject * [pBlockObject->m_nParticle];
 					for (int p = 0; p < pBlockObject->m_nParticle; ++p) {
 						CParticle* pParticle = new CParticle();
 						pBlockObject->m_pParticles[p] = pParticle;
 						pBlockObject->m_pParticles[p]->SetPosition(position);
+						pBlockObject->m_pParticles[p]->SetMesh(pBulletMesh);
+						pBlockObject->m_pParticles[p]->SetShader(m_pSceneShader);
 					}
 
 					m_ppObjects[cnt] = pBlockObject;
