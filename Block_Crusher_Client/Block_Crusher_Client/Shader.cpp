@@ -1229,6 +1229,8 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 			m_pObjectsScene->m_ppObjects[i]->Render(pd3dCommandList, pCamera);
 		}
 	}
+	m_pObjectsScene->m_pTestParticle->Render(pd3dCommandList, pCamera);
+
 	/*m_pObjectsScene->m_pDirectionalLight->UpdateShaderVariables(pd3dCommandList);
 	m_pObjectsScene->m_pDirectionalLight->Render(pd3dCommandList, pCamera);*/
 }

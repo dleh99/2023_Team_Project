@@ -331,6 +331,10 @@ public:
 	CGameObject* m_pChild = NULL;
 	CGameObject* m_pSibling = NULL;
 
+	CGameObject** m_pParticles = NULL;
+	int m_nParticle = 10;
+	bool m_bParticleActive = false;
+
 	CAnimationController* m_pSkinnedAnimationController = NULL;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dCbvGPUDescriptorHandle;
@@ -347,6 +351,7 @@ public:
 
 	virtual void OnPrepareAnimation() {  }
 	virtual void Animate(float fTimeElapsed);
+	virtual void AnimateParticles(float fTimeElapsed);
 
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);

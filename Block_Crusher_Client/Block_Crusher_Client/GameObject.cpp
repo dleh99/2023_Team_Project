@@ -333,6 +333,13 @@ void CGameObject::Animate(float fTimeElapsed)
 	if (m_pChild) m_pChild->Animate(fTimeElapsed);
 }
 
+void CGameObject::AnimateParticles(float fTimeElapsed)
+{
+	for (int i = 0; i < m_nParticle; i++) {
+		reinterpret_cast<CParticle*>(m_pParticles[i])->Animate(fTimeElapsed);
+	}
+}
+
 void CGameObject::OnPrepareRender()
 {
 

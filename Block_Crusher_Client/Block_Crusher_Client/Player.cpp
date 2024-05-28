@@ -376,7 +376,9 @@ void CPlayer::Update(float fTimeElapsed)
 {
 	m_fEtime = fTimeElapsed;
 	m_fKeyDownTime += fTimeElapsed;
-	//cout << m_bPlayerGravity << " ";
+
+
+	//cout << m_xmf3Position.x << " " << m_xmf3Position.y << " " << m_xmf3Position.z << endl;
 	if (m_fKeyDownTime > 2.0f) {
 		m_bReloading = false;
 		m_fKeyDownTime = 0.f;

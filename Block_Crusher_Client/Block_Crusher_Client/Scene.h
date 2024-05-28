@@ -2,6 +2,7 @@
 #include "Timer.h"
 #include "Shader.h"
 #include "..\..\Block_Crusher_Server\protocol.h"
+#include "Particle.h"
 //#include "Network.h"
 
 #define MAX_OBJ_COUNT 3000
@@ -165,5 +166,6 @@ public:
 	CDepthRenderShader* m_pDepthRenderShader = NULL;
 	CShadowMapShader* m_pShadowShader = NULL;
 	CTextureToViewportShader* m_pShadowMapToViewport = NULL;
+	CParticle* m_pTestParticle;
 };
 

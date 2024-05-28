@@ -75,6 +75,16 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	pBulletMesh = BulletMesh;
 
+	CTriangleMesh* TriMesh = new CTriangleMesh(pd3dDevice, pd3dCommandList);
+
+	m_pTestParticle = new CParticle();
+	m_pTestParticle->SetMesh(BulletMesh);
+	m_pTestParticle->SetShader(pShader);
+
+	XMFLOAT3 dir = { 1,1,1 };
+
+	m_pTestParticle->SetDiretion(dir);
+
 	//AddBlocksByMapData(pCubeMesh, pTShader, pMaterial, 0, mapkey);
 
 	m_pDepthRenderShader = new CDepthRenderShader(this, m_pLights->m_pLights);
@@ -129,6 +139,7 @@ void CScene::DisableObject(int bullet_id, int block_id, int p_id)
 	if (m_ppObjects[block_id]) {
 		m_ppObjects[block_id]->SetIsActive(false);
 		m_ppObjects[block_id]->SetPosition(99999, 99999, 99999);
+		m_ppObjects[block_id]->m_bParticleActive = true;
 		auto tmp = m_ppObjects[block_id]->GetWorldMatrix();
 		XMFLOAT4X4 result;
 		XMStoreFloat4x4(&result, XMMatrixTranspose(XMLoadFloat4x4(&tmp)));
@@ -518,9 +529,15 @@ void CScene::AnimateObjects(float fTimeElapsed)
 {
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		if (m_ppObjects[j]->GetIsActive()) 
+		if (m_ppObjects[j]->GetIsActive())
 			m_ppObjects[j]->Animate(fTimeElapsed);
+		else
+			if (m_ppObjects[j]->m_bParticleActive) {
+				m_ppObjects[j]->AnimateParticles(fTimeElapsed);
+				cout << "파티클 움직임" << endl;
+			}
 	}
+
 
 	// 조명 위치를 플레이어 위치와 방향에 맞게 조정
 	//if (m_pLights)
@@ -1026,6 +1043,13 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 					pBlockObject->SetIsActive(true);
 					pBlockObject->SetObjectType(TYPE_BLOCK);
 
+					pBlockObject->m_pParticles = new CGameObject * [pBlockObject->m_nParticle];
+					for (int p = 0; p < pBlockObject->m_nParticle; ++p) {
+						CParticle* pParticle = new CParticle();
+						pBlockObject->m_pParticles[p] = pParticle;
+						pBlockObject->m_pParticles[p]->SetPosition(position);
+					}
+
 					m_ppObjects[cnt] = pBlockObject;
 					m_ppObjects[cnt]->SetPosition(position);
 
@@ -1043,6 +1067,13 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 					pBlockObject->SetMesh(m_pBlockMesh);
 					pBlockObject->SetIsActive(true);
 					pBlockObject->SetObjectType(TYPE_BLOCK);
+
+					pBlockObject->m_pParticles = new CGameObject * [pBlockObject->m_nParticle];
+					for (int p = 0; p < pBlockObject->m_nParticle; ++p) {
+						CParticle* pParticle = new CParticle();
+						pBlockObject->m_pParticles[p] = pParticle;
+						pBlockObject->m_pParticles[p]->SetPosition(position);
+					}
 
 					m_ppObjects[cnt] = pBlockObject;
 					m_ppObjects[cnt]->SetPosition(position);
