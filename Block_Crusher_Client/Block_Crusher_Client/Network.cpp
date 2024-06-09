@@ -29,6 +29,9 @@ bool m_gameStart = false;
 bool gameResult = false;
 char m_mapKey;
 
+// 게임 모드
+int gameMode = 0;		// 0: Survival Mode, 1: RPG Mode
+
 int NetworkInit()
 {
 	int ret;
@@ -255,6 +258,9 @@ void ProcessPacket(char* ptr)
 		NetScene->DisableObject(packet->bullet_id, packet->block_id, packet->player_id);
 
 		if (id == packet->player_id) {
+			//if (gameMode == 1)
+			Netplayers[id]->IncreasePlayerBlockMoney();
+
 			int UpdatedSocre = Netplayers[id]->GetPlayerScore() + 100;
 			Netplayers[id]->SetPlayerScore(UpdatedSocre);
 		}
@@ -268,7 +274,7 @@ void ProcessPacket(char* ptr)
 
 		cout << packet->player_id << "가 " << packet->enemy_id << "를 " << packet->bullet_id << "번 총알로 맞춤" << endl;
 		if (id == packet->enemy_id) {
-			int UpdatedHP = Netplayers[id]->GetPlayerHP() - 10;
+			int UpdatedHP = Netplayers[id]->GetPlayerHP() - 10; // (10 + Netplayers[hit]->GetUpgradeDamage());
 			Netplayers[id]->SetPlayerHP(UpdatedHP);
 		}
 		break;
@@ -278,7 +284,7 @@ void ProcessPacket(char* ptr)
 		cout << "플레이어 [" << packet->death_id << "]가 사망하였습니다." << endl;
 		NetScene->DisableBullet(packet->bullet_id, packet->player_id);
 		if (id == packet->death_id) {
-			int UpdatedHP = Netplayers[id]->GetPlayerHP() - 10;
+			int UpdatedHP = Netplayers[id]->GetPlayerHP() - 10; // (10 + Netplayers[hit]->GetUpgradeDamage());
 			Netplayers[id]->SetPlayerHP(UpdatedHP);
 		}
 		Netplayers[packet->death_id]->SetIsActive(false);

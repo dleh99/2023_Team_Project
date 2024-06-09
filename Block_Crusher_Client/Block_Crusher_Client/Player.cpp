@@ -377,10 +377,10 @@ void CPlayer::Update(float fTimeElapsed)
 	m_fEtime = fTimeElapsed;
 	m_fKeyDownTime += fTimeElapsed;
 	//cout << m_bPlayerGravity << " ";
-	if (m_fKeyDownTime > 2.0f) {
+	if (m_fKeyDownTime > 2.0f) {		// 재장전 시간
 		m_bReloading = false;
 		m_fKeyDownTime = 0.f;
-		m_nBullet = 30;
+		m_nBullet = 30 + m_nUpgradeBullet;
 	}
 
 	if (m_fBoosterMount < 100.0f) {
@@ -552,6 +552,112 @@ bool CPlayer::GetIsRotate()
 	return isRotate;
 }
 
+void CPlayer::ActiveRifle()
+{
+	if (m_pRifle)
+	{
+		m_pRifle->SetIsActive(true);
+		m_nGunType = 0;
+	}
+	if (m_pShotgun) m_pShotgun->SetIsActive(false);
+	if (m_pPistol) m_pPistol->SetIsActive(false);
+}
+
+void CPlayer::ActiveShotgun()
+{
+	if (m_pRifle) m_pRifle->SetIsActive(false);
+	if (m_pShotgun)
+	{
+		m_pShotgun->SetIsActive(true);
+		m_nGunType = 1;
+	}
+	if (m_pPistol) m_pPistol->SetIsActive(false);
+}
+
+void CPlayer::ActivePistol()
+{
+	if (m_pRifle) m_pRifle->SetIsActive(false);
+	if (m_pShotgun) m_pShotgun->SetIsActive(false);
+	if (m_pPistol)
+	{
+		m_pPistol->SetIsActive(true);
+		m_nGunType = 2;
+	}
+}
+
+void CPlayer::UpgradePlayerSpeed()
+{
+	if (m_iPlayerMoney < 10)
+		cout << "플레이어의 돈이 부족합니다. 현재 돈: " << m_iPlayerMoney << endl;
+	else
+	{
+		m_nUpgradeSpeed += 50;
+		m_iPlayerMoney -= 10;
+
+		cout << "이동 속도 구매 성공!!! 현재 이동 속도: " << 300 + m_nUpgradeSpeed << ", 현재 돈: " << m_iPlayerMoney << endl;
+	}
+}
+
+void CPlayer::UpgradePlayerDamage()
+{
+	if (m_iPlayerMoney < 10)
+		cout << "플레이어의 돈이 부족합니다. 현재 돈: " << m_iPlayerMoney << endl;
+	else
+	{
+		m_nUpgradeDamage += 5;
+		m_iPlayerMoney -= 10;
+
+		cout << "데미지 구매 성공!!! 현재 데미지: " << 10 + m_nUpgradeDamage << ", 현재 돈: " << m_iPlayerMoney << endl;
+	}
+}
+
+void CPlayer::UpgradePlayerBulletSpeed()
+{
+	if (m_iPlayerMoney < 10)
+		cout << "플레이어의 돈이 부족합니다. 현재 돈: " << m_iPlayerMoney << endl;
+	else
+	{
+		m_fUpgradeBulletSpeed += 0.2f;
+		m_iPlayerMoney -= 10;
+
+		cout << "총알 속도 구매 성공!!! 현재 총알 속도: +" << int(m_fUpgradeBulletSpeed * 100)
+			<< "%, 현재 돈: " << m_iPlayerMoney << endl;
+	}
+}
+
+void CPlayer::UpgradePlayerHp()
+{
+	if (m_iPlayerMoney < 10)
+		cout << "플레이어의 돈이 부족합니다. 현재 돈: " << m_iPlayerMoney << endl;
+	else
+	{
+		m_iPlayerHP += 10;
+		m_nUpgradeHp += 10;
+		m_iPlayerMoney -= 10;
+
+		cout << "체력 구매 성공!!! 현재 체력: " << 100 + m_nUpgradeHp << ", 현재 돈: " << m_iPlayerMoney << endl;
+	}
+}
+
+void CPlayer::UpgradePlayerBullet()
+{
+	if (m_iPlayerMoney < 10)
+		cout << "플레이어의 돈이 부족합니다. 현재 돈: " << m_iPlayerMoney << endl;
+	else
+	{
+		m_nBullet += 10;
+		m_nUpgradeBullet += 10;
+		m_iPlayerMoney -= 10;
+
+		cout << "탄창 구매 성공!!! 현재 탄창: " << 30 + m_nUpgradeBullet << ", 현재 돈: " << m_iPlayerMoney << endl;
+	}
+}
+
+void CPlayer::ConfirmPlayerMoney()
+{
+	cout << "현재 남은 돈: " << m_iPlayerMoney << endl;
+}
+
 CCubePlayer::CCubePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z, int id)
 {
@@ -621,21 +727,33 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 		"Models/player model data.bin", "Models/player animation data.bin", pPlayerShader, pSkinnedPlayerShader, pMaterial);
 	SetChild(pPlayerModel->m_pModelRootObject);
 
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 12, pPlayerModel);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);	// Idle
-	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);	// Run_Forward
-	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);	// Run_Left
-	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3);	// Run_Right
-	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4);	// Run_Back
-	m_pSkinnedAnimationController->SetTrackAnimationSet(5, 5);	// Fire_Bullet
-	m_pSkinnedAnimationController->SetTrackAnimationSet(6, 6);	// Damaged_Motion
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 23, pPlayerModel);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);	// Rifle_Idle
+	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);	// Rifle_Run_Forward
+	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);	// Rifle_Run_Left
+	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3);	// Rifle_Run_Right
+	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4);	// Rifle_Run_Back
+	m_pSkinnedAnimationController->SetTrackAnimationSet(5, 5);	// Rifle_Fire_Bullet
+	m_pSkinnedAnimationController->SetTrackAnimationSet(6, 6);	// Rifle_Damaged_Motion
 	m_pSkinnedAnimationController->SetTrackAnimationSet(7, 7);	// Death
-	m_pSkinnedAnimationController->SetTrackAnimationSet(8, 8);	// Forward + Fire
-	m_pSkinnedAnimationController->SetTrackAnimationSet(9, 9);	// Left + Fire
-	m_pSkinnedAnimationController->SetTrackAnimationSet(10, 10);	// Right + Fire
-	m_pSkinnedAnimationController->SetTrackAnimationSet(11, 11);	// Back + Fire
+	m_pSkinnedAnimationController->SetTrackAnimationSet(8, 8);	// Pistol_Idle
+	m_pSkinnedAnimationController->SetTrackAnimationSet(9, 9);	// Pistol_Run_Forward
+	m_pSkinnedAnimationController->SetTrackAnimationSet(10, 10);	// Pistol_Run_Left
+	m_pSkinnedAnimationController->SetTrackAnimationSet(11, 11);	// Pistol_Run_Right
+	m_pSkinnedAnimationController->SetTrackAnimationSet(12, 12);	// Pistol_Run_Back
+	m_pSkinnedAnimationController->SetTrackAnimationSet(13, 13);	// Pistol_Damaged_Motion
+	m_pSkinnedAnimationController->SetTrackAnimationSet(14, 14);	// Pistol_Fire_Bullet
+	m_pSkinnedAnimationController->SetTrackAnimationSet(15, 15);	// Rifle_Forward + Fire
+	m_pSkinnedAnimationController->SetTrackAnimationSet(16, 16);	// Rifle_Left + Fire
+	m_pSkinnedAnimationController->SetTrackAnimationSet(17, 17);	// Rifle_Right + Fire
+	m_pSkinnedAnimationController->SetTrackAnimationSet(18, 18);	// Rifle_Back + Fire
+	m_pSkinnedAnimationController->SetTrackAnimationSet(19, 19);	// Pistol_Forward + Fire
+	m_pSkinnedAnimationController->SetTrackAnimationSet(20, 20);	// Pistol_Left + Fire
+	m_pSkinnedAnimationController->SetTrackAnimationSet(21, 21);	// Pistol_Right + Fire
+	m_pSkinnedAnimationController->SetTrackAnimationSet(22, 22);	// Pistol_Back + Fire
 	m_pSkinnedAnimationController->m_pAnimationTracks[6].m_nType = ANIMATION_TYPE_ONCE;
 	m_pSkinnedAnimationController->m_pAnimationTracks[7].m_nType = ANIMATION_TYPE_ONCE;
+	m_pSkinnedAnimationController->m_pAnimationTracks[13].m_nType = ANIMATION_TYPE_ONCE;
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);
 	m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	m_pSkinnedAnimationController->SetTrackEnable(3, false);
@@ -647,6 +765,17 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	m_pSkinnedAnimationController->SetTrackEnable(9, false);
 	m_pSkinnedAnimationController->SetTrackEnable(10, false);
 	m_pSkinnedAnimationController->SetTrackEnable(11, false);
+	m_pSkinnedAnimationController->SetTrackEnable(12, false);
+	m_pSkinnedAnimationController->SetTrackEnable(13, false);
+	m_pSkinnedAnimationController->SetTrackEnable(14, false);
+	m_pSkinnedAnimationController->SetTrackEnable(15, false);
+	m_pSkinnedAnimationController->SetTrackEnable(16, false);
+	m_pSkinnedAnimationController->SetTrackEnable(17, false);
+	m_pSkinnedAnimationController->SetTrackEnable(18, false);
+	m_pSkinnedAnimationController->SetTrackEnable(19, false);
+	m_pSkinnedAnimationController->SetTrackEnable(20, false);
+	m_pSkinnedAnimationController->SetTrackEnable(21, false);
+	m_pSkinnedAnimationController->SetTrackEnable(22, false);
 
 	//SetMaterial(pMaterial);
 
@@ -694,57 +823,115 @@ void CMainPlayer::OnPrepareRender()
 
 void CMainPlayer::OtherPlayerAnimationUpdate(Animation dwOtherPlayerDirection)
 {
-	switch (dwOtherPlayerDirection) {
-	case ANIMATION_IDLE: {
-		m_pSkinnedAnimationController->SetTracksEnable(0);
-		//cout << "IDLE 출력중" << endl;
-		break;
+	if (m_nGunType == 0 || m_nGunType == 1)
+	{
+		switch (dwOtherPlayerDirection) {
+		case ANIMATION_IDLE: {
+			m_pSkinnedAnimationController->SetTracksEnable(0);
+			//cout << "IDLE 출력중" << endl;
+			break;
+		}
+		case ANIMATION_WALK_FORAWRRD: {
+			m_pSkinnedAnimationController->SetTracksEnable(1);
+			//cout << "FORWORD 출력중" << endl;
+			break;
+		}
+		case ANIMATION_WALK_LEFT: {
+			m_pSkinnedAnimationController->SetTracksEnable(2);
+			break;
+		}
+		case ANIMATION_WALK_RIGHT: {
+			m_pSkinnedAnimationController->SetTracksEnable(3);
+			break;
+		}
+		case ANIMATION_WALK_BACKWARD: {
+			m_pSkinnedAnimationController->SetTracksEnable(4);
+			break;
+		}
+		case ANIMATION_SHOOT: {
+			m_pSkinnedAnimationController->SetTracksEnable(5);
+			break;
+		}
+		case ANIMATION_DAMAGED: {
+			m_pSkinnedAnimationController->SetTracksEnable(6);
+			break;
+		}
+		case ANIMATION_DEATH: {
+			m_pSkinnedAnimationController->SetTracksEnable(7);
+			break;
+		}
+		case ANIMATION_SHOOT_FORWARD: {
+			m_pSkinnedAnimationController->SetTracksEnable(15);
+			break;
+		}
+		case ANIMATION_SHOOT_LEFT: {
+			m_pSkinnedAnimationController->SetTracksEnable(16);
+			break;
+		}
+		case ANIMATION_SHOOT_RIGHT: {
+			m_pSkinnedAnimationController->SetTracksEnable(17);
+			break;
+		}
+		case ANIMATION_SHOOT_BACKWARD: {
+			m_pSkinnedAnimationController->SetTracksEnable(18);
+			break;
+		}
+		}
 	}
-	case ANIMATION_WALK_FORAWRRD: {
-		m_pSkinnedAnimationController->SetTracksEnable(1);
-		//cout << "FORWORD 출력중" << endl;
-		break;
-	}
-	case ANIMATION_WALK_LEFT: {
-		m_pSkinnedAnimationController->SetTracksEnable(2);
-		break;
-	}
-	case ANIMATION_WALK_RIGHT: {
-		m_pSkinnedAnimationController->SetTracksEnable(3);
-		break;
-	}
-	case ANIMATION_WALK_BACKWARD: {
-		m_pSkinnedAnimationController->SetTracksEnable(4);
-		break;
-	}
-	case ANIMATION_SHOOT: {
-		m_pSkinnedAnimationController->SetTracksEnable(5);
-		break;
-	}
-	case ANIMATION_DAMAGED: {
-		m_pSkinnedAnimationController->SetTracksEnable(6);
-		break;
-	}
-	case ANIMATION_DEATH: {
-		m_pSkinnedAnimationController->SetTracksEnable(7);
-		break;
-	}
-	case ANIMATION_SHOOT_FORWARD: {
-		m_pSkinnedAnimationController->SetTracksEnable(8);
-		break;
-	}
-	case ANIMATION_SHOOT_LEFT: {
-		m_pSkinnedAnimationController->SetTracksEnable(9);
-		break;
-	}
-	case ANIMATION_SHOOT_RIGHT: {
-		m_pSkinnedAnimationController->SetTracksEnable(10);
-		break;
-	}
-	case ANIMATION_SHOOT_BACKWARD: {
-		m_pSkinnedAnimationController->SetTracksEnable(11);
-		break;
-	}
+	else
+	{
+		switch (dwOtherPlayerDirection) {
+		case ANIMATION_IDLE: {
+			m_pSkinnedAnimationController->SetTracksEnable(0);
+			//cout << "IDLE 출력중" << endl;
+			break;
+		}
+		case ANIMATION_WALK_FORAWRRD: {
+			m_pSkinnedAnimationController->SetTracksEnable(1);
+			//cout << "FORWORD 출력중" << endl;
+			break;
+		}
+		case ANIMATION_WALK_LEFT: {
+			m_pSkinnedAnimationController->SetTracksEnable(2);
+			break;
+		}
+		case ANIMATION_WALK_RIGHT: {
+			m_pSkinnedAnimationController->SetTracksEnable(3);
+			break;
+		}
+		case ANIMATION_WALK_BACKWARD: {
+			m_pSkinnedAnimationController->SetTracksEnable(4);
+			break;
+		}
+		case ANIMATION_SHOOT: {
+			m_pSkinnedAnimationController->SetTracksEnable(14);
+			break;
+		}
+		case ANIMATION_DAMAGED: {
+			m_pSkinnedAnimationController->SetTracksEnable(13);
+			break;
+		}
+		case ANIMATION_DEATH: {
+			m_pSkinnedAnimationController->SetTracksEnable(7);
+			break;
+		}
+		case ANIMATION_SHOOT_FORWARD: {
+			m_pSkinnedAnimationController->SetTracksEnable(19);
+			break;
+		}
+		case ANIMATION_SHOOT_LEFT: {
+			m_pSkinnedAnimationController->SetTracksEnable(20);
+			break;
+		}
+		case ANIMATION_SHOOT_RIGHT: {
+			m_pSkinnedAnimationController->SetTracksEnable(21);
+			break;
+		}
+		case ANIMATION_SHOOT_BACKWARD: {
+			m_pSkinnedAnimationController->SetTracksEnable(22);
+			break;
+		}
+		}
 	}
 }
 
@@ -757,10 +944,15 @@ void CMainPlayer::SetWalkAnimationSpeed(float fSpeed)
 		m_pSkinnedAnimationController->SetTrackSpeed(3, fSpeed);
 		m_pSkinnedAnimationController->SetTrackSpeed(4, fSpeed);
 
-		m_pSkinnedAnimationController->SetTrackSpeed(8, fSpeed);
-		m_pSkinnedAnimationController->SetTrackSpeed(9, fSpeed);
-		m_pSkinnedAnimationController->SetTrackSpeed(10, fSpeed);
-		m_pSkinnedAnimationController->SetTrackSpeed(11, fSpeed);
+		m_pSkinnedAnimationController->SetTrackSpeed(15, fSpeed);
+		m_pSkinnedAnimationController->SetTrackSpeed(16, fSpeed);
+		m_pSkinnedAnimationController->SetTrackSpeed(17, fSpeed);
+		m_pSkinnedAnimationController->SetTrackSpeed(18, fSpeed);
+		
+		m_pSkinnedAnimationController->SetTrackSpeed(19, fSpeed);
+		m_pSkinnedAnimationController->SetTrackSpeed(20, fSpeed);
+		m_pSkinnedAnimationController->SetTrackSpeed(21, fSpeed);
+		m_pSkinnedAnimationController->SetTrackSpeed(22, fSpeed);
 	}
 }
 
@@ -775,14 +967,28 @@ void CMainPlayer::Update(float fTimeElapsed, DWORD dwDirection)
 			float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
 			if (::IsZero(fLength))
 			{
-				m_pSkinnedAnimationController->SetTracksEnable(0);
+				if (m_nGunType == 2)
+					m_pSkinnedAnimationController->SetTracksEnable(8);
+				else
+					m_pSkinnedAnimationController->SetTracksEnable(0);
 				m_ani_state = ANIMATION_IDLE;
 
 				if (GetIsShoot())//dwDirection& KEY_SHOOT
 				{
-					m_pSkinnedAnimationController->SetTrackEnable(0, false);
-					m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
-					m_pSkinnedAnimationController->SetTrackEnable(5, true);
+					if (m_nGunType == 2)
+					{
+						m_pSkinnedAnimationController->SetTrackEnable(8, false);	// Idle
+						m_pSkinnedAnimationController->SetTrackPosition(8, 0.0f);
+
+						m_pSkinnedAnimationController->SetTrackEnable(14, true);	// Fire
+					}
+					else
+					{
+						m_pSkinnedAnimationController->SetTrackEnable(0, false);	// Idle
+						m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
+
+						m_pSkinnedAnimationController->SetTrackEnable(5, true);		// Fire
+					}
 					m_ani_state = ANIMATION_SHOOT;
 				}
 			}
@@ -827,58 +1033,124 @@ void CMainPlayer::Move(DWORD dwDirection, float fDistance, bool bVelocity)
 		{
 			if (GetIsShoot())	// Shoot
 			{
-				/*m_pSkinnedAnimationController->SetTracksEnable(5);
+				/*if (m_nGunType == 2)
+					m_pSkinnedAnimationController->SetTracksEnable(14);
+				else
+					m_pSkinnedAnimationController->SetTracksEnable(5);
 				m_ani_state = ANIMATION_SHOOT;*/
 
 				// Shoot And Move
-				if (dwDirection & DIR_FORWARD)
+				if (m_nGunType == 2)
 				{
-					m_pSkinnedAnimationController->SetTracksEnable(8);
-					m_ani_state = ANIMATION_SHOOT_FORWARD;
+					if (dwDirection & DIR_FORWARD)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(19);
+						m_ani_state = ANIMATION_SHOOT_FORWARD;
+					}
+					else if (dwDirection & DIR_LEFT)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(20);
+						m_ani_state = ANIMATION_SHOOT_LEFT;
+					}
+					else if (dwDirection & DIR_RIGHT)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(21);
+						m_ani_state = ANIMATION_SHOOT_RIGHT;
+					}
+					else if (dwDirection & DIR_BACKWARD)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(22);
+						m_ani_state = ANIMATION_SHOOT_BACKWARD;
+					}
 				}
-				else if (dwDirection & DIR_LEFT)
+				else
 				{
-					m_pSkinnedAnimationController->SetTracksEnable(9);
-					m_ani_state = ANIMATION_SHOOT_LEFT;
-				}
-				else if (dwDirection & DIR_RIGHT)
-				{
-					m_pSkinnedAnimationController->SetTracksEnable(10);
-					m_ani_state = ANIMATION_SHOOT_RIGHT;
-				}
-				else if (dwDirection & DIR_BACKWARD)
-				{
-					m_pSkinnedAnimationController->SetTracksEnable(11);
-					m_ani_state = ANIMATION_SHOOT_BACKWARD;
+					if (dwDirection & DIR_FORWARD)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(15);
+						m_ani_state = ANIMATION_SHOOT_FORWARD;
+					}
+					else if (dwDirection & DIR_LEFT)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(16);
+						m_ani_state = ANIMATION_SHOOT_LEFT;
+					}
+					else if (dwDirection & DIR_RIGHT)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(17);
+						m_ani_state = ANIMATION_SHOOT_RIGHT;
+					}
+					else if (dwDirection & DIR_BACKWARD)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(18);
+						m_ani_state = ANIMATION_SHOOT_BACKWARD;
+					}
 				}
 			}
 			else				// Don't Shoot
 			{
 				// Don't Shoot And Move
-				if (dwDirection & DIR_FORWARD)
+				if (m_nGunType == 2)
 				{
-					m_pSkinnedAnimationController->SetTracksEnable(1);
-					m_ani_state = ANIMATION_WALK_FORAWRRD;
+					if (dwDirection & DIR_FORWARD)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(9);
+						m_ani_state = ANIMATION_WALK_FORAWRRD;
+					}
+					else if (dwDirection & DIR_LEFT)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(10);
+						m_ani_state = ANIMATION_WALK_LEFT;
+					}
+					else if (dwDirection & DIR_RIGHT)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(11);
+						m_ani_state = ANIMATION_WALK_RIGHT;
+					}
+					else if (dwDirection & DIR_BACKWARD)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(12);
+						m_ani_state = ANIMATION_WALK_BACKWARD;
+					}
+					else			// Move & Don't Shoot
+					{
+						/*if (m_nGunType == 2)
+							m_pSkinnedAnimationController->SetTracksEnable(15);
+						else*/
+						m_pSkinnedAnimationController->SetTracksEnable(0);
+						m_ani_state = ANIMATION_IDLE;
+					}
 				}
-				else if (dwDirection & DIR_LEFT)
+				else
 				{
-					m_pSkinnedAnimationController->SetTracksEnable(2);
-					m_ani_state = ANIMATION_WALK_LEFT;
-				}
-				else if (dwDirection & DIR_RIGHT)
-				{
-					m_pSkinnedAnimationController->SetTracksEnable(3);
-					m_ani_state = ANIMATION_WALK_RIGHT;
-				}
-				else if (dwDirection & DIR_BACKWARD)
-				{
-					m_pSkinnedAnimationController->SetTracksEnable(4);
-					m_ani_state = ANIMATION_WALK_BACKWARD;
-				}
-				else			// Move & Don't Shoot
-				{
-					m_pSkinnedAnimationController->SetTracksEnable(0);
-					m_ani_state = ANIMATION_IDLE;
+					if (dwDirection & DIR_FORWARD)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(1);
+						m_ani_state = ANIMATION_WALK_FORAWRRD;
+					}
+					else if (dwDirection & DIR_LEFT)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(2);
+						m_ani_state = ANIMATION_WALK_LEFT;
+					}
+					else if (dwDirection & DIR_RIGHT)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(3);
+						m_ani_state = ANIMATION_WALK_RIGHT;
+					}
+					else if (dwDirection & DIR_BACKWARD)
+					{
+						m_pSkinnedAnimationController->SetTracksEnable(4);
+						m_ani_state = ANIMATION_WALK_BACKWARD;
+					}
+					else			// Move & Don't Shoot
+					{
+						/*if (m_nGunType == 2)
+							m_pSkinnedAnimationController->SetTracksEnable(15);
+						else*/
+						m_pSkinnedAnimationController->SetTracksEnable(0);
+						m_ani_state = ANIMATION_IDLE;
+					}
 				}
 			}
 		}

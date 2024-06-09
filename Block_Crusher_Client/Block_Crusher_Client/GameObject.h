@@ -313,6 +313,7 @@ public:
 	int m_nFrames = 0;
 
 	CMesh* m_pMesh = NULL;
+	CMesh* m_pGunMesh = NULL;
 
 	CMaterial* m_pMaterial = NULL;
 
@@ -403,6 +404,10 @@ public:
 	void SetTrackAnimationPosition(int nAnimationTrack, float fPosition);
 
 	void SetRootMotion(bool bRootMotion) { if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->SetRootMotion(bRootMotion); }
+
+	void SearchRifle(CGameObject** pRifle);
+	void SearchShotgun(CGameObject** pShotgun);
+	void SearchPistol(CGameObject** pPistol);
 
 	static CLoadedModelInfo* LoadModelAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrModelFileName, const char* pstrAnimationFileName,
