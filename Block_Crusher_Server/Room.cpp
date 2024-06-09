@@ -142,7 +142,10 @@ void Room::SpawnBlock()
 		int z = std::rand() % 50;
 		Block_Spawn_Pos.insert({ x, z });
 		XMFLOAT3 position = { -(float)x * 12.0f + 20.0f, (float)19 * 12.0f + 12.0f, -(float)z * 12.0f + 40.0f };
-		map_information.Map_B[z + 50 * x][19].Init_Block(input_id, position, TYPE_NORMAL);
+		Block b;
+		b.Init_Block(input_id, position, TYPE_NORMAL);
+		map_information.Map_B[z + 50 * x].push_back(b);
+		//map_information.Map_B[z + 50 * x][19].Init_Block(input_id, position, TYPE_NORMAL);
 		Falling_Blocks.push_back({ x, 19, z });
 		input_id++;
 	}

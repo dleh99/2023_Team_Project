@@ -39,6 +39,8 @@ private:
 	int block_x_range;
 	int block_y_range;
 	int block_z_range;
+
+	bool isMove = false;
 public:
 	Block();
 	Block(int input_id, XMFLOAT3 input_pos);

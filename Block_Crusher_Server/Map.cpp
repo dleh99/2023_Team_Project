@@ -85,7 +85,7 @@ void Map::CreateMap()
 				//Map_Block.emplace_back(cnt, position);
 				Block b;
 				b.Init_Block(cnt, position, TYPE_NORMAL);
-				Map_B[k + 50 * i].push_back(cnt, position, TYPE_NORMAL);
+				Map_B[k + 50 * i].push_back(b);
 				//Map_B[k + 50 * i][9 - j].Init_Block(cnt, position, TYPE_NORMAL);
 				cnt++;
 			}
@@ -96,10 +96,14 @@ void Map::CreateMap()
 			for (int y = 0; y < mapdata[i][k]; ++y) {
 				XMFLOAT3 position = { -(float)i * 12.0f + 20.0f, (float)y * 12.0f + 12.0f, -(float)k * 12.0f + 40.0f };
 				//Map_Block.emplace_back(cnt, position);
-				Map_B[k + 50 * i][10 + y].Init_Block(cnt, position, TYPE_NORMAL);
+				Block b;
+				b.Init_Block(cnt, position, TYPE_NORMAL);
+				Map_B[k + 50 * i].push_back(b);
+				//Map_B[k + 50 * i][10 + y].Init_Block(cnt, position, TYPE_NORMAL);
 				cnt++;
 			}
 		}
+	
 }
 
 void Map::ClearMap()

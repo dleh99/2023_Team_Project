@@ -12,8 +12,9 @@ public:
 	int					block_num;	
 public:
 	//std::vector<Block> Map_Block;
+	std::vector<Block> Map_B[Map_Width * Map_Depth];
 	//Block Map_B[Map_Width * Map_Depth][Map_Height];
-	std::vector<std::vector<Block>> Map_B;
+	//std::vector<std::vector<Block>> Map_B;
 
 public:
 	Map();
