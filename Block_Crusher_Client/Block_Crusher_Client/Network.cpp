@@ -95,11 +95,19 @@ void send_login_packet(wstring i_id, wstring i_password)
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
-void send_match_packet()
+void send_crush_match_packet()
 {
-	CS_MATCH_PACKET p{};
-	p.size = sizeof(CS_MATCH_PACKET);
-	p.type = CS_MATCH;
+	CS_CRUSH_MATCH_PACKET p{};
+	p.size = sizeof(CS_CRUSH_MATCH_PACKET);
+	p.type = CS_CRUSH_MATCH;
+	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
+}
+
+void send_rpg_match_packet()
+{
+	CS_RPG_MATCH_PACKET p{};
+	p.size = sizeof(CS_RPG_MATCH_PACKET);
+	p.type = CS_RPG_MATCH;
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
@@ -149,6 +157,15 @@ void send_score_packet(int score)
 	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
 }
 
+void send_upgrade_packet(UPGRADE_OPTION in_op)
+{
+	CS_UPGRADE_PACKET p{};
+	p.size = sizeof(CS_UPGRADE_PACKET);
+	p.type = CS_UPGRADE;
+	p.up_option = in_op;
+	send(g_socket, reinterpret_cast<const char*>(&p), sizeof(p), 0);
+}
+
 void ProcessPacket(char* ptr)
 {
 	switch (ptr[1]) {
@@ -194,8 +211,13 @@ void ProcessPacket(char* ptr)
 		start_z = packet->z;
 		break;
 	}
-	case SC_MATCH_FINISH: {
-		SC_MATCH_FINISH_PACKET* packet = reinterpret_cast<SC_MATCH_FINISH_PACKET*>(ptr);
+	case SC_CRUSH_MODE_MATCH_FINISH: {
+		SC_CRUSH_MODE_MATCH_FINISH_PACKET* packet = reinterpret_cast<SC_CRUSH_MODE_MATCH_FINISH_PACKET*>(ptr);
+		cout << packet->room_num << "방에 입장" << endl;
+		break;
+	}
+	case SC_RPG_MODE_MATCH_FINISH: {
+		SC_RPG_MODE_MATCH_FINISH_PACKET* packet = reinterpret_cast<SC_RPG_MODE_MATCH_FINISH_PACKET*>(ptr);
 		cout << packet->room_num << "방에 입장" << endl;
 		break;
 	}
@@ -241,6 +263,8 @@ void ProcessPacket(char* ptr)
 		SC_BULLET_ADD_PACKET* packet = reinterpret_cast<SC_BULLET_ADD_PACKET*>(ptr);
 		XMFLOAT3 BPos = { packet->s_x ,packet->s_y ,packet->s_z };
 		XMFLOAT3 BVec = { packet->b_x ,packet->b_y ,packet->b_z };
+		
+		// packet->bullet_speed
 
 		NetScene->AddObjects(0, BPos, BVec, packet->player_id, packet->bullet_id);
 		//cout << "총알을 받아 왔습니다. 위치 :" << packet->s_x << ", " << packet->s_y << ", " << packet->s_z << ", 발사 벡터 : " << packet->b_x << ", " << packet->b_y << ", " << packet->b_z << endl;
@@ -272,9 +296,9 @@ void ProcessPacket(char* ptr)
 		//cout << packet->bullet_id << ", " << packet->player_id << endl;
 		NetScene->DisableBullet(packet->bullet_id, packet->player_id);
 
-		cout << packet->player_id << "가 " << packet->enemy_id << "를 " << packet->bullet_id << "번 총알로 맞춤" << endl;
+		cout << packet->player_id << "가 " << packet->enemy_id << "를 " << packet->bullet_id << "번 총알로 맞춤, 데미지는 " << packet->bullet_damage << endl;
 		if (id == packet->enemy_id) {
-			int UpdatedHP = Netplayers[id]->GetPlayerHP() - 10; // (10 + Netplayers[hit]->GetUpgradeDamage());
+			int UpdatedHP = Netplayers[id]->GetPlayerHP() - packet->bullet_damage; // (10 + Netplayers[hit]->GetUpgradeDamage());
 			Netplayers[id]->SetPlayerHP(UpdatedHP);
 		}
 		break;
@@ -284,7 +308,8 @@ void ProcessPacket(char* ptr)
 		cout << "플레이어 [" << packet->death_id << "]가 사망하였습니다." << endl;
 		NetScene->DisableBullet(packet->bullet_id, packet->player_id);
 		if (id == packet->death_id) {
-			int UpdatedHP = Netplayers[id]->GetPlayerHP() - 10; // (10 + Netplayers[hit]->GetUpgradeDamage());
+			//int UpdatedHP = Netplayers[id]->GetPlayerHP() - 10; // (10 + Netplayers[hit]->GetUpgradeDamage());
+			int UpdatedHP = 0;
 			Netplayers[id]->SetPlayerHP(UpdatedHP);
 		}
 		Netplayers[packet->death_id]->SetIsActive(false);
@@ -318,6 +343,13 @@ void ProcessPacket(char* ptr)
 		/*
 		* y 좌표는 240.f 하면 될듯?
 		*/
+		break;
+	}
+	case SC_RESTART: {
+		SC_RESTART_PACKET* packet = reinterpret_cast<SC_RESTART_PACKET*>(ptr);
+		
+		cout << "재시작 하래" << endl;
+
 		break;
 	}
 	default:

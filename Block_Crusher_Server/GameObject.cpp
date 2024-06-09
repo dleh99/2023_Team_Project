@@ -38,7 +38,7 @@ void GameObject::SetPosition(float x, float y, float z)
 
 BulletObject::BulletObject()
 {
-	bullet_speed = 200.f;
+	//bullet_speed = 200.f;
 
 	bullet_vec.x = 0.f;
 	bullet_vec.y = 0.f;
@@ -57,7 +57,7 @@ void BulletObject::SetBulletVec(float x, float y, float z)
 	bullet_vec = { x, y, z };
 }
 
-void BulletObject::Move(float fTimeElapsed)
+void BulletObject::Move(float fTimeElapsed, float bullet_speed)
 {
 	XMFLOAT3 position = GetPosition();
 	XMFLOAT3 velocity;

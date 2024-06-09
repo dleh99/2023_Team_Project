@@ -33,6 +33,10 @@ public:
 	int				score;						
 	bool			isWin;
 
+	float			cl_bullet_speed;
+	float			cl_bullet_normal_speed;
+	int				cl_damage;
+
 	std::mutex			_s_lock;				// state lock
 	std::wstring		login_id;
 
@@ -49,16 +53,18 @@ public:
 	void send_login_fail_packet(LOGIN_STATE ls);
 	void send_login_success_packet(LOGIN_STATE ls);
 	void send_login_info_packet();
-	void send_match_finish_packet(short i_room_num);
+	void send_crush_mode_match_finish_packet(short i_room_num);
+	void send_rpg_mode_match_finish_packet(short i_room_num);
 	void send_start_packet(char mapkey, int input_id, float x, float y, float z);
 	void send_move_packet(User_Interface* clients, int c_id, Animation animation_state);
 	void send_bullet_add_packet(User_Interface* clients, int c_id, int bullet_num);
 	void send_collision_packet(int id_1, int id_2);
 	void send_bullet_collision_packet(int id_1, int id_2, int c_id, int block_type);
-	void send_hit_packet(int bullet_id, int player_id, int enemy_id);
+	void send_hit_packet(int bullet_id, int player_id, int enemy_id, int bullet_damage);
 	void send_dead_packet(int bullet_id, int player_id, int death_id);
 	void send_respawn_packet(float x, float y, float z, int player_id);
 	void send_fall_packet(int fall_id);
 	void send_result_packet();
 	void send_add_block_packet(float input_x, float input_z, int input_id);
+	void send_restart_packet();
 };

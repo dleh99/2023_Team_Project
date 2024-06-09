@@ -951,7 +951,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			else if (m_pScene->m_SceneState == 2) {
 				//m_pScene->m_SceneState = 1;
 				::ShowCursor(false);
-				send_match_packet();
+				send_crush_match_packet();
 				// 매칭시작 패킷
 			}
 #else
@@ -966,6 +966,11 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		}
 		case VK_F8:
+#ifdef USE_SERVER
+			if (m_pScene->m_SceneState == 2) {
+				send_rpg_match_packet();
+			}
+#endif
 			//m_flag += 1;
 			break;
 		case VK_F9:

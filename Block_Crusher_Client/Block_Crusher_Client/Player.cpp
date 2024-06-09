@@ -607,6 +607,8 @@ void CPlayer::UpgradePlayerDamage()
 		m_nUpgradeDamage += 5;
 		m_iPlayerMoney -= 10;
 
+		send_upgrade_packet(UP_DAMAGE);
+
 		cout << "데미지 구매 성공!!! 현재 데미지: " << 10 + m_nUpgradeDamage << ", 현재 돈: " << m_iPlayerMoney << endl;
 	}
 }
@@ -619,6 +621,8 @@ void CPlayer::UpgradePlayerBulletSpeed()
 	{
 		m_fUpgradeBulletSpeed += 0.2f;
 		m_iPlayerMoney -= 10;
+
+		send_upgrade_packet(UP_BULLET_SPEED);
 
 		cout << "총알 속도 구매 성공!!! 현재 총알 속도: +" << int(m_fUpgradeBulletSpeed * 100)
 			<< "%, 현재 돈: " << m_iPlayerMoney << endl;
@@ -634,6 +638,8 @@ void CPlayer::UpgradePlayerHp()
 		m_iPlayerHP += 10;
 		m_nUpgradeHp += 10;
 		m_iPlayerMoney -= 10;
+
+		send_upgrade_packet(UP_HP);
 
 		cout << "체력 구매 성공!!! 현재 체력: " << 100 + m_nUpgradeHp << ", 현재 돈: " << m_iPlayerMoney << endl;
 	}

@@ -26,11 +26,13 @@ struct Mouse {
 int NetworkInit();
 void NetCleanup();
 void send_login_packet(wstring i_id, wstring i_password);
-void send_match_packet();
+void send_crush_match_packet();
+void send_rpg_match_packet();
 void send_move_packet(float x, float y, float z, float cx, float cy, Animation dwDirection);
 void send_bullet_add_packet(XMFLOAT3 pos, XMFLOAT3 vec, int bullet_id);
 void send_fall_packet();
 void send_score_packet(int score);
+void send_upgrade_packet(UPGRADE_OPTION in_op);
 void err_quit(const char* msg);
 void err_display(const char* msg);
 void err_display(int errcode);

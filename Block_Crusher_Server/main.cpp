@@ -121,12 +121,24 @@ void checking_room(int key)
 	}
 }
 
-void FindEmptyRoom(int c_id)
+void FindCrushEmptyRoom(int c_id)
 {
 	for (auto& r : rooms) {
 		if (r.GetRoomState() == RS_INGAME) continue; 
 		if (false == r.PlayerIn(c_id)) continue;
 		clients_room[c_id] = r.GetRoomNum();
+		checking_room(c_id);
+		cout << clients_room[c_id] << "번 룸에 접속함" << endl;
+		break;
+	}
+}
+
+void FindRpgEmptyRoom(int c_id)
+{
+	for (int rn = rooms.size() / 2; rn < rooms.size(); ++rn) {
+		if (rooms[rn].GetRoomState() == RS_INGAME) continue;
+		if (false == rooms[rn].PlayerIn(c_id)) continue;
+		clients_room[c_id] = rooms[rn].GetRoomNum();
 		checking_room(c_id);
 		cout << clients_room[c_id] << "번 룸에 접속함" << endl;
 		break;
@@ -172,10 +184,17 @@ void packet_process(int c_id, char* packet)
 
 		break;
 	}
-	case CS_MATCH: {
+	case CS_CRUSH_MATCH: {
 		// 비어 있는 방 찾기
-		FindEmptyRoom(c_id);
-		clients[c_id].send_match_finish_packet(clients_room[c_id]);
+		cout << "crush에 들어옴" << endl;
+		FindCrushEmptyRoom(c_id);
+		clients[c_id].send_crush_mode_match_finish_packet(clients_room[c_id]);
+		break;
+	}
+	case CS_RPG_MATCH: {
+		cout << "rpg에 들어옴" << endl;
+		FindRpgEmptyRoom(c_id);
+		clients[c_id].send_rpg_mode_match_finish_packet(clients_room[c_id]);
 		break;
 	}
 	case CS_MOVE: {
@@ -263,9 +282,30 @@ void packet_process(int c_id, char* packet)
 					{
 						clients[room_member[i]].isWin = false;
 					}
+
+					TIMER_EVENT ev{ room_member[i], chrono::system_clock::now() + 10s, EV_RESTART, 0 };
+					timer_queue.push(ev);
+
 					clients[room_member[i]].send_result_packet();
 				}
 			}
+		}
+		break;
+	}
+	case CS_UPGRADE: {
+		CS_UPGRADE_PACKET* p = reinterpret_cast<CS_UPGRADE_PACKET*>(packet);
+
+		if (p->up_option == UP_BULLET_SPEED) {
+			//cout << "[" << c_id << "] 의 총알 스피드를 강화해요" << endl;
+			clients[c_id].cl_bullet_speed += clients[c_id].cl_bullet_normal_speed * 0.2f;
+		}
+		else if (p->up_option == UP_DAMAGE) {
+			//cout << "[" << c_id << "] 의 데미지를 강화해요" << endl;
+			clients[c_id].cl_damage += 5;
+		}
+		else if (p->up_option == UP_HP) {
+			//cout << "[" << c_id << "] 의 체력을 강화해요" << endl;
+			clients[c_id].hp += 10;
 		}
 		break;
 	}
@@ -445,6 +485,13 @@ void worker_thread(HANDLE iocp_h)
 				delete ex_over;
 				break;
 			}
+			case OT_RESTART:
+			{
+				cout << "끝나고 10초 지나서 재시작 패킷 보냄" << endl;
+				clients[key].send_restart_packet();
+				delete ex_over;
+				break;
+			}
 		}
 	}
 }
@@ -463,7 +510,7 @@ void Physics_Calculation_thread()
 			if (cl._state != US_INGAME) continue;
 			for (int i{}; i < MAX_BULLET_NUM; ++i) {
 				if (cl.bullet[i].GetisActive()) {
-					cl.bullet[i].Move(server_timer.GetTimeElapsed());
+					cl.bullet[i].Move(server_timer.GetTimeElapsed(), cl.cl_bullet_speed);
 					//cout << "이거 작동해?" << endl;
 				}
 			}
@@ -612,14 +659,16 @@ void Physics_Calculation_thread()
 							// 총알을 비활성화, hp 하락
 							//cout << "플레이어 [" << clients[check_id]._id << "] 의 총알이 플레이어 [" << clients[other_id]._id << "] 를 맞췄습니다" << endl;
 							clients[check_id].bullet[bullet_num].SetisActive(false);
-							clients[other_id].hp -= 1;
+							clients[other_id].hp -= clients[check_id].cl_damage;
+
+							cout << "[" << check_id << "] 가 [" << other_id << "]를 " << clients[check_id].cl_damage << "의 데미지로 때려서 " << clients[other_id].hp << "이 남음" << endl;
 							
 							// hp가 0이면 죽었다고, 아니면 맞았다는 패킷 보냄
 							if (clients[other_id].hp > 0) {
 								for (int send_round{}; send_round < MAX_PLAYER; ++send_round) {
 									int send_id = room_player_ids[send_round];
 									if (send_id == -1) continue;
-									clients[send_id].send_hit_packet(clients[check_id].bullet[bullet_num].GetbulletId(), clients[check_id]._room_id, clients[other_id]._room_id);
+									clients[send_id].send_hit_packet(clients[check_id].bullet[bullet_num].GetbulletId(), clients[check_id]._room_id, clients[other_id]._room_id, clients[check_id].cl_damage);
 								}
 							}
 							else {
@@ -646,6 +695,12 @@ void InitRoom()
 	int room_num = 0;
 	for (Room& r : rooms) {
 		r.SetRoomNum(room_num);
+		if (room_num < rooms.size()) {
+			r.SetRoomCategory(RC_CRUSH);
+		}
+		else {
+			r.SetRoomCategory(RC_RPG);
+		}
 		room_num++;
 	}
 
@@ -671,6 +726,11 @@ void do_timer()
 				ov->_overlapped_type = OT_RESPAWN;
 				PostQueuedCompletionStatus(iocp_h, 1, ev.obj_id, &ov->_over);
 				break;
+			}
+			case EV_RESTART: {
+				Overlapped* ov = new Overlapped;
+				ov->_overlapped_type = OT_RESTART;
+				PostQueuedCompletionStatus(iocp_h, 1, ev.obj_id, &ov->_over);
 			}
 			}
 			continue;

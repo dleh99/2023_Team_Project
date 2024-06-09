@@ -8,7 +8,7 @@ User_Interface::User_Interface()
 	_prev_remain = 0;
 	cx = cy = 0;
 	_player_radius = 7.f;
-	hp = 10;
+	hp = 100;
 	isinvincible = false;
 	invincible_time = 0.f;
 	isDeath = false;
@@ -17,6 +17,9 @@ User_Interface::User_Interface()
 	isWin = false;
 	login_id = L"";
 	_room_id = -1;
+	cl_bullet_speed = 200.f;
+	cl_bullet_normal_speed = 200.f;
+	cl_damage = 10;
 }
 
 User_Interface::~User_Interface()
@@ -68,11 +71,20 @@ void User_Interface::send_login_info_packet()
 	do_send(&p);
 }
 
-void User_Interface::send_match_finish_packet(short i_room_num)
+void User_Interface::send_crush_mode_match_finish_packet(short i_room_num)
 {
-	SC_MATCH_FINISH_PACKET p;
-	p.size = sizeof(SC_MATCH_FINISH_PACKET);
-	p.type = SC_MATCH_FINISH;
+	SC_CRUSH_MODE_MATCH_FINISH_PACKET p;
+	p.size = sizeof(SC_CRUSH_MODE_MATCH_FINISH_PACKET);
+	p.type = SC_CRUSH_MODE_MATCH_FINISH;
+	p.room_num = i_room_num;
+	do_send(&p);
+}
+
+void User_Interface::send_rpg_mode_match_finish_packet(short i_room_num)
+{
+	SC_RPG_MODE_MATCH_FINISH_PACKET p;
+	p.size = sizeof(SC_RPG_MODE_MATCH_FINISH_PACKET);
+	p.type = SC_RPG_MODE_MATCH_FINISH;
 	p.room_num = i_room_num;
 	do_send(&p);
 }
@@ -119,6 +131,7 @@ void User_Interface::send_bullet_add_packet(User_Interface* clients, int c_id, i
 	p.b_z = clients[c_id].bullet[bullet_num].GetBulletVec().z;
 	p.player_id = c_id;
 	p.bullet_id = clients[c_id].bullet[bullet_num].GetbulletId();
+	p.bullet_speed = clients[c_id].cl_bullet_speed;
 	do_send(&p);
 }
 
@@ -144,7 +157,7 @@ void User_Interface::send_bullet_collision_packet(int bullet_id, int block_id, i
 	do_send(&p);
 }
 
-void User_Interface::send_hit_packet(int bullet_id, int player_id, int enemy_id)
+void User_Interface::send_hit_packet(int bullet_id, int player_id, int enemy_id, int bullet_damage)
 {
 	SC_HIT_PACKET p;
 	p.size = sizeof(SC_HIT_PACKET);
@@ -152,6 +165,7 @@ void User_Interface::send_hit_packet(int bullet_id, int player_id, int enemy_id)
 	p.bullet_id = bullet_id;
 	p.player_id = player_id;
 	p.enemy_id = enemy_id;
+	p.bullet_damage = bullet_damage;
 	do_send(&p);
 }
 
@@ -204,5 +218,13 @@ void User_Interface::send_add_block_packet(float input_x, float input_z, int inp
 	p.block_x = input_x;
 	p.block_z = input_z;
 	p.block_id = input_id;
+	do_send(&p);
+}
+
+void User_Interface::send_restart_packet()
+{
+	SC_RESTART_PACKET p;
+	p.size = sizeof(SC_RESTART_PACKET);
+	p.type = SC_RESTART;
 	do_send(&p);
 }

@@ -4,6 +4,7 @@
 
 constexpr int MAX_PLAYER = 3;
 enum ROOM_STATE { RS_WAITING, RS_READY, RS_INGAME };
+enum ROOM_CATEGORY { RC_CRUSH, RC_RPG };
 
 struct Block_pos {
 	int x;
@@ -32,6 +33,7 @@ private:
 	std::atomic_int						score_person;				// 스코어에 참여한 수
 	float								block_spawn_time;			// 블록 생성 시계
 	int									map_block_num;				// 맵 블록 개수
+	ROOM_CATEGORY						room_category;				// 룸 종류
 public:
 	std::mutex							_r_lock;					// 
 	Map									map_information;			// 룸의 맵
@@ -53,6 +55,8 @@ public:
 	char GetMapKey();
 	int FindPlayer(int p_id);
 	void SetRoomState(ROOM_STATE rs);
+	void SetRoomCategory(ROOM_CATEGORY rc);
+	ROOM_CATEGORY GetRoomCategory() { return room_category; };
 	int scoreCalculate(int i_score);
 	void AddTime(float input_time);
 	float GetTime() { return block_spawn_time; };

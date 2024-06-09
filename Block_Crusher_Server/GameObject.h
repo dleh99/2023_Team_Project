@@ -60,7 +60,7 @@ class BulletObject : public GameObject
 private:
 	XMFLOAT3 bullet_vec;
 
-	float bullet_speed;
+	//float bullet_speed;
 
 	int bullet_id;
 
@@ -74,7 +74,7 @@ public:
 	XMFLOAT3 GetBulletVec() { return bullet_vec; };
 	void SetBulletVec(float x, float y, float z);
 
-	void Move(float fTimeElapsed);
+	void Move(float fTimeElapsed, float bullet_speed);
 
 	void SetBulletId(int x) { bullet_id = x; };
 	int GetbulletId() { return bullet_id; };

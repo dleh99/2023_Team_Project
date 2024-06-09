@@ -115,6 +115,11 @@ void Room::SetRoomState(ROOM_STATE rs)
 	_r_lock.unlock();
 }
 
+void Room::SetRoomCategory(ROOM_CATEGORY rc)
+{
+	room_category = rc;
+}
+
 int Room::scoreCalculate(int i_score)
 {
 	if (i_score > max_score) max_score = i_score;
