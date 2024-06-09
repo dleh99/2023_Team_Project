@@ -29,6 +29,11 @@ bool m_gameStart = false;
 bool gameResult = false;
 char m_mapKey;
 
+// 게임 모드
+int gameMode = 0;		// 0: Survival Mode, 1: RPG Mode
+void SetGameMode(int mode) { gameMode = mode; }
+int GetGameMode() { return gameMode; }
+
 int NetworkInit()
 {
 	int ret;
@@ -242,6 +247,9 @@ void ProcessPacket(char* ptr)
 		NetScene->DisableObject(packet->bullet_id, packet->block_id, packet->player_id);
 
 		if (id == packet->player_id) {
+			if (gameMode == 1)
+				Netplayers[id]->IncreasePlayerBlockMoney();
+
 			int UpdatedSocre = Netplayers[id]->GetPlayerScore() + 100;
 			Netplayers[id]->SetPlayerScore(UpdatedSocre);
 		}

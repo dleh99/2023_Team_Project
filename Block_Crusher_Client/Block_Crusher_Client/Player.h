@@ -89,6 +89,8 @@ protected:
 
 	Animation m_ani_state;
 
+	int m_nBlockMoney = 0;
+
 public:
 	float m_fKeyDownTime = 9999;
 	float m_fBoosterMount = 100.0f;
@@ -213,6 +215,13 @@ public:
 	void ActiveRifle();
 	void ActiveShotgun();
 	void ActivePistol();
+
+	void IncreasePlayerBlockMoney() { m_nBlockMoney += 10; }
+	void DecreasePlayerBlockMoney() { m_nBlockMoney -= 100; }
+	int GetPlayerBlockMoney() { return m_nBlockMoney; }
+
+	void UpgradePlayerHp() { m_iPlayerHP += 10; }
+	void UpgradePlayerBullet() { m_nBullet += 10; }
 };
 
 class CCubePlayer : public CPlayer
