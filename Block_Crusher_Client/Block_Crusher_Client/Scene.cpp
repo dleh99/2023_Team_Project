@@ -3,6 +3,8 @@
 #include "Player.h"
 #include "Network.h"
 
+extern int gameMode;
+
 ID3D12DescriptorHeap* CScene::m_pd3dCbvSrvDescriptorHeap = NULL;
 
 D3D12_CPU_DESCRIPTOR_HANDLE	CScene::m_d3dCbvCPUDescriptorStartHandle;
@@ -496,6 +498,27 @@ bool CScene::OnPrecessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	case WM_KEYUP:
 		switch (wParam)
 		{
+			if (gameMode == 1)
+			{
+		case 0x30:
+			m_pPlayer->UpgradePlayerSpeed();
+			break;
+		case 0x35:
+			m_pPlayer->UpgradePlayerDamage();
+			break;
+		case 0x37:
+			m_pPlayer->UpgradePlayerBulletSpeed();
+			break;
+		case 0x38:
+			m_pPlayer->UpgradePlayerBullet();
+			break;
+		case 0x39:
+			m_pPlayer->UpgradePlayerHp();
+			break;
+		case 0x4D:
+			m_pPlayer->ConfirmPlayerMoney();
+			break;
+			}
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
 			break;
@@ -585,6 +608,9 @@ void CScene::AddObjects(int type,XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector,
 	pBulletObject->SetShader(m_pSceneShader);
 
 	XMFLOAT3 bullet_vector = BulletVector;
+	bullet_vector.x *= (1.0f + m_pPlayer->GetUpgradeBulletSpeed());
+	bullet_vector.y *= (1.0f + m_pPlayer->GetUpgradeBulletSpeed());
+	bullet_vector.z *= (1.0f + m_pPlayer->GetUpgradeBulletSpeed());
 	//bullet_vector = Vector3::ScalarProduct(bullet_vector, -1.f, false);
 	pBulletObject->SetBulletVector(bullet_vector);
 	pBulletObject->SetObjectType(TYPE_BULLET);

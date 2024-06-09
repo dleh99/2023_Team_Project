@@ -380,7 +380,7 @@ void CPlayer::Update(float fTimeElapsed)
 	if (m_fKeyDownTime > 2.0f) {		// 재장전 시간
 		m_bReloading = false;
 		m_fKeyDownTime = 0.f;
-		m_nBullet = 30;
+		m_nBullet = 30 + m_nUpgradeBullet;
 	}
 
 	if (m_fBoosterMount < 100.0f) {
@@ -583,6 +583,79 @@ void CPlayer::ActivePistol()
 		m_pPistol->SetIsActive(true);
 		m_nGunType = 2;
 	}
+}
+
+void CPlayer::UpgradePlayerSpeed()
+{
+	if (m_iPlayerMoney < 10)
+		cout << "플레이어의 돈이 부족합니다. 현재 돈: " << m_iPlayerMoney << endl;
+	else
+	{
+		m_nUpgradeSpeed += 50;
+		m_iPlayerMoney -= 10;
+
+		cout << "이동 속도 구매 성공!!! 현재 이동 속도: " << 300 + m_nUpgradeSpeed << ", 현재 돈: " << m_iPlayerMoney << endl;
+	}
+}
+
+void CPlayer::UpgradePlayerDamage()
+{
+	if (m_iPlayerMoney < 10)
+		cout << "플레이어의 돈이 부족합니다. 현재 돈: " << m_iPlayerMoney << endl;
+	else
+	{
+		m_nUpgradeDamage += 5;
+		m_iPlayerMoney -= 10;
+
+		cout << "데미지 구매 성공!!! 현재 데미지: " << 10 + m_nUpgradeDamage << ", 현재 돈: " << m_iPlayerMoney << endl;
+	}
+}
+
+void CPlayer::UpgradePlayerBulletSpeed()
+{
+	if (m_iPlayerMoney < 10)
+		cout << "플레이어의 돈이 부족합니다. 현재 돈: " << m_iPlayerMoney << endl;
+	else
+	{
+		m_fUpgradeBulletSpeed += 0.2f;
+		m_iPlayerMoney -= 10;
+
+		cout << "총알 속도 구매 성공!!! 현재 총알 속도: +" << int(m_fUpgradeBulletSpeed * 100)
+			<< "%, 현재 돈: " << m_iPlayerMoney << endl;
+	}
+}
+
+void CPlayer::UpgradePlayerHp()
+{
+	if (m_iPlayerMoney < 10)
+		cout << "플레이어의 돈이 부족합니다. 현재 돈: " << m_iPlayerMoney << endl;
+	else
+	{
+		m_iPlayerHP += 10;
+		m_nUpgradeHp += 10;
+		m_iPlayerMoney -= 10;
+
+		cout << "체력 구매 성공!!! 현재 체력: " << 100 + m_nUpgradeHp << ", 현재 돈: " << m_iPlayerMoney << endl;
+	}
+}
+
+void CPlayer::UpgradePlayerBullet()
+{
+	if (m_iPlayerMoney < 10)
+		cout << "플레이어의 돈이 부족합니다. 현재 돈: " << m_iPlayerMoney << endl;
+	else
+	{
+		m_nBullet += 10;
+		m_nUpgradeBullet += 10;
+		m_iPlayerMoney -= 10;
+
+		cout << "탄창 구매 성공!!! 현재 탄창: " << 30 + m_nUpgradeBullet << ", 현재 돈: " << m_iPlayerMoney << endl;
+	}
+}
+
+void CPlayer::ConfirmPlayerMoney()
+{
+	cout << "현재 남은 돈: " << m_iPlayerMoney << endl;
 }
 
 CCubePlayer::CCubePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,

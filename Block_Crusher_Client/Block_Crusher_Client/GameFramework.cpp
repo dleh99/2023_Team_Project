@@ -71,6 +71,11 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hWnd)
 
 	//HANDLE hThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)do_recv, (LPVOID)NULL, 0, NULL);
 
+	/*if (gameMode == 0)
+		cout << "서바이벌 모드로 시작합니다." << endl;
+	else if (gameMode == 1)
+		cout << "RPG 모드로 시작합니다." << endl;*/
+
 	return true;
 }
 
@@ -734,6 +739,9 @@ void CGameFramework::ProcessInput()
 			if (pKeyBuffer[0x31] & 0xF0) m_pPlayer->ActiveRifle();				// 1
 			if (pKeyBuffer[0x32] & 0xF0) m_pPlayer->ActiveShotgun();			// 2
 			if (pKeyBuffer[0x33] & 0xF0) m_pPlayer->ActivePistol();				// 3
+
+			//if (pKeyBuffer[0x38] & 0xF0) m_pPlayer->UpgradePlayerBullet();		// 8
+			//if (pKeyBuffer[0x39] & 0xF0) m_pPlayer->UpgradePlayerHp();			// 9
 		}
 
 		float cxDelta = 0.0f, cyDelta = 0.0f;
@@ -812,9 +820,7 @@ void CGameFramework::ProcessInput()
 			/*플레이어를 dwDirection 방향으로 이동한다(실제로는 속도 벡터를 변경한다).
 			이동 거리는 시간에 비례하도록 한다. 플레이어의 이동 속력은 (50/초)로 가정한다.*/
 
-			float fPlayerSpeed = 300.0f;
-			if (gameMode == 1)
-				;
+			float fPlayerSpeed = 300.0f + m_pPlayer->GetUpgradeSpeed();
 			if (dwDirection) m_pPlayer->Move(dwDirection, fPlayerSpeed * m_GameTimer.GetTimeElapsed(), true);
 		}
 		
