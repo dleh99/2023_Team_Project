@@ -68,6 +68,7 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hWnd)
 	}*/
 #endif
 	BuildObjects();
+	SoundSetup();
 
 	//HANDLE hThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)do_recv, (LPVOID)NULL, 0, NULL);
 
@@ -426,6 +427,12 @@ void CGameFramework::WaitForGpuComplete()
 		hResult = m_pd3dFence->SetEventOnCompletion(nFenceValue, m_hFenceEvent);
 		::WaitForSingleObject(m_hFenceEvent, INFINITE);
 	}
+}
+
+void CGameFramework::SoundSetup()
+{
+	//FMOD_System_Create(&m_SoundSystem, FMOD_VERSION);
+	//FMOD_System_Init(m_SoundSystem, 10, FMOD_INIT_NORMAL, NULL);
 }
 
 void CGameFramework::MoveToNextFrame()

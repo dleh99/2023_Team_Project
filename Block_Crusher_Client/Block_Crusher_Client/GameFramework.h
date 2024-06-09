@@ -79,6 +79,9 @@ private:
 
 	bool m_Buildingflag = false;
 
+	// fmod ¸â¹ö
+	FMOD_SYSTEM* m_SoundSystem;
+
 public:
 	CGameFramework();
 	~CGameFramework();
@@ -117,6 +120,8 @@ public:
 	void ChangeSwapChainState();
 
 	long long GetFrame() { return frame_num; };
+
+	void SoundSetup();
 
 public:
 	void MoveToNextFrame();

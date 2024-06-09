@@ -63,6 +63,8 @@ using Microsoft::WRL::ComPtr;			// ComPtr
 
 #include "DDSTextureLoader12.h"
 
+#include <fmod.h>
+
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 
