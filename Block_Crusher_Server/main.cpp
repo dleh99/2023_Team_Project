@@ -492,6 +492,19 @@ void Physics_Calculation_thread()
 
 				r.AddMapBlockNum(r.Block_Spawn_Pos.size());
 			}
+
+			// 블록 이동
+			/*
+				이동해야 하는 블록들 전부 이동시킨다
+				1. 밑 블록이 사라져 움직여야 하는 위 블록들
+				2. 새로 생성되어 떨어져 아직 바닥에 닿지 않은 블록들
+			*/
+
+			// 무조건 움직이면 안 됨
+			// 일단 밑에 블록이 없는 경우에만 활발하게 움직임
+			for (Falling_Block_pos p : r.Falling_Blocks) {
+				r.map_information.Map_B[p.z + 50 * p.x][p.y].Move(server_timer.GetTimeElapsed());
+			}
 			
 			// 총알과 충돌 처리
 			/*

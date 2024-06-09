@@ -29,6 +29,7 @@ void Room::SettingRoom()
 	map_information.CreateMap();
 	map_block_num = map_information.block_num;
 	block_spawn_time = 0.f;
+	Falling_Blocks.clear();
 	//std::cout << "청소 했습니다" << std::endl;
 }
 
@@ -141,7 +142,8 @@ void Room::SpawnBlock()
 		int z = std::rand() % 50;
 		Block_Spawn_Pos.insert({ x, z });
 		XMFLOAT3 position = { -(float)x * 12.0f + 20.0f, (float)19 * 12.0f + 12.0f, -(float)z * 12.0f + 40.0f };
-		map_information.Map_B[z + 50 * x][19].Init_Block(input_id, position, TYPE_AIR);
+		map_information.Map_B[z + 50 * x][19].Init_Block(input_id, position, TYPE_NORMAL);
+		Falling_Blocks.push_back({ x, 19, z });
 		input_id++;
 	}
 }

@@ -17,22 +17,29 @@ struct Block_pos {
 	}
 };
 
+struct Falling_Block_pos {
+	int x;
+	int y;
+	int z;
+};
+
 class Room
 {
 private:
-	int						clients_id[MAX_PLAYER];		// 룸에 참가중인 클라이언트들의 id
-	int						room_num;					// 룸 번호
-	ROOM_STATE				room_state;					// 룸의 상태
-	std::atomic_int			score_person;				// 스코어에 참여한 수
-	float					block_spawn_time;			// 블록 생성 시계
-	int						map_block_num;				// 맵 블록 개수
+	int									clients_id[MAX_PLAYER];		// 룸에 참가중인 클라이언트들의 id
+	int									room_num;					// 룸 번호
+	ROOM_STATE							room_state;					// 룸의 상태
+	std::atomic_int						score_person;				// 스코어에 참여한 수
+	float								block_spawn_time;			// 블록 생성 시계
+	int									map_block_num;				// 맵 블록 개수
 public:
-	std::mutex				_r_lock;					// 
-	Map						map_information;			// 룸의 맵
-	std::atomic_int			max_score;					// 최대 스코어
+	std::mutex							_r_lock;					// 
+	Map									map_information;			// 룸의 맵
+	std::atomic_int						max_score;					// 최대 스코어
 
-	std::atomic_int			clients_number;				// 참가중인 클라이언트의 수
-	std::set<Block_pos>		Block_Spawn_Pos;			// 블록 생성 좌표들
+	std::atomic_int						clients_number;				// 참가중인 클라이언트의 수
+	std::set<Block_pos>					Block_Spawn_Pos;			// 블록 생성 좌표들
+	std::vector<Falling_Block_pos>		Falling_Blocks;				// 떨어지고 있는 블록들의 좌표들
 public:
 	Room();
 	~Room();

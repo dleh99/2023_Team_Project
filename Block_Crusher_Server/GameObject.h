@@ -2,7 +2,7 @@
 #include "header.h"
 
 constexpr int TYPE_NORMAL = 1;
-constexpr int TYPE_AIR = 2;
+//constexpr int TYPE_AIR = 2;
 
 class GameObject
 {
@@ -33,7 +33,12 @@ public:
 class Block : public GameObject
 {
 private:
-	int type;
+	int		type;
+	float	falling_speed = 5.f;
+
+	int block_x_range;
+	int block_y_range;
+	int block_z_range;
 public:
 	Block();
 	Block(int input_id, XMFLOAT3 input_pos);
@@ -41,6 +46,11 @@ public:
 
 	int GetBlockType() { return type; };
 	void Init_Block(int input_id, XMFLOAT3 input_pos, int input_type);
+
+	void Move(float fTimeElapsed);
+
+	Range_Pos Block_Convert_index(float x, float y, float z);
+	void SetBlockRange(float x, float y, float z);
 };
 
 class BulletObject : public GameObject
