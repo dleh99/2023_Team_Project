@@ -350,6 +350,7 @@ void ProcessPacket(char* ptr)
 		
 		//cout << "재시작 하래" << endl;
 		NetScene->m_SceneState = 2;
+		NetScene->m_fPlayTime = 120.0f;
 
 		break;
 	}

@@ -873,7 +873,7 @@ void CScene::RenderTitle(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, 
 	m_fBlinkTime += fTimeElapsed * 2.0f;
 
 	std::wstring karrotstr = *m_sTitleTexts[m_flag];
-	/*wchar_t lastChar = karrotstr.back();
+	wchar_t lastChar = karrotstr.back();
 	if ((int)m_fBlinkTime % 2 && lastChar != '|') {
 		karrotstr += '|';
 	}
@@ -883,11 +883,11 @@ void CScene::RenderTitle(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, 
 				karrotstr.pop_back();
 			}
 		}
-	}*/
+	}
 
 	// BackGround
-	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(0, 0));
-	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT), SolidColorBrush[6].Get());
+	//m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(0, 0));
+	//m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT), SolidColorBrush[6].Get());
 
 	std::wstring str;
 
@@ -1155,7 +1155,7 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 					cnt++;
 				}
 
-		for (int i = 0; i < 50; ++i)s
+		for (int i = 0; i < 50; ++i)
 			for (int k = 0; k < 50; ++k) {
 				for (int y = 0; y < mapdata[i][k]; ++y) {
 

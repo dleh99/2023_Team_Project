@@ -93,6 +93,8 @@ public:
 	int m_SceneState = 0;
 	int m_TitleError = -1;
 	int m_flag = ID;
+	float m_fPlayTime = 120.0f;
+
 	bool GetisEnd() { return isEnd; };
 
 protected:
@@ -128,7 +130,7 @@ protected:
 
 	int m_nRandObject = 0;
 
-	float m_fPlayTime = 120.0f;
+
 	float m_fBlinkTime = 0;
 
 	CShader* m_pSceneShader = NULL;
