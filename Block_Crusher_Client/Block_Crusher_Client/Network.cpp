@@ -348,7 +348,8 @@ void ProcessPacket(char* ptr)
 	case SC_RESTART: {
 		SC_RESTART_PACKET* packet = reinterpret_cast<SC_RESTART_PACKET*>(ptr);
 		
-		cout << "재시작 하래" << endl;
+		//cout << "재시작 하래" << endl;
+		NetScene->m_SceneState = 2;
 
 		break;
 	}

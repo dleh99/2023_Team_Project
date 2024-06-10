@@ -41,6 +41,27 @@ void User_Interface::do_send(void* packet)
 	WSASend(_socket, &send_data->_wsabuf, 1, 0, 0, &send_data->_over, 0);
 }
 
+void User_Interface::refresh()
+{
+	_state = US_CONNECTING;
+	hp = 100;
+	isinvincible = false;
+	invincible_time = 0.f;
+	isDeath = false;
+	Death_time = 0.f;
+	score = -1;
+	isWin = false;
+	_room_id = -1;
+	cl_bullet_speed = 200.f;
+	cl_bullet_normal_speed = 200.f;
+	cl_damage = 10;
+
+	for (int i{}; i < MAX_BULLET_NUM; ++i) {
+		bullet[i].SetPosition(9999, 9999, 9999);
+		bullet[i].SetisActive(false);
+	}
+}
+
 void User_Interface::send_login_fail_packet(LOGIN_STATE ls)
 {
 	SC_LOGIN_FAIL_PACKET p;

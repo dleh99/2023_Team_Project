@@ -488,6 +488,12 @@ void worker_thread(HANDLE iocp_h)
 			case OT_RESTART:
 			{
 				cout << "끝나고 10초 지나서 재시작 패킷 보냄" << endl;
+				{
+					//lock_guard<mutex> ll{ rooms[clients_room[key]]._r_lock };
+					rooms[clients_room[key]].SetRoomState(RS_END);
+				}
+				//cout << clients_room[key] << endl;
+				clients[key].refresh();
 				clients[key].send_restart_packet();
 				delete ex_over;
 				break;
@@ -603,6 +609,8 @@ void Physics_Calculation_thread()
 								//cout << temp.x << ", " << temp.y << ", " << temp.z << endl;
 								if (CollisionCheck_objects(clients[check_id].bullet[bullet_num].GetPosition(), r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetPosition(),
 									clients[check_id].bullet[bullet_num].GetRadius(), r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetRadius())) {
+									cout << r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetPosition().y << endl;
+									//cout << "충돌은 해?" << endl;
 									clients[check_id].bullet[bullet_num].SetisActive(false);
 									r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].SetisActive(false);
 

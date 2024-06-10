@@ -3,7 +3,7 @@
 #include "Map.h"
 
 constexpr int MAX_PLAYER = 3;
-enum ROOM_STATE { RS_WAITING, RS_READY, RS_INGAME };
+enum ROOM_STATE { RS_WAITING, RS_READY, RS_INGAME, RS_END };
 enum ROOM_CATEGORY { RC_CRUSH, RC_RPG };
 
 struct Block_pos {
