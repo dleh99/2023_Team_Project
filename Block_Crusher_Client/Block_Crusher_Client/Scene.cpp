@@ -1071,7 +1071,7 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 			for (int j = 0; j < 10; ++j)
 				for (int k = 0; k < 50; ++k) {
 					XMFLOAT3 position = { -(float)i * 12.0f + 20.0f,
-					 -108.f + (float)j * 12.0f , -(float)k * 12.0f + 40.0f };
+					 -(float)j * 12.0f , -(float)k * 12.0f + 40.0f };
 					CBlockObject* pBlockObject = new CBlockObject();
 					pBlockObject->SetMesh(m_pBlockMesh);
 					pBlockObject->SetIsActive(true);
@@ -1155,7 +1155,7 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 					cnt++;
 				}
 
-		for (int i = 0; i < 50; ++i)
+		for (int i = 0; i < 50; ++i)s
 			for (int k = 0; k < 50; ++k) {
 				for (int y = 0; y < mapdata[i][k]; ++y) {
 
