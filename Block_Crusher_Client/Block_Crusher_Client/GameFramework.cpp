@@ -687,7 +687,7 @@ void CGameFramework::BuildObjects()
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed(), NULL);
 
 	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
-		if(m_vEnemyPlayers[i])
+		if (m_vEnemyPlayers[i])
 			m_vEnemyPlayers[i]->Update(m_GameTimer.GetTimeElapsed(), NULL);
 	}
 

@@ -120,6 +120,7 @@ public:
 	int GetUpgradeDamage() { return m_nUpgradeDamage; };
 	int GetUpgradeSpeed() { return m_nUpgradeSpeed; };
 	float GetUpgradeBulletSpeed() { return m_fUpgradeBulletSpeed; };
+	void SetUpgradeBulletSpeed(float bulletSpeed) { m_fUpgradeBulletSpeed = bulletSpeed; };
 
 	bool GetDeath() { return m_bDeath; };
 	int GetBlockNum() { return m_nBlock; };

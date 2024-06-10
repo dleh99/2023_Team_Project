@@ -617,6 +617,7 @@ void CScene::AddObjects(int type,XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector,
 	//pBulletObject->SetBoundingRadius(2.0f);
 
 	pBulletObject->SetPlayerId(p_id);
+	pBulletObject->SetUpgradeBulletSpeed(m_vPlayers[p_id]->GetUpgradeBulletSpeed());
 	pBulletObject->SetBulletId(b_id);
 
 	//int index = FindEmptySlot();
