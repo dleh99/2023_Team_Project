@@ -1219,7 +1219,7 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 {
 	CShader::Render(pd3dCommandList, pCamera);
 
-	//UpdateShaderVariables(pd3dCommandList);
+	//UpdateShaderVariables(pd3dCommandList)
 
 	for (int i = 0; i < m_pObjectsScene->m_nBlock; i++) {
 		if (m_pObjectsScene->m_ppObjects[i] && m_pObjectsScene->m_ppObjects[i]->m_bParticleActive) {

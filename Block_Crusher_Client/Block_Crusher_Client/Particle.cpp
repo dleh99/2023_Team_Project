@@ -6,12 +6,14 @@ std::uniform_int_distribution<> dist(-200, 200);
 
 CParticle::CParticle() {
 
-	m_fLifeTime = 10.f;
-	m_fspeed = (float)abs(dist(gen)) / 1000.0f;;
+	m_fLifeTime = 5.f;
+	m_fspeed = abs(dist(gen)) % 50 + 100;
 	m_bStart = false;
 	m_f3Direction = {};
-	m_fGravity = 20.f;
-	m_fScale = 0.5;
+	m_fGravity = 4.f;
+	
+	float rdscale = abs(dist(gen)) % 10 + 10;
+	m_fScale = rdscale / 100.0f;
 
 	m_f3Direction.x = dist(gen);
 	m_f3Direction.y = std::abs(dist(gen)) + 200;
@@ -20,10 +22,10 @@ CParticle::CParticle() {
 	m_f3Direction = Vector3::Normalize(m_f3Direction);
 
 	SetScale(m_fScale, m_fScale, m_fScale);
-	SetIsActive(true);
 }
 
 void CParticle::Animate(float time) {
+	//std::cout << "이거맞나" << std::endl;
 
 	XMFLOAT3 pos = GetPosition();
 

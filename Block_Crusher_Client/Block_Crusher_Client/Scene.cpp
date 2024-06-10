@@ -75,6 +75,18 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	pBulletMesh = BulletMesh;
 
+	CParticle* pParticle = new CParticle();
+
+	pParticle->SetMesh(pBulletMesh);
+	pParticle->SetShader(m_pSceneShader);
+
+	pParticle->SetPosition(20, 20, 30);
+
+	pParticle->SetIsActive(true);
+
+	testobj = pParticle;
+
+
 	//AddBlocksByMapData(pCubeMesh, pTShader, pMaterial, 0, mapkey);
 
 	m_pDepthRenderShader = new CDepthRenderShader(this, m_pLights->m_pLights);
@@ -126,23 +138,43 @@ void CScene::ReleaseUploadBuffers()
 
 void CScene::DisableObject(int bullet_id, int block_id, int p_id)
 {
+	DisableBlock(block_id);
+	DisableBullet(bullet_id, p_id);
+
+	//if (m_ppObjects[block_id]) {
+	//	m_ppObjects[block_id]->SetIsActive(false);
+	//	m_ppObjects[block_id]->SetPosition(99999, 99999, 99999);
+	//	m_ppObjects[block_id]->m_bParticleActive = true;
+	//	auto tmp = m_ppObjects[block_id]->GetWorldMatrix();
+	//	XMFLOAT4X4 result;
+	//	XMStoreFloat4x4(&result, XMMatrixTranspose(XMLoadFloat4x4(&tmp)));
+	//	m_pInstance[block_id].worldMatrix = result;
+	//}
+	//for (int i{}; i < m_nObjects; ++i) {
+	//	if (m_ppObjects[i]->GetObjectType() != TYPE_BULLET) continue;
+	//	if (((CBulletObject*)m_ppObjects[i])->GetPlayerId() == p_id && ((CBulletObject*)m_ppObjects[i])->GetBulletId() == bullet_id) {
+	//		//std::cout << "충돌 처리 및 삭제 완료" << std::endl;
+	//		if(m_ppObjects[i])
+	//			m_ppObjects[i]->SetIsActive(false);
+	//		break;
+	//	}
+	//}
+}
+
+void CScene::DisableBlock(int block_id)
+{
 	if (m_ppObjects[block_id]) {
 		m_ppObjects[block_id]->SetIsActive(false);
 		m_ppObjects[block_id]->SetPosition(99999, 99999, 99999);
 		m_ppObjects[block_id]->m_bParticleActive = true;
+
+		auto pos = m_ppObjects[block_id]->m_pParticles[0]->GetPosition();
+		cout << pos.x << " " << pos.y << " " << pos.z << " " << endl;
+
 		auto tmp = m_ppObjects[block_id]->GetWorldMatrix();
 		XMFLOAT4X4 result;
 		XMStoreFloat4x4(&result, XMMatrixTranspose(XMLoadFloat4x4(&tmp)));
 		m_pInstance[block_id].worldMatrix = result;
-	}
-	for (int i{}; i < m_nObjects; ++i) {
-		if (m_ppObjects[i]->GetObjectType() != TYPE_BULLET) continue;
-		if (((CBulletObject*)m_ppObjects[i])->GetPlayerId() == p_id && ((CBulletObject*)m_ppObjects[i])->GetBulletId() == bullet_id) {
-			//std::cout << "충돌 처리 및 삭제 완료" << std::endl;
-			if(m_ppObjects[i])
-				m_ppObjects[i]->SetIsActive(false);
-			break;
-		}
 	}
 }
 
@@ -524,7 +556,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		else
 			if (m_ppObjects[j]->m_bParticleActive) {
 				m_ppObjects[j]->AnimateParticles(fTimeElapsed);
-				cout << "파티클 움직임" << endl;
+				//cout << "파티클 움직임" << endl;
 			}
 	}
 
@@ -578,8 +610,13 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera);
 
-	/*if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nBlock; i++) {
+		if (m_ppObjects[i] && m_ppObjects[i]->m_bParticleActive) {
+			m_ppObjects[i]->RenderParticles(pd3dCommandList, pCamera);
+		}
+	}
 
+	/*if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);*/
 }
@@ -809,7 +846,7 @@ void CScene::RenderTitle(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, 
 	m_fBlinkTime += fTimeElapsed * 2.0f;
 
 	std::wstring karrotstr = *m_sTitleTexts[m_flag];
-	wchar_t lastChar = karrotstr.back();
+	/*wchar_t lastChar = karrotstr.back();
 	if ((int)m_fBlinkTime % 2 && lastChar != '|') {
 		karrotstr += '|';
 	}
@@ -819,33 +856,13 @@ void CScene::RenderTitle(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, 
 				karrotstr.pop_back();
 			}
 		}
-	}
+	}*/
 
 	// BackGround
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(0, 0));
 	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT), SolidColorBrush[6].Get());
 
 	std::wstring str;
-
-	//// Room 입력란
-	//m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(590, 665));
-	//std::wstring str = L"Room Number";
-	//m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
-	//	pTextFormat[3].Get(), D2D1::RectF(0, 0, 100, 50), SolidColorBrush[0].Get());
-
-	//m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(700, 675));
-	//m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 250, 30), SolidColorBrush[0].Get());
-
-	//m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(705, 665));
-	//str = *m_sTitleTexts[RoomNumber];
-	//if (m_flag == RoomNumber) {
-	//	m_d2dDeviceContext->DrawText(karrotstr.c_str(), static_cast<UINT32>(karrotstr.size()),
-	//		pTextFormat[4].Get(), D2D1::RectF(0, 0, 300, 50), SolidColorBrush[7].Get());
-	//}
-	//else {
-	//	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
-	//		pTextFormat[4].Get(), D2D1::RectF(0, 0, 300, 50), SolidColorBrush[7].Get());
-	//}
 
 	// ID 입력란
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(590, 565));
@@ -935,23 +952,23 @@ void CScene::RenderLobby(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, 
 		pTextFormat[3].Get(), D2D1::RectF(0, 0, 300, 50), SolidColorBrush[6].Get());
 
 	// Ranking
-	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(50, 50));
-	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 200, 75), SolidColorBrush[0].Get());
+	//m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(50, 50));
+	//m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 200, 75), SolidColorBrush[0].Get());
 
-	str = L"Ranking";
-	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(50, 60));
-	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
-		pTextFormat[3].Get(), D2D1::RectF(0, 0, 200, 50), SolidColorBrush[6].Get());
+	//str = L"Ranking";
+	//m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(50, 60));
+	//m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+	//	pTextFormat[3].Get(), D2D1::RectF(0, 0, 200, 50), SolidColorBrush[6].Get());
 
 	//Weapon Select
-	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 200));
-	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
+	//m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 200));
+	//m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
 
-	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 350));
-	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
+	//m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 350));
+	//m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
 
-	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 500));
-	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
+	//m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 500));
+	//m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
 
 }
 
@@ -1033,18 +1050,19 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 					pBlockObject->SetIsActive(true);
 					pBlockObject->SetObjectType(TYPE_BLOCK);
 
-					// 파티클 빌드
-					pBlockObject->m_pParticles = new CGameObject * [pBlockObject->m_nParticle];
-					for (int p = 0; p < pBlockObject->m_nParticle; ++p) {
-						CParticle* pParticle = new CParticle();
-						pBlockObject->m_pParticles[p] = pParticle;
-						pBlockObject->m_pParticles[p]->SetPosition(position);
-						pBlockObject->m_pParticles[p]->SetMesh(pBulletMesh);
-						pBlockObject->m_pParticles[p]->SetShader(m_pSceneShader);
-					}
-
 					m_ppObjects[cnt] = pBlockObject;
 					m_ppObjects[cnt]->SetPosition(position);
+
+					// 파티클 빌드
+					m_ppObjects[cnt]->m_pParticles = new CGameObject * [pBlockObject->m_nParticle];
+					for (int p = 0; p < m_ppObjects[cnt]->m_nParticle; ++p) {
+						CParticle* pParticle = new CParticle();
+						pParticle->SetMesh(m_pBlockMesh);
+						pParticle->SetShader(m_pSceneShader);
+						pParticle->SetPosition(position);
+						pParticle->SetIsActive(true);
+						m_ppObjects[cnt]->m_pParticles[p] = pParticle;
+					}
 
 					cnt++;
 				}
@@ -1061,18 +1079,20 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 					pBlockObject->SetIsActive(true);
 					pBlockObject->SetObjectType(TYPE_BLOCK);
 
-					//파티클 빌드
-					pBlockObject->m_pParticles = new CGameObject * [pBlockObject->m_nParticle];
-					for (int p = 0; p < pBlockObject->m_nParticle; ++p) {
-						CParticle* pParticle = new CParticle();
-						pBlockObject->m_pParticles[p] = pParticle;
-						pBlockObject->m_pParticles[p]->SetPosition(position);
-						pBlockObject->m_pParticles[p]->SetMesh(pBulletMesh);
-						pBlockObject->m_pParticles[p]->SetShader(m_pSceneShader);
-					}
-
 					m_ppObjects[cnt] = pBlockObject;
 					m_ppObjects[cnt]->SetPosition(position);
+
+					// 파티클 빌드
+					m_ppObjects[cnt]->m_pParticles = new CGameObject * [pBlockObject->m_nParticle];
+					for (int p = 0; p < m_ppObjects[cnt]->m_nParticle; ++p) {
+						CParticle* pParticle = new CParticle();
+						pParticle->SetMesh(m_pBlockMesh);
+						pParticle->SetShader(m_pSceneShader);
+						pParticle->SetPosition(position);
+						pParticle->SetIsActive(true);
+
+						m_ppObjects[cnt]->m_pParticles[p] = pParticle;
+					}
 
 					cnt++;
 				}
@@ -1099,6 +1119,11 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 
 					m_ppObjects[cnt]->SetPosition(position);
 					m_ppObjects[cnt]->SetIsActive(true);
+					m_ppObjects[cnt]->m_bParticleActive = false;
+
+					for (int p = 0; p < m_ppObjects[cnt]->m_nParticle; ++p) {
+						m_ppObjects[cnt]->m_pParticles[p]->SetPosition(position);
+					}
 
 					cnt++;
 				}
@@ -1112,6 +1137,11 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 
 					m_ppObjects[cnt]->SetPosition(position);
 					m_ppObjects[cnt]->SetIsActive(true);
+					m_ppObjects[cnt]->m_bParticleActive = false;
+
+					for (int p = 0; p < m_ppObjects[cnt]->m_nParticle; ++p) {
+						m_ppObjects[cnt]->m_pParticles[p]->SetPosition(position);
+					}
 
 					cnt++;
 				}

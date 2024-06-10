@@ -404,6 +404,8 @@ void CGameObject::RenderParticles(ID3D12GraphicsCommandList* pd3dCommandList, CC
 {
 	for (int i = 0; i < m_nParticle; i++)
 		m_pParticles[i]->Render(pd3dCommandList, pCamera);
+
+	//std::cout << "파티클 랜더" << std::endl;
 }
 
 void CGameObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)

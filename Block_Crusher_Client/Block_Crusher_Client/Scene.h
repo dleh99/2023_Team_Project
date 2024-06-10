@@ -55,6 +55,7 @@ public:
 	void ReleaseUploadBuffers();
 
 	void DisableObject(int id_1, int id_2, int p_id);
+	void DisableBlock(int block_id);
 	void DisableBullet(int bullet_id, int p_id);
 
 	void Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, ComPtr<ID2D1Factory3> m_d2dFactory, ComPtr<IDWriteFactory> m_dWriteFactory, float fTimeElapsed);
@@ -82,6 +83,7 @@ public:
 	int m_nActiveBlock = 0;
 	CMesh* m_pBlockMesh = NULL;
 	CGameObject** m_ppObjects = NULL;
+	CGameObject* testobj = NULL;
 
 	CPlayer* m_pPlayer= NULL;
 	std::vector<CMainPlayer*> m_vPlayers;

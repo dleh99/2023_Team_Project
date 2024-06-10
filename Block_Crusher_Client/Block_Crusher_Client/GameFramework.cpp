@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 
+int bi;
+
 CGameFramework::CGameFramework()
 {
 	m_hInstance = NULL;
@@ -941,6 +943,10 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			else if(m_pScene->m_SceneState == 2) {
 				m_pScene->m_SceneState = 1;
 				::ShowCursor(false);
+			}
+			else if (m_pScene->m_SceneState == 1) {
+				m_pScene->DisableBlock(bi);
+				bi++;
 			}
 #endif
 			break;
