@@ -613,7 +613,7 @@ void CScene::AddObjects(int type,XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector,
 	bullet_vector.z *= (1.0f + m_pPlayer->GetUpgradeBulletSpeed());
 	//bullet_vector = Vector3::ScalarProduct(bullet_vector, -1.f, false);
 	pBulletObject->SetBulletVector(bullet_vector);
-	pBulletObject->SetObjectType(TYPE_BULLET);
+	pBulletObject->SetObjectType(TYPE_BULLET);	
 	//pBulletObject->SetBoundingRadius(2.0f);
 
 	pBulletObject->SetPlayerId(p_id);
