@@ -111,13 +111,16 @@ public:
 	CPlayer();
 	virtual ~CPlayer();
 
-	int GetPlayerHP() { return m_iPlayerHP + m_nUpgradeHp; };
+	int GetPlayerHP() { return m_iPlayerHP; };
+	int GetPlayerUpgradeHp() { return m_nUpgradeHp; };
 	int GetPlayerScore() { return m_iPlayerScore; };
 	int GetBulletNum() { return m_nBullet + m_nUpgradeBullet; };
+	int GetCurrentBulletNum() { return m_nBullet; };
 	int GetUpgradeBulletNum() { return m_nUpgradeBullet; };
 	int GetUpgradeDamage() { return m_nUpgradeDamage; };
 	int GetUpgradeSpeed() { return m_nUpgradeSpeed; };
 	float GetUpgradeBulletSpeed() { return m_fUpgradeBulletSpeed; };
+	void SetUpgradeBulletSpeed(float bulletSpeed) { m_fUpgradeBulletSpeed = bulletSpeed; };
 
 	bool GetDeath() { return m_bDeath; };
 	int GetBlockNum() { return m_nBlock; };

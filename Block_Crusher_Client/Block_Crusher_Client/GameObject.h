@@ -479,11 +479,14 @@ public:
 
 		player_id = 0;
 		bullet_id = 0;
+
+		m_fUpgradeBulletSpeed = 0.0f;
 	};
 	virtual ~CBulletObject() {};
 
 	void SetPlayerId(int x) { player_id = x; };
 	void SetBulletId(int x) { bullet_id = x; };
+	void SetUpgradeBulletSpeed(float bulletSpeed) { m_fUpgradeBulletSpeed = bulletSpeed; };
 
 	int GetPlayerId() { return player_id; };
 	int GetBulletId() { return bullet_id; };
@@ -497,6 +500,8 @@ private:
 
 	int player_id;
 	int bullet_id;
+
+	float m_fUpgradeBulletSpeed;
 
 
 public:

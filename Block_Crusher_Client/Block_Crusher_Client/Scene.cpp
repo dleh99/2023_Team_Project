@@ -657,10 +657,11 @@ void CScene::AddObjects(int type,XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector,
 	bullet_vector.z *= (1.0f + m_pPlayer->GetUpgradeBulletSpeed());
 	//bullet_vector = Vector3::ScalarProduct(bullet_vector, -1.f, false);
 	pBulletObject->SetBulletVector(bullet_vector);
-	pBulletObject->SetObjectType(TYPE_BULLET);
+	pBulletObject->SetObjectType(TYPE_BULLET);	
 	//pBulletObject->SetBoundingRadius(2.0f);
 
 	pBulletObject->SetPlayerId(p_id);
+	pBulletObject->SetUpgradeBulletSpeed(m_vPlayers[p_id]->GetUpgradeBulletSpeed());
 	pBulletObject->SetBulletId(b_id);
 
 	//int index = FindEmptySlot();
@@ -806,7 +807,7 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 	// 체력
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(50, 675));
 	if (!m_pPlayer->GetDeath()) {
-		float portion = float(m_pPlayer->GetPlayerHP()) / 100.0f;
+		float portion = float(m_pPlayer->GetPlayerHP()) / float(100 + m_pPlayer->GetPlayerUpgradeHp());
 		m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, 300.0f * portion, 40), SolidColorBrush[6].Get());
 		m_d2dDeviceContext->DrawRectangle(D2D1::RectF(0, 0, 300.0f, 40), SolidColorBrush[0].Get(), 2.0f);
 	}
@@ -819,8 +820,8 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 650));
 
 	if (m_pPlayer->GetBulletNum() < 10)
-		str = L"0" + std::to_wstring(m_pPlayer->GetBulletNum()) + L"/30";
-	else str = std::to_wstring(m_pPlayer->GetBulletNum()) + L"/30";
+		str = L"0" + std::to_wstring(m_pPlayer->GetCurrentBulletNum()) + L"/" + std::to_wstring(30 + m_pPlayer->GetUpgradeBulletNum()); // L"/30";
+	else str = std::to_wstring(m_pPlayer->GetCurrentBulletNum()) + L"/" + std::to_wstring(30 + m_pPlayer->GetUpgradeBulletNum()); // L"/30";
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
 		pTextFormat[0].Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush[6].Get());
 

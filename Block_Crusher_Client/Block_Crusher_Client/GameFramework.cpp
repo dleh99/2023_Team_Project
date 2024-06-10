@@ -70,6 +70,7 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hWnd)
 	}*/
 #endif
 	BuildObjects();
+	SoundSetup();
 
 	//HANDLE hThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)do_recv, (LPVOID)NULL, 0, NULL);
 
@@ -430,6 +431,12 @@ void CGameFramework::WaitForGpuComplete()
 	}
 }
 
+void CGameFramework::SoundSetup()
+{
+	//FMOD_System_Create(&m_SoundSystem, FMOD_VERSION);
+	//FMOD_System_Init(m_SoundSystem, 10, FMOD_INIT_NORMAL, NULL);
+}
+
 void CGameFramework::MoveToNextFrame()
 {
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
@@ -682,7 +689,7 @@ void CGameFramework::BuildObjects()
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed(), NULL);
 
 	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
-		if(m_vEnemyPlayers[i])
+		if (m_vEnemyPlayers[i])
 			m_vEnemyPlayers[i]->Update(m_GameTimer.GetTimeElapsed(), NULL);
 	}
 

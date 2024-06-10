@@ -1201,6 +1201,8 @@ void CBulletObject::Animate(float fTimeElapsed)
 	XMFLOAT3 velocity;
 
 	float speed = m_fSpeed * fTimeElapsed;
+	speed *= (1.0f + m_fUpgradeBulletSpeed);
+
 	velocity = m_xmf3Vector;
 	velocity.x *= speed;
 	velocity.y *= speed;
