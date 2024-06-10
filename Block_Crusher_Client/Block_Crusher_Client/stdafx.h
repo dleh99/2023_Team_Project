@@ -41,6 +41,7 @@
 #include <string>
 #include <random>
 #include <cmath>
+#include <chrono>
 
 
 // Direct3D 12

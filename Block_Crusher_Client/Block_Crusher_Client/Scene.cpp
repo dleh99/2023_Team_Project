@@ -3,6 +3,8 @@
 #include "Player.h"
 #include "Network.h"
 
+extern int gameMode;
+
 ID3D12DescriptorHeap* CScene::m_pd3dCbvSrvDescriptorHeap = NULL;
 
 D3D12_CPU_DESCRIPTOR_HANDLE	CScene::m_d3dCbvCPUDescriptorStartHandle;
@@ -42,6 +44,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
+	m_pSkyBox->SetIsActive(true);
 
 	// 가로 x 세로 x 깊이가 12 x 12 x 12인 정육면체 메쉬 생성
 	CCubeMeshTextured* pCubeMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
@@ -528,6 +531,27 @@ bool CScene::OnPrecessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	case WM_KEYUP:
 		switch (wParam)
 		{
+			if (gameMode == 1)
+			{
+		case 0x30:
+			m_pPlayer->UpgradePlayerSpeed();
+			break;
+		case 0x35:
+			m_pPlayer->UpgradePlayerDamage();
+			break;
+		case 0x37:
+			m_pPlayer->UpgradePlayerBulletSpeed();
+			break;
+		case 0x38:
+			m_pPlayer->UpgradePlayerBullet();
+			break;
+		case 0x39:
+			m_pPlayer->UpgradePlayerHp();
+			break;
+		case 0x4D:
+			m_pPlayer->ConfirmPlayerMoney();
+			break;
+			}
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
 			break;
@@ -628,6 +652,9 @@ void CScene::AddObjects(int type,XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector,
 	pBulletObject->SetShader(m_pSceneShader);
 
 	XMFLOAT3 bullet_vector = BulletVector;
+	bullet_vector.x *= (1.0f + m_pPlayer->GetUpgradeBulletSpeed());
+	bullet_vector.y *= (1.0f + m_pPlayer->GetUpgradeBulletSpeed());
+	bullet_vector.z *= (1.0f + m_pPlayer->GetUpgradeBulletSpeed());
 	//bullet_vector = Vector3::ScalarProduct(bullet_vector, -1.f, false);
 	pBulletObject->SetBulletVector(bullet_vector);
 	pBulletObject->SetObjectType(TYPE_BULLET);
@@ -1044,7 +1071,7 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 			for (int j = 0; j < 10; ++j)
 				for (int k = 0; k < 50; ++k) {
 					XMFLOAT3 position = { -(float)i * 12.0f + 20.0f,
-					 -(float)j * 12.0f , -(float)k * 12.0f + 40.0f };
+					 -108.f + (float)j * 12.0f , -(float)k * 12.0f + 40.0f };
 					CBlockObject* pBlockObject = new CBlockObject();
 					pBlockObject->SetMesh(m_pBlockMesh);
 					pBlockObject->SetIsActive(true);

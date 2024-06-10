@@ -3,7 +3,7 @@
 
 constexpr int MAX_FRAME_COUNT = 60;
 
-enum EVENT_TYPE { EV_RESPAWN };
+enum EVENT_TYPE { EV_RESPAWN, EV_RESTART };
 
 class Timer
 {

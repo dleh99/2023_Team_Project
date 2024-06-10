@@ -3,6 +3,8 @@
 
 int bi;
 
+extern int gameMode;
+
 CGameFramework::CGameFramework()
 {
 	m_hInstance = NULL;
@@ -70,6 +72,11 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hWnd)
 	BuildObjects();
 
 	//HANDLE hThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)do_recv, (LPVOID)NULL, 0, NULL);
+
+	/*if (gameMode == 0)
+		cout << "서바이벌 모드로 시작합니다." << endl;
+	else if (gameMode == 1)
+		cout << "RPG 모드로 시작합니다." << endl;*/
 
 	return true;
 }
@@ -448,7 +455,7 @@ void CGameFramework::Render2D()
 
 	// 2D 객체 랜더링
 	if (m_pScene) {
-		if(m_pScene->m_SceneState == 0)
+		if (m_pScene->m_SceneState == 0)
 			m_pScene->RenderTitle(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory, m_GameTimer.GetTimeElapsed());
 		else if(m_pScene->m_SceneState == 1)
 			m_pScene->Render2D(m_d2dDeviceContext, m_d2dFactory, m_dWriteFactory, m_GameTimer.GetTimeElapsed());
@@ -658,6 +665,10 @@ void CGameFramework::BuildObjects()
 	m_pPlayer = pCubePlayer;
 	CMaterial* pMaterial = new CMaterial;
 	m_pPlayer->SetMaterial(pMaterial);
+
+	m_pPlayer->SearchRifle(&(m_pPlayer->m_pRifle));
+	m_pPlayer->SearchShotgun(&(m_pPlayer->m_pShotgun));
+	m_pPlayer->SearchPistol(&(m_pPlayer->m_pPistol));
 #endif
 	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
 	m_pPlayer->SetBlockNum(m_pScene->m_nBlock);
@@ -728,6 +739,13 @@ void CGameFramework::ProcessInput()
 				dwDirection |= KEY_SHOOT;
 				m_pPlayer->SetIsShoot(true);
 			}
+
+			if (pKeyBuffer[0x31] & 0xF0) m_pPlayer->ActiveRifle();				// 1
+			if (pKeyBuffer[0x32] & 0xF0) m_pPlayer->ActiveShotgun();			// 2
+			if (pKeyBuffer[0x33] & 0xF0) m_pPlayer->ActivePistol();				// 3
+
+			//if (pKeyBuffer[0x38] & 0xF0) m_pPlayer->UpgradePlayerBullet();		// 8
+			//if (pKeyBuffer[0x39] & 0xF0) m_pPlayer->UpgradePlayerHp();			// 9
 		}
 
 		float cxDelta = 0.0f, cyDelta = 0.0f;
@@ -805,7 +823,9 @@ void CGameFramework::ProcessInput()
 			}
 			/*플레이어를 dwDirection 방향으로 이동한다(실제로는 속도 벡터를 변경한다).
 			이동 거리는 시간에 비례하도록 한다. 플레이어의 이동 속력은 (50/초)로 가정한다.*/
-			if (dwDirection) m_pPlayer->Move(dwDirection, 300.0f * m_GameTimer.GetTimeElapsed(), true);
+
+			float fPlayerSpeed = 300.0f + m_pPlayer->GetUpgradeSpeed();
+			if (dwDirection) m_pPlayer->Move(dwDirection, fPlayerSpeed * m_GameTimer.GetTimeElapsed(), true);
 		}
 		
 		//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다.
@@ -933,7 +953,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			else if (m_pScene->m_SceneState == 2) {
 				//m_pScene->m_SceneState = 1;
 				::ShowCursor(false);
-				send_match_packet();
+				send_crush_match_packet();
 				// 매칭시작 패킷
 			}
 #else
@@ -952,6 +972,11 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		}
 		case VK_F8:
+#ifdef USE_SERVER
+			if (m_pScene->m_SceneState == 2) {
+				send_rpg_match_packet();
+			}
+#endif
 			//m_flag += 1;
 			break;
 		case VK_F9:

@@ -26,7 +26,9 @@ constexpr char CS_MOVE = 1;
 constexpr char CS_BULLET_ADD = 5;
 constexpr char CS_FALL = 12;
 constexpr char CS_SCORE = 14;
-constexpr char CS_MATCH = 18;
+constexpr char CS_CRUSH_MATCH = 18;
+constexpr char CS_UPGRADE = 21;
+constexpr char CS_RPG_MATCH = 22;
 
 constexpr char SC_LOGIN = 2;
 constexpr char SC_LOGIN_FAIL = 16;
@@ -41,7 +43,10 @@ constexpr char SC_DEATH = 10;
 constexpr char SC_RESPAWN = 11;
 constexpr char SC_FALL = 13;
 constexpr char SC_RESULT = 15;
-constexpr char SC_MATCH_FINISH = 19;
+constexpr char SC_CRUSH_MODE_MATCH_FINISH = 19;
+constexpr char SC_ADD_BLOCK = 20;
+constexpr char SC_RPG_MODE_MATCH_FINISH = 23;
+constexpr char SC_RESTART = 24;
 
 enum Animation
 {
@@ -69,6 +74,13 @@ enum LOGIN_STATE
 	LS_ALREADY_INGAME,
 };
 
+enum UPGRADE_OPTION
+{
+	UP_HP,
+	UP_BULLET_SPEED,
+	UP_DAMAGE,
+};
+
 #pragma pack(push, 1)
 
 struct CS_LOGIN_PACKET {
@@ -78,7 +90,12 @@ struct CS_LOGIN_PACKET {
 	wchar_t				password[20];
 };
 
-struct CS_MATCH_PACKET {
+struct CS_CRUSH_MATCH_PACKET {
+	unsigned char		size;
+	char				type;
+};
+
+struct CS_RPG_MATCH_PACKET {
 	unsigned char		size;
 	char				type;
 };
@@ -117,6 +134,12 @@ struct CS_SCORE_PACKET {
 	int					score;
 };
 
+struct CS_UPGRADE_PACKET {
+	unsigned char		size;
+	char				type;
+	UPGRADE_OPTION		up_option;
+};
+
 //===========================
 struct SC_LOGIN_FAIL_PACKET
 {
@@ -139,7 +162,13 @@ struct SC_LOGININFO_PACKET
 	float				y;
 	float				z;
 };
-struct SC_MATCH_FINISH_PACKET
+struct SC_CRUSH_MODE_MATCH_FINISH_PACKET
+{
+	unsigned char		size;
+	char				type;
+	short				room_num;
+};
+struct SC_RPG_MODE_MATCH_FINISH_PACKET
 {
 	unsigned char		size;
 	char				type;
@@ -179,6 +208,7 @@ struct SC_BULLET_ADD_PACKET {
 	float				b_z;
 	int					player_id;
 	int					bullet_id;
+	float				bullet_speed;
 };
 
 struct SC_COLLISION_PACKET {
@@ -203,6 +233,7 @@ struct SC_HIT_PACKET {
 	int					bullet_id;
 	int					player_id;
 	int					enemy_id;
+	int					bullet_damage;
 };
 
 struct SC_DEATH_PACKET {
@@ -232,6 +263,19 @@ struct SC_RESULT_PACKET {
 	unsigned char		size;
 	char				type;
 	bool				result;
+};
+
+struct SC_ADD_BLOCK_PACKET {
+	unsigned char		size;
+	char				type;
+	float				block_x;
+	float				block_z;
+	int					block_id;
+};
+
+struct SC_RESTART_PACKET {
+	unsigned char		size;
+	char				type;
 };
 
 #pragma pack(pop)

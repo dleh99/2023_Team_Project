@@ -37,6 +37,14 @@ protected:
 	bool m_bDeath = false;
 	bool m_bOnAir = false;
 	bool m_bIsShoot = false;
+	std::chrono::high_resolution_clock m_cGunDelayClock;
+
+	int m_iPlayerMoney = 100;
+	int m_nUpgradeSpeed = 0;
+	int m_nUpgradeDamage = 0;
+	float m_fUpgradeBulletSpeed = 0.0f;
+	int m_nUpgradeBullet = 0;
+	int m_nUpgradeHp = 0;
 
 	// 플레이어 부스터
 	float m_fJumpTime = 0;
@@ -94,12 +102,23 @@ public:
 	CGameObject** m_ppObjects = NULL;
 	CScene* m_pScene = NULL;
 
+	// 플레이어 총 오브젝트
+	int m_nGunType = 0;					// 0: Rifle, 1: Shotgun, 2: Pistol
+	CGameObject* m_pRifle = NULL;
+	CGameObject* m_pShotgun = NULL;
+	CGameObject* m_pPistol = NULL;
+
 	CPlayer();
 	virtual ~CPlayer();
 
-	int GetPlayerHP() { return m_iPlayerHP; };
+	int GetPlayerHP() { return m_iPlayerHP + m_nUpgradeHp; };
 	int GetPlayerScore() { return m_iPlayerScore; };
-	int GetBulletNum() { return m_nBullet; };
+	int GetBulletNum() { return m_nBullet + m_nUpgradeBullet; };
+	int GetUpgradeBulletNum() { return m_nUpgradeBullet; };
+	int GetUpgradeDamage() { return m_nUpgradeDamage; };
+	int GetUpgradeSpeed() { return m_nUpgradeSpeed; };
+	float GetUpgradeBulletSpeed() { return m_fUpgradeBulletSpeed; };
+
 	bool GetDeath() { return m_bDeath; };
 	int GetBlockNum() { return m_nBlock; };
 	float GetRotationRadian() { return m_fcosTheta;  }
@@ -202,6 +221,22 @@ public:
 	void SetBulletId(int x) { bullet_id = x; };
 	int GetBulletId() { return bullet_id; };
 	Animation GetAniState() { return m_ani_state; };
+
+	void ActiveRifle();
+	void ActiveShotgun();
+	void ActivePistol();
+
+	void IncreasePlayerBlockMoney() { m_iPlayerMoney += 10; }
+	void DecreasePlayerBlockMoney() { m_iPlayerMoney -= 100; }
+	int GetPlayerBlockMoney() { return m_iPlayerMoney; }
+	
+	void UpgradePlayerSpeed();
+	void UpgradePlayerDamage();
+	void UpgradePlayerBulletSpeed();
+	void UpgradePlayerHp();
+	void UpgradePlayerBullet();
+
+	void ConfirmPlayerMoney();
 };
 
 class CCubePlayer : public CPlayer

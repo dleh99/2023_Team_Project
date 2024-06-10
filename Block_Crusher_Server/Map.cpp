@@ -81,21 +81,29 @@ void Map::CreateMap()
 	for (int i = 0; i < 50; ++i)
 		for (int j = 0; j < 10; ++j)
 			for (int k = 0; k < 50; ++k) {
-				XMFLOAT3 position = { -(float)i * 12.0f + 20.0f, -(float)j * 12.0f , -(float)k * 12.0f + 40.0f };
+				XMFLOAT3 position = { -(float)i * 12.0f + 20.0f, -108.f + (float)j * 12.0f , -(float)k * 12.0f + 40.0f};
 				//Map_Block.emplace_back(cnt, position);
-				Map_B[k + 50 * i][9 - j].Init_Block(cnt, position, TYPE_NORMAL);
+				Block b;
+				b.Init_Block(cnt, position, TYPE_NORMAL);
+				Map_B[k + 50 * i].push_back(b);
+				//Map_B[k + 50 * i][9 - j].Init_Block(cnt, position, TYPE_NORMAL);
 				cnt++;
 			}
 
+	// 추가 블록들
 	for (int i = 0; i < 50; ++i)
 		for (int k = 0; k < 50; ++k) {
 			for (int y = 0; y < mapdata[i][k]; ++y) {
 				XMFLOAT3 position = { -(float)i * 12.0f + 20.0f, (float)y * 12.0f + 12.0f, -(float)k * 12.0f + 40.0f };
 				//Map_Block.emplace_back(cnt, position);
-				Map_B[k + 50 * i][10 + y].Init_Block(cnt, position, TYPE_NORMAL);
+				Block b;
+				b.Init_Block(cnt, position, TYPE_NORMAL);
+				Map_B[k + 50 * i].push_back(b);
+				//Map_B[k + 50 * i][10 + y].Init_Block(cnt, position, TYPE_NORMAL);
 				cnt++;
 			}
 		}
+	
 }
 
 void Map::ClearMap()

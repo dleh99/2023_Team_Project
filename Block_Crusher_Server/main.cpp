@@ -52,8 +52,10 @@ void disconnect(int c_id)
 	// 룸에서도 빠져나가게 해야함
 	short room_num = clients_room[c_id];
 	if (room_num != -1) {
-		if (rooms[room_num].PlayerOut(c_id))
+		if (rooms[room_num].PlayerOut(c_id)) {
+			if (rooms[room_num].clients_number == 0) rooms[room_num].SettingRoom();
 			cout << "[" << c_id << "] 룸에서 탈퇴 완료" << endl;
+		}
 	}
 
 	// 룸 번호 저장소 초기화
@@ -119,12 +121,24 @@ void checking_room(int key)
 	}
 }
 
-void FindEmptyRoom(int c_id)
+void FindCrushEmptyRoom(int c_id)
 {
 	for (auto& r : rooms) {
 		if (r.GetRoomState() == RS_INGAME) continue; 
 		if (false == r.PlayerIn(c_id)) continue;
 		clients_room[c_id] = r.GetRoomNum();
+		checking_room(c_id);
+		cout << clients_room[c_id] << "번 룸에 접속함" << endl;
+		break;
+	}
+}
+
+void FindRpgEmptyRoom(int c_id)
+{
+	for (int rn = rooms.size() / 2; rn < rooms.size(); ++rn) {
+		if (rooms[rn].GetRoomState() == RS_INGAME) continue;
+		if (false == rooms[rn].PlayerIn(c_id)) continue;
+		clients_room[c_id] = rooms[rn].GetRoomNum();
 		checking_room(c_id);
 		cout << clients_room[c_id] << "번 룸에 접속함" << endl;
 		break;
@@ -170,10 +184,17 @@ void packet_process(int c_id, char* packet)
 
 		break;
 	}
-	case CS_MATCH: {
+	case CS_CRUSH_MATCH: {
 		// 비어 있는 방 찾기
-		FindEmptyRoom(c_id);
-		clients[c_id].send_match_finish_packet(clients_room[c_id]);
+		cout << "crush에 들어옴" << endl;
+		FindCrushEmptyRoom(c_id);
+		clients[c_id].send_crush_mode_match_finish_packet(clients_room[c_id]);
+		break;
+	}
+	case CS_RPG_MATCH: {
+		cout << "rpg에 들어옴" << endl;
+		FindRpgEmptyRoom(c_id);
+		clients[c_id].send_rpg_mode_match_finish_packet(clients_room[c_id]);
 		break;
 	}
 	case CS_MOVE: {
@@ -261,9 +282,30 @@ void packet_process(int c_id, char* packet)
 					{
 						clients[room_member[i]].isWin = false;
 					}
+
+					TIMER_EVENT ev{ room_member[i], chrono::system_clock::now() + 10s, EV_RESTART, 0 };
+					timer_queue.push(ev);
+
 					clients[room_member[i]].send_result_packet();
 				}
 			}
+		}
+		break;
+	}
+	case CS_UPGRADE: {
+		CS_UPGRADE_PACKET* p = reinterpret_cast<CS_UPGRADE_PACKET*>(packet);
+
+		if (p->up_option == UP_BULLET_SPEED) {
+			//cout << "[" << c_id << "] 의 총알 스피드를 강화해요" << endl;
+			clients[c_id].cl_bullet_speed += clients[c_id].cl_bullet_normal_speed * 0.2f;
+		}
+		else if (p->up_option == UP_DAMAGE) {
+			//cout << "[" << c_id << "] 의 데미지를 강화해요" << endl;
+			clients[c_id].cl_damage += 5;
+		}
+		else if (p->up_option == UP_HP) {
+			//cout << "[" << c_id << "] 의 체력을 강화해요" << endl;
+			clients[c_id].hp += 10;
 		}
 		break;
 	}
@@ -443,6 +485,19 @@ void worker_thread(HANDLE iocp_h)
 				delete ex_over;
 				break;
 			}
+			case OT_RESTART:
+			{
+				cout << "끝나고 10초 지나서 재시작 패킷 보냄" << endl;
+				{
+					//lock_guard<mutex> ll{ rooms[clients_room[key]]._r_lock };
+					rooms[clients_room[key]].SetRoomState(RS_END);
+				}
+				//cout << clients_room[key] << endl;
+				clients[key].refresh();
+				clients[key].send_restart_packet();
+				delete ex_over;
+				break;
+			}
 		}
 	}
 }
@@ -461,19 +516,56 @@ void Physics_Calculation_thread()
 			if (cl._state != US_INGAME) continue;
 			for (int i{}; i < MAX_BULLET_NUM; ++i) {
 				if (cl.bullet[i].GetisActive()) {
-					cl.bullet[i].Move(server_timer.GetTimeElapsed());
+					cl.bullet[i].Move(server_timer.GetTimeElapsed(), cl.cl_bullet_speed);
+					//cout << "이거 작동해?" << endl;
 				}
 			}
 		}
 
-		// 총알과 충돌 처리
-		/*
-		* 클라이언트 전체를 돌아서 인게임 중인 클라이언트의 총알들과 맵의 충돌을 검사하고
-		* 충돌했다면 Active를 false 시키고 모든 클라이언트들에게 충돌했다는 패킷을 보낸다
-		*/
-
 		for (auto& r : rooms) {
 			if (r.GetRoomState() != RS_INGAME) continue;
+
+			// 블록 생성하기
+			r.AddTime(server_timer.GetTimeElapsed());
+			if (r.GetTime() > 10.f) {
+				// 룸 블록 생성
+				r.SpawnBlock();
+
+				int* room_player_ids = r.GetPlayerId();
+
+				// 룸에 들어있는 플레이어들에게 생성 블록 좌표, id 주기
+				for (int i{}; i < MAX_PLAYER; ++i) {
+					int check_id = room_player_ids[i];
+					if (check_id == -1) continue;
+					int input_id = r.GetMapBlockNum();
+					for (const auto& pos : r.Block_Spawn_Pos) {
+						clients[check_id].send_add_block_packet(-pos.x * 12.0f + 20.0f, -(float)pos.z * 12.0f + 40.0f, input_id);
+						input_id++;
+					}
+				}
+
+				r.AddMapBlockNum(r.Block_Spawn_Pos.size());
+			}
+
+			// 블록 이동
+			/*
+				이동해야 하는 블록들 전부 이동시킨다
+				1. 밑 블록이 사라져 움직여야 하는 위 블록들
+				2. 새로 생성되어 떨어져 아직 바닥에 닿지 않은 블록들
+			*/
+
+			// 무조건 움직이면 안 됨
+			// 일단 밑에 블록이 없는 경우에만 활발하게 움직임
+			for (Falling_Block_pos p : r.Falling_Blocks) {
+				//r.map_information.Map_B[p.z + 50 * p.x][p.y].Move(server_timer.GetTimeElapsed());
+			}
+			
+			// 총알과 충돌 처리
+			/*
+			* 클라이언트 전체를 돌아서 인게임 중인 클라이언트의 총알들과 맵의 충돌을 검사하고
+			* 충돌했다면 Active를 false 시키고 모든 클라이언트들에게 충돌했다는 패킷을 보낸다
+			*/
+
 			int* room_player_ids = r.GetPlayerId();
 
 			for (int i{}; i < MAX_PLAYER; ++i) {
@@ -510,24 +602,57 @@ void Physics_Calculation_thread()
 					Range_Pos temp = clients[check_id].bullet[bullet_num].GetBulletRange();
 
 					// 그 범위에 블록이 있냐? 없으면 넘어가
-					if (0 <= temp.x && temp.x < 50 && 0 <= temp.y && temp.y < 20 && 0 <= temp.z && temp.z < 50) {
-						if (true == r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetisActive()) {
-							//cout << temp.x << ", " << temp.y << ", " << temp.z << endl;
-							if (CollisionCheck_objects(clients[check_id].bullet[bullet_num].GetPosition(), r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetPosition(),
-								clients[check_id].bullet[bullet_num].GetRadius(), r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetRadius())) {
-								clients[check_id].bullet[bullet_num].SetisActive(false);
-								r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].SetisActive(false);
+					// array 쓴 방법
+					{
+						if (0 <= temp.x && temp.x < 50 && 0 <= temp.y && temp.y < 20 && 0 <= temp.z && temp.z < 50) {
+							if (true == r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetisActive()) {
+								//cout << temp.x << ", " << temp.y << ", " << temp.z << endl;
+								if (CollisionCheck_objects(clients[check_id].bullet[bullet_num].GetPosition(), r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetPosition(),
+									clients[check_id].bullet[bullet_num].GetRadius(), r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetRadius())) {
+									cout << r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetPosition().y << endl;
+									//cout << "충돌은 해?" << endl;
+									clients[check_id].bullet[bullet_num].SetisActive(false);
+									r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].SetisActive(false);
 
-								for (int round{}; round < MAX_PLAYER; ++round) {
-									if (room_player_ids[round] == -1) continue;
-									clients[room_player_ids[round]].send_bullet_collision_packet(clients[check_id].bullet[bullet_num].GetbulletId(),
-										r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetId(),
-										clients[check_id]._room_id,
-										r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetBlockType());
+									for (int round{}; round < MAX_PLAYER; ++round) {
+										if (room_player_ids[round] == -1) continue;
+										clients[room_player_ids[round]].send_bullet_collision_packet(clients[check_id].bullet[bullet_num].GetbulletId(),
+											r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetId(),
+											clients[check_id]._room_id,
+											r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetBlockType());
+									}
+
 								}
-
 							}
 						}
+					}
+
+					// vector 쓴 방법
+					{
+						//if (0 <= temp.x && temp.x < 50 && 0 <= temp.y && temp.y < 20 && 0 <= temp.z && temp.z < 50) {
+						//	if (0 != r.map_information.Map_B[temp.z + 50 * temp.x].size()) {
+						//		//cout << "x = " << temp.x << ", z = " << temp.z << ", size = " << r.map_information.Map_B[temp.z + 50 * temp.x].size() << endl;
+						//		for (int line_size{}; line_size < r.map_information.Map_B[temp.z + 50 * temp.x].size(); ++line_size) {
+						//			//cout << "라인 : " << line_size << endl;
+						//			if (CollisionCheck_objects(clients[check_id].bullet[bullet_num].GetPosition(), r.map_information.Map_B[temp.z + 50 * temp.x][line_size].GetPosition(),
+						//				clients[check_id].bullet[bullet_num].GetRadius(), r.map_information.Map_B[temp.z + 50 * temp.x][line_size].GetRadius())) {
+						//				//cout << "충돌 발생!" << endl;
+						//				clients[check_id].bullet[bullet_num].SetisActive(false);
+						//				r.map_information.Map_B[temp.z + 50 * temp.x][line_size].SetisActive(false);
+
+						//				for (int round{}; round < MAX_PLAYER; ++round) {
+						//					if (room_player_ids[round] == -1) continue;
+						//					clients[room_player_ids[round]].send_bullet_collision_packet(clients[check_id].bullet[bullet_num].GetbulletId(),
+						//						r.map_information.Map_B[temp.z + 50 * temp.x][line_size].GetId(),
+						//						clients[check_id]._room_id,
+						//						r.map_information.Map_B[temp.z + 50 * temp.x][line_size].GetBlockType());
+						//				}
+						//				break;
+						//				// 락 걸고 erase
+						//			}
+						//		}
+						//	}
+						//}
 					}
 
 					// 총알과 플레이어 충돌 확인
@@ -542,14 +667,16 @@ void Physics_Calculation_thread()
 							// 총알을 비활성화, hp 하락
 							//cout << "플레이어 [" << clients[check_id]._id << "] 의 총알이 플레이어 [" << clients[other_id]._id << "] 를 맞췄습니다" << endl;
 							clients[check_id].bullet[bullet_num].SetisActive(false);
-							clients[other_id].hp -= 1;
+							clients[other_id].hp -= clients[check_id].cl_damage;
+
+							cout << "[" << check_id << "] 가 [" << other_id << "]를 " << clients[check_id].cl_damage << "의 데미지로 때려서 " << clients[other_id].hp << "이 남음" << endl;
 							
 							// hp가 0이면 죽었다고, 아니면 맞았다는 패킷 보냄
 							if (clients[other_id].hp > 0) {
 								for (int send_round{}; send_round < MAX_PLAYER; ++send_round) {
 									int send_id = room_player_ids[send_round];
 									if (send_id == -1) continue;
-									clients[send_id].send_hit_packet(clients[check_id].bullet[bullet_num].GetbulletId(), clients[check_id]._room_id, clients[other_id]._room_id);
+									clients[send_id].send_hit_packet(clients[check_id].bullet[bullet_num].GetbulletId(), clients[check_id]._room_id, clients[other_id]._room_id, clients[check_id].cl_damage);
 								}
 							}
 							else {
@@ -576,6 +703,12 @@ void InitRoom()
 	int room_num = 0;
 	for (Room& r : rooms) {
 		r.SetRoomNum(room_num);
+		if (room_num < rooms.size()) {
+			r.SetRoomCategory(RC_CRUSH);
+		}
+		else {
+			r.SetRoomCategory(RC_RPG);
+		}
 		room_num++;
 	}
 
@@ -601,6 +734,11 @@ void do_timer()
 				ov->_overlapped_type = OT_RESPAWN;
 				PostQueuedCompletionStatus(iocp_h, 1, ev.obj_id, &ov->_over);
 				break;
+			}
+			case EV_RESTART: {
+				Overlapped* ov = new Overlapped;
+				ov->_overlapped_type = OT_RESTART;
+				PostQueuedCompletionStatus(iocp_h, 1, ev.obj_id, &ov->_over);
 			}
 			}
 			continue;

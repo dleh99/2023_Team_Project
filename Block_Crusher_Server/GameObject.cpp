@@ -38,7 +38,7 @@ void GameObject::SetPosition(float x, float y, float z)
 
 BulletObject::BulletObject()
 {
-	bullet_speed = 200.f;
+	//bullet_speed = 200.f;
 
 	bullet_vec.x = 0.f;
 	bullet_vec.y = 0.f;
@@ -57,7 +57,7 @@ void BulletObject::SetBulletVec(float x, float y, float z)
 	bullet_vec = { x, y, z };
 }
 
-void BulletObject::Move(float fTimeElapsed)
+void BulletObject::Move(float fTimeElapsed, float bullet_speed)
 {
 	XMFLOAT3 position = GetPosition();
 	XMFLOAT3 velocity;
@@ -130,4 +130,48 @@ void Block::Init_Block(int input_id, XMFLOAT3 input_pos, int input_type)
 	SetRadius(rad);
 	SetisActive(true);
 	type = input_type;
+}
+
+
+void Block::Move(float fTimeElapsed)
+{
+	XMFLOAT3 position = GetPosition();
+
+	float speed = falling_speed * fTimeElapsed;
+
+	position = { position.x, position.y - speed, position.z };
+
+	/*if (position.y > 500.0f || position.y < -200.0f) {
+		SetisActive(false);
+		return;
+	}*/
+
+	SetBlockRange(position.x, position.y, position.z);
+	SetPosition(position.x, position.y, position.z);
+}
+
+Range_Pos Block::Block_Convert_index(float x, float y, float z)
+{
+	Range_Pos temp;
+
+	temp.x = ((x - 26) / 12) * (-1);
+	temp.y = ((y + 108) / 12);
+	temp.z = ((z - 46) / 12) * (-1);
+
+	return temp;
+}
+
+void Block::SetBlockRange(float x, float y, float z)
+{
+	Range_Pos temp = Block_Convert_index(x, y, z);
+	
+	if (temp.y != block_y_range) {
+		// 여기서 더 해야함
+		// Map_B에 이전에 있던 건 지우고 새로운 곳을 활성화 시켜야 함
+		
+	}
+
+	block_x_range = temp.x;
+	block_y_range = temp.y;
+	block_z_range = temp.z;
 }
