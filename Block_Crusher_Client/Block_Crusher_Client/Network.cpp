@@ -263,10 +263,8 @@ void ProcessPacket(char* ptr)
 		SC_BULLET_ADD_PACKET* packet = reinterpret_cast<SC_BULLET_ADD_PACKET*>(ptr);
 		XMFLOAT3 BPos = { packet->s_x ,packet->s_y ,packet->s_z };
 		XMFLOAT3 BVec = { packet->b_x ,packet->b_y ,packet->b_z };
-		
-		// packet->bullet_speed
 
-		NetScene->AddObjects(0, BPos, BVec, packet->player_id, packet->bullet_id);
+		NetScene->AddObjects(0, BPos, BVec, packet->player_id, packet->bullet_id, packet->bullet_speed);
 		//cout << "총알을 받아 왔습니다. 위치 :" << packet->s_x << ", " << packet->s_y << ", " << packet->s_z << ", 발사 벡터 : " << packet->b_x << ", " << packet->b_y << ", " << packet->b_z << endl;
 		//cout << packet->player_id << "의 " << packet->bullet_id << "번 총알을 받아왔습니다" << endl;
 		break;

@@ -645,23 +645,28 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	pCamera->UpdateShaderVariables(pd3dCommandList);*/
 }
 
-void CScene::AddObjects(int type,XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector, int p_id, int b_id)
+void CScene::AddObjects(int type,XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector, int p_id, int b_id, float bulletSpeed)
 {
 	CBulletObject* pBulletObject = new CBulletObject();
 	pBulletObject->SetMesh(pBulletMesh);
 	pBulletObject->SetShader(m_pSceneShader);
 
 	XMFLOAT3 bullet_vector = BulletVector;
-	bullet_vector.x *= (1.0f + m_pPlayer->GetUpgradeBulletSpeed());
+	/*bullet_vector.x *= (1.0f + m_pPlayer->GetUpgradeBulletSpeed());
 	bullet_vector.y *= (1.0f + m_pPlayer->GetUpgradeBulletSpeed());
-	bullet_vector.z *= (1.0f + m_pPlayer->GetUpgradeBulletSpeed());
+	bullet_vector.z *= (1.0f + m_pPlayer->GetUpgradeBulletSpeed());*/
+
+	bullet_vector.x *= (1.0f + bulletSpeed);
+	bullet_vector.y *= (1.0f + bulletSpeed);
+	bullet_vector.z *= (1.0f + bulletSpeed);
+
 	//bullet_vector = Vector3::ScalarProduct(bullet_vector, -1.f, false);
 	pBulletObject->SetBulletVector(bullet_vector);
 	pBulletObject->SetObjectType(TYPE_BULLET);	
 	//pBulletObject->SetBoundingRadius(2.0f);
 
 	pBulletObject->SetPlayerId(p_id);
-	pBulletObject->SetUpgradeBulletSpeed(m_vPlayers[p_id]->GetUpgradeBulletSpeed());
+	//pBulletObject->SetUpgradeBulletSpeed(m_vPlayers[p_id]->GetUpgradeBulletSpeed());
 	pBulletObject->SetBulletId(b_id);
 
 	//int index = FindEmptySlot();
