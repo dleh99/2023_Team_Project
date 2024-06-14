@@ -81,7 +81,7 @@ void Map::CreateMap()
 	for (int i = 0; i < 50; ++i)
 		for (int j = 0; j < 10; ++j)
 			for (int k = 0; k < 50; ++k) {
-				XMFLOAT3 position = { -(float)i * 12.0f + 20.0f,-(float)j * 12.0f , -(float)k * 12.0f + 40.0f};
+				XMFLOAT3 position = { -(float)i * 12.0f + 20.0f, -108.f +(float)j * 12.0f , -(float)k * 12.0f + 40.0f};
 				//Map_Block.emplace_back(cnt, position);
 				Block b;
 				b.Init_Block(cnt, position, TYPE_NORMAL);
