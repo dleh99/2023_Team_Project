@@ -30,7 +30,7 @@ bool gameResult = false;
 char m_mapKey;
 
 // 게임 모드
-int gameMode = 0;		// 0: Survival Mode, 1: RPG Mode
+int gameMode = -1;		// 0: Survival Mode, 1: RPG Mode
 
 int NetworkInit()
 {
@@ -265,6 +265,13 @@ void ProcessPacket(char* ptr)
 		XMFLOAT3 BVec = { packet->b_x ,packet->b_y ,packet->b_z };
 
 		NetScene->AddObjects(0, BPos, BVec, packet->player_id, packet->bullet_id, packet->bullet_speed);
+
+		cout << "################" << endl;
+		cout << "총을 쏘는 플레이어의 ID: " << packet->player_id << endl;
+		cout << "총알 ID: " << packet->bullet_id << endl;
+		cout << "다른 플레이어의 총알 속도: " << 1.0f + packet->bullet_speed << endl;
+		cout << "################" << endl << endl;
+
 		//cout << "총알을 받아 왔습니다. 위치 :" << packet->s_x << ", " << packet->s_y << ", " << packet->s_z << ", 발사 벡터 : " << packet->b_x << ", " << packet->b_y << ", " << packet->b_z << endl;
 		//cout << packet->player_id << "의 " << packet->bullet_id << "번 총알을 받아왔습니다" << endl;
 		break;
@@ -283,8 +290,16 @@ void ProcessPacket(char* ptr)
 			//if (gameMode == 1)
 			Netplayers[id]->IncreasePlayerBlockMoney();
 
-			int UpdatedSocre = Netplayers[id]->GetPlayerScore() + 100;
-			Netplayers[id]->SetPlayerScore(UpdatedSocre);
+			if (gameMode == 0)
+			{
+				int UpdatedSocre = Netplayers[id]->GetPlayerScore() + 100;
+				Netplayers[id]->SetPlayerScore(UpdatedSocre);
+			}
+			/*else
+			{
+				int UpdatedKillCount = Netplayers[id]->GetPlayerKillCount() + 1;
+				Netplayers[id]->SetPlayerKillCount(UpdatedKillCount);
+			}*/
 		}
 		break;
 	}
@@ -309,6 +324,14 @@ void ProcessPacket(char* ptr)
 			//int UpdatedHP = Netplayers[id]->GetPlayerHP() - 10; // (10 + Netplayers[hit]->GetUpgradeDamage());
 			int UpdatedHP = 0;
 			Netplayers[id]->SetPlayerHP(UpdatedHP);
+		}
+		else
+		{
+			if (gameMode == 0)
+			{
+				int UpdatedKillCount = Netplayers[id]->GetPlayerKillCount() + 1;
+				Netplayers[id]->SetPlayerKillCount(UpdatedKillCount);
+			}
 		}
 		Netplayers[packet->death_id]->SetIsActive(false);
 		Netplayers[packet->death_id]->SetDeath(true);

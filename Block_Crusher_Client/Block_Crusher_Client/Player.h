@@ -30,6 +30,7 @@ protected:
 	//플레이 관련
 	int m_iPlayerHP = 100;
 	int m_iPlayerScore = 0;
+	int m_iPlayerKillCount = 0;
 	int m_nBullet = 30;
 	float m_fEtime = 0;
 	float m_fBoosterCoolDownTime = 0;
@@ -114,6 +115,7 @@ public:
 	int GetPlayerHP() { return m_iPlayerHP; };
 	int GetPlayerUpgradeHp() { return m_nUpgradeHp; };
 	int GetPlayerScore() { return m_iPlayerScore; };
+	int GetPlayerKillCount() { return m_iPlayerKillCount; };
 	int GetBulletNum() { return m_nBullet + m_nUpgradeBullet; };
 	int GetCurrentBulletNum() { return m_nBullet; };
 	int GetUpgradeBulletNum() { return m_nUpgradeBullet; };
@@ -139,6 +141,7 @@ public:
 
 	void SetPlayerHP(int hp) { m_iPlayerHP = hp; };
 	void SetPlayerScore(int score) { m_iPlayerScore = score; };
+	void SetPlayerKillCount(int killCount) { m_iPlayerKillCount = killCount; };
 	void SetBulletNum(int nBullet) { m_nBullet = nBullet; };
 	void SetBlockNum(int nBlock) { m_nBlock = nBlock; };
 	void SetDeath(bool bDeath) { m_bDeath = bDeath; }

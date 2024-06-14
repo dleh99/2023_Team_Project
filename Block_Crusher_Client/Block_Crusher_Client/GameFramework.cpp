@@ -74,10 +74,10 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hWnd)
 
 	//HANDLE hThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)do_recv, (LPVOID)NULL, 0, NULL);
 
-	/*if (gameMode == 0)
+	if (gameMode == 0)
 		cout << "서바이벌 모드로 시작합니다." << endl;
 	else if (gameMode == 1)
-		cout << "RPG 모드로 시작합니다." << endl;*/
+		cout << "RPG 모드로 시작합니다." << endl;
 
 	return true;
 }

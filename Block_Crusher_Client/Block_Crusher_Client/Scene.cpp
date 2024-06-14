@@ -531,27 +531,30 @@ bool CScene::OnPrecessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	case WM_KEYUP:
 		switch (wParam)
 		{
-			if (gameMode == 1)
-			{
 		case 0x30:
-			m_pPlayer->UpgradePlayerSpeed();
+			if (gameMode == 1)
+				m_pPlayer->UpgradePlayerSpeed();
 			break;
 		case 0x35:
-			m_pPlayer->UpgradePlayerDamage();
+			if (gameMode == 1)
+				m_pPlayer->UpgradePlayerDamage();
 			break;
 		case 0x37:
-			m_pPlayer->UpgradePlayerBulletSpeed();
+			if (gameMode == 1)
+				m_pPlayer->UpgradePlayerBulletSpeed();
 			break;
 		case 0x38:
-			m_pPlayer->UpgradePlayerBullet();
+			if (gameMode == 1)
+				m_pPlayer->UpgradePlayerBullet();
 			break;
 		case 0x39:
-			m_pPlayer->UpgradePlayerHp();
+			if (gameMode == 1)
+				m_pPlayer->UpgradePlayerHp();
 			break;
 		case 0x4D:
-			m_pPlayer->ConfirmPlayerMoney();
+			if (gameMode == 1)
+				m_pPlayer->ConfirmPlayerMoney();
 			break;
-			}
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
 			break;
