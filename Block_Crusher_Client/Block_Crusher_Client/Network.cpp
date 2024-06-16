@@ -264,12 +264,13 @@ void ProcessPacket(char* ptr)
 		XMFLOAT3 BPos = { packet->s_x ,packet->s_y ,packet->s_z };
 		XMFLOAT3 BVec = { packet->b_x ,packet->b_y ,packet->b_z };
 
-		NetScene->AddObjects(0, BPos, BVec, packet->player_id, packet->bullet_id, packet->bullet_speed);
+		float bulletSpeedAdjust = 199.0f;
+		NetScene->AddObjects(0, BPos, BVec, packet->player_id, packet->bullet_id, packet->bullet_speed - bulletSpeedAdjust);
 
 		cout << "################" << endl;
 		cout << "총을 쏘는 플레이어의 ID: " << packet->player_id << endl;
 		cout << "총알 ID: " << packet->bullet_id << endl;
-		cout << "다른 플레이어의 총알 속도: " << 1.0f + packet->bullet_speed << endl;
+		cout << "다른 플레이어의 총알 속도: " << packet->bullet_speed - bulletSpeedAdjust << endl;
 		cout << "################" << endl << endl;
 
 		//cout << "총알을 받아 왔습니다. 위치 :" << packet->s_x << ", " << packet->s_y << ", " << packet->s_z << ", 발사 벡터 : " << packet->b_x << ", " << packet->b_y << ", " << packet->b_z << endl;
@@ -327,7 +328,7 @@ void ProcessPacket(char* ptr)
 		}
 		else
 		{
-			if (gameMode == 0)
+			if (gameMode == 1)
 			{
 				int UpdatedKillCount = Netplayers[id]->GetPlayerKillCount() + 1;
 				Netplayers[id]->SetPlayerKillCount(UpdatedKillCount);
