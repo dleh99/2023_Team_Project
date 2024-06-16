@@ -80,7 +80,7 @@ private:
 	bool m_Buildingflag = false;
 
 	// fmod ¸â¹ö
-	FMOD_SYSTEM* m_SoundSystem;
+	//FMOD_SYSTEM* m_SoundSystem;
 
 public:
 	CGameFramework();

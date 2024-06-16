@@ -51,11 +51,15 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	CCubeMeshDiffused* BulletMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 2.0f, 2.0f, 2.0f);
 	m_pBlockMesh = pCubeMesh;
 
-	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/rock1.dds", RESOURCE_TEXTURE2D, 0);
+	CTexture* pTexture[2];
+
+	pTexture[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTexture[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/rock1.dds", RESOURCE_TEXTURE2D, 0);
+	pTexture[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTexture[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/Ceiling.dds", RESOURCE_TEXTURE2D, 0);
 
 	CMaterial* pMaterial = new CMaterial();
-	pMaterial->SetTexture(pTexture);
+	pMaterial->SetTexture(pTexture[0]);
 
 	m_nObjects = 50 * 50 * 10 + 2000;
 	m_ppObjects = new CGameObject * [m_nObjects + 4000];
@@ -66,8 +70,9 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pInstanceShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	//m_pInstanceShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
 	//m_pInstanceShader->CreateShaderResourceViews(pd3dDevice, pTexture, 0, 2);
-	m_pInstanceShader->SetTexture(pTexture);
-	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 2);
+	m_pInstanceShader->SetTexture(pTexture[0]);
+	CreateShaderResourceViews(pd3dDevice, pTexture[0], 0, 2);
+	CreateShaderResourceViews(pd3dDevice, pTexture[1], 0, 2);
 
 	AddBlocksByMapData(0, mapkey,true);
 
@@ -77,18 +82,6 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pSceneShader = pShader;
 
 	pBulletMesh = BulletMesh;
-
-	CParticle* pParticle = new CParticle();
-
-	pParticle->SetMesh(pBulletMesh);
-	pParticle->SetShader(m_pSceneShader);
-
-	pParticle->SetPosition(20, 20, 30);
-
-	pParticle->SetIsActive(true);
-
-	testobj = pParticle;
-
 
 	//AddBlocksByMapData(pCubeMesh, pTShader, pMaterial, 0, mapkey);
 
@@ -351,26 +344,26 @@ ComPtr<ID3D12RootSignature> CScene::CreateGraphicsRootSignature(ID3D12Device* pd
 	::ZeroMemory(pd3dDescriptorRange, sizeof(D3D12_DESCRIPTOR_RANGE) * 4);
 
 	pd3dDescriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRange[0].NumDescriptors = 1;
+	pd3dDescriptorRange[0].NumDescriptors = 2;
 	pd3dDescriptorRange[0].BaseShaderRegister = 0; //t0: gtxtTexture
 	pd3dDescriptorRange[0].RegisterSpace = 0;
 	pd3dDescriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRange[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRange[1].NumDescriptors = 1;
-	pd3dDescriptorRange[1].BaseShaderRegister = 1; //t1: gtxtSkyCubeTexture
+	pd3dDescriptorRange[1].BaseShaderRegister = 2; //t1: gtxtSkyCubeTexture
 	pd3dDescriptorRange[1].RegisterSpace = 0;
 	pd3dDescriptorRange[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRange[2].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRange[2].NumDescriptors = 1;
-	pd3dDescriptorRange[2].BaseShaderRegister = 2; //t2: AlbedoTexture
+	pd3dDescriptorRange[2].BaseShaderRegister = 3; //t2: AlbedoTexture
 	pd3dDescriptorRange[2].RegisterSpace = 0;
 	pd3dDescriptorRange[2].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRange[3].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRange[3].NumDescriptors = MAX_DEPTH_TEXTURES;
-	pd3dDescriptorRange[3].BaseShaderRegister = 3; //t3: Depth Buffer
+	pd3dDescriptorRange[3].BaseShaderRegister = 4; //t3: Depth Buffer
 	pd3dDescriptorRange[3].RegisterSpace = 0;
 	pd3dDescriptorRange[3].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
@@ -661,7 +654,7 @@ void CScene::AddObjects(int type,XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector,
 	//pBulletObject->SetBoundingRadius(2.0f);
 
 	pBulletObject->SetPlayerId(p_id);
-	pBulletObject->SetUpgradeBulletSpeed(m_vPlayers[p_id]->GetUpgradeBulletSpeed());
+	//pBulletObject->SetUpgradeBulletSpeed(m_vPlayers[p_id]->GetUpgradeBulletSpeed());
 	pBulletObject->SetBulletId(b_id);
 
 	//int index = FindEmptySlot();
