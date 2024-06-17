@@ -517,6 +517,7 @@ void Physics_Calculation_thread()
 			if (cl._state != US_INGAME) continue;
 			for (int i{}; i < MAX_BULLET_NUM; ++i) {
 				if (cl.bullet[i].GetisActive()) {
+					cl.cl_bullet_speed *= cl.cl_bullet_upgrade_speed;
 					cl.bullet[i].Move(server_timer.GetTimeElapsed(), cl.cl_bullet_speed);
 					//cout << "이거 작동해?" << endl;
 				}

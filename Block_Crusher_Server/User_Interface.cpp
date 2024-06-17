@@ -156,7 +156,8 @@ void User_Interface::send_bullet_add_packet(User_Interface* clients, int c_id, i
 	p.b_z = clients[c_id].bullet[bullet_num].GetBulletVec().z;
 	p.player_id = c_id;
 	p.bullet_id = clients[c_id].bullet[bullet_num].GetbulletId();
-	p.bullet_speed = clients[c_id].cl_bullet_speed;
+	//p.bullet_speed = clients[c_id].cl_bullet_speed;
+	p.bullet_speed = clients[c_id].cl_bullet_upgrade_speed;
 	do_send(&p);
 }
 
