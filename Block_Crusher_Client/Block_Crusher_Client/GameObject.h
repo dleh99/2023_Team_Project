@@ -480,7 +480,7 @@ public:
 		player_id = 0;
 		bullet_id = 0;
 
-		m_fUpgradeBulletSpeed = 0.0f;
+		m_fUpgradeBulletSpeed = 1.0f;
 	};
 	virtual ~CBulletObject() {};
 

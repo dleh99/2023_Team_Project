@@ -19,6 +19,8 @@ User_Interface::User_Interface()
 	_room_id = -1;
 	cl_bullet_speed = 200.f;
 	cl_bullet_normal_speed = 200.f;
+	cl_bullet_upgrade_speed = 1.0f;
+	cl_bullet_upgrade_normal_speed = 1.0f;
 	cl_damage = 10;
 }
 
@@ -54,6 +56,8 @@ void User_Interface::refresh()
 	_room_id = -1;
 	cl_bullet_speed = 200.f;
 	cl_bullet_normal_speed = 200.f;
+	cl_bullet_upgrade_speed = 1.0f;
+	cl_bullet_upgrade_normal_speed = 1.0f;
 	cl_damage = 10;
 
 	for (int i{}; i < MAX_BULLET_NUM; ++i) {

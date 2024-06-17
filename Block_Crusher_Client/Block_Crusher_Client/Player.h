@@ -43,7 +43,7 @@ protected:
 	int m_iPlayerMoney = 100;
 	int m_nUpgradeSpeed = 0;
 	int m_nUpgradeDamage = 0;
-	float m_fUpgradeBulletSpeed = 0.0f;
+	float m_fUpgradeBulletSpeed = 1.0f;
 	int m_nUpgradeBullet = 0;
 	int m_nUpgradeHp = 0;
 

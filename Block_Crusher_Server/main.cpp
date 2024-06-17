@@ -297,7 +297,8 @@ void packet_process(int c_id, char* packet)
 
 		if (p->up_option == UP_BULLET_SPEED) {
 			//cout << "[" << c_id << "] 의 총알 스피드를 강화해요" << endl;
-			clients[c_id].cl_bullet_speed += clients[c_id].cl_bullet_normal_speed * 0.2f;
+			//clients[c_id].cl_bullet_speed += clients[c_id].cl_bullet_normal_speed * 0.2f;
+			clients[c_id].cl_bullet_upgrade_speed += clients[c_id].cl_bullet_upgrade_normal_speed * 0.2f;
 		}
 		else if (p->up_option == UP_DAMAGE) {
 			//cout << "[" << c_id << "] 의 데미지를 강화해요" << endl;

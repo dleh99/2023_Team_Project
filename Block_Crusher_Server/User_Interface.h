@@ -35,6 +35,8 @@ public:
 
 	float			cl_bullet_speed;
 	float			cl_bullet_normal_speed;
+	float			cl_bullet_upgrade_speed;
+	float			cl_bullet_upgrade_normal_speed;
 	int				cl_damage;
 
 	std::mutex			_s_lock;				// state lock
