@@ -283,6 +283,7 @@ void ProcessPacket(char* ptr)
 	case SC_BULLET_COLLISION: {
 		SC_BULLET_COLLISION_PACKET* packet = reinterpret_cast<SC_BULLET_COLLISION_PACKET*>(ptr);
 		//cout << "총알 번호 : " << packet->bullet_id << ", 블록 번호 : " << packet->block_id << ", 총알 주인 : " << packet->player_id << endl;;
+		cout << packet->block_id << endl;
 		NetScene->DisableObject(packet->bullet_id, packet->block_id, packet->player_id);
 
 		if (id == packet->player_id) {

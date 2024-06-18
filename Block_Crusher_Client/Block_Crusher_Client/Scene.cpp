@@ -27,7 +27,7 @@ CScene::CScene()
 	m_xmf4GlobalAmbient = XMFLOAT4{};
 	::ZeroMemory(m_sTitleTexts, sizeof(std::wstring*) * 3);
 
-	SoundSetup();
+	//SoundSetup();
 }
 
 CScene::~CScene()
@@ -175,12 +175,13 @@ void CScene::DisableObject(int bullet_id, int block_id, int p_id)
 void CScene::DisableBlock(int block_id)
 {
 	if (m_ppObjects[block_id]) {
+		//cout << block_id << ", " << m_ppObjects[block_id]->GetPosition().y << endl;
 		m_ppObjects[block_id]->SetIsActive(false);
 		m_ppObjects[block_id]->SetPosition(99999, 99999, 99999);
 		m_ppObjects[block_id]->m_bParticleActive = true;
 
 		auto pos = m_ppObjects[block_id]->m_pParticles[0]->GetPosition();
-		cout << pos.x << " " << pos.y << " " << pos.z << " " << endl;
+		//cout << pos.x << " " << pos.y << " " << pos.z << " " << endl;
 
 		auto tmp = m_ppObjects[block_id]->GetWorldMatrix();
 		XMFLOAT4X4 result;
@@ -1133,7 +1134,7 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 						pParticle->SetIsActive(true);
 						m_ppObjects[cnt]->m_pParticles[p] = pParticle;
 					}
-
+					//if (cnt == 499) cout << "여기 들어왔다, " << m_ppObjects[cnt]->GetPosition().y << endl;
 					cnt++;
 				}
 
@@ -1185,7 +1186,7 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 			for (int j = 0; j < 10; ++j)
 				for (int k = 0; k < 50; ++k) {
 					XMFLOAT3 position = { -(float)i * 12.0f + 20.0f,
-					 -(float)j * 12.0f , -(float)k * 12.0f + 40.0f };
+					 -108.f + (float)j * 12.0f , -(float)k * 12.0f + 40.0f };
 
 					m_ppObjects[cnt]->SetPosition(position);
 					m_ppObjects[cnt]->SetIsActive(true);
