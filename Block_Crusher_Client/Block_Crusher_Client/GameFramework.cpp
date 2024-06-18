@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "GameFramework.h"
-#include <fmod.h>
 
 int bi;
 
@@ -71,7 +70,6 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hWnd)
 	}*/
 #endif
 	BuildObjects();
-	SoundSetup();
 
 	//HANDLE hThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)do_recv, (LPVOID)NULL, 0, NULL);
 
@@ -432,12 +430,6 @@ void CGameFramework::WaitForGpuComplete()
 	}
 }
 
-void CGameFramework::SoundSetup()
-{
-	//FMOD_System_Create(&m_SoundSystem, FMOD_VERSION);
-	//FMOD_System_Init(m_SoundSystem, 10, FMOD_INIT_NORMAL, NULL);
-}
-
 void CGameFramework::MoveToNextFrame()
 {
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
@@ -512,9 +504,9 @@ void CGameFramework::FrameAdvance()
 				m_pPlayer->SetDeath(m_vEnemyPlayers[i]->GetDeath());
 	}
 
-	if(m_pScene->m_SceneState == 1)
+	if (m_pScene->m_SceneState == 1) 
 		ProcessInput();
-
+	
 	AnimateObjects();
 
 	//명령 할당자와 명령 리스트를 리셋한다.
@@ -745,6 +737,8 @@ void CGameFramework::ProcessInput()
 			//if (pKeyBuffer[VK_ESCAPE] & 0xF0) m_SceneState = 0;
 			if (pKeyBuffer[0x43] & 0xF0){
 				dwDirection |= KEY_SHOOT;
+				//FMOD_System_PlaySound(m_SoundSystem, m_Gun_soundFile, NULL, 0, &m_sound_channel[1]);
+				//FMOD_Channel_SetVolume(m_sound_channel[1], 0.03);
 				m_pPlayer->SetIsShoot(true);
 			}
 

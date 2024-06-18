@@ -73,6 +73,11 @@ public:
 		return (pt.x >= rect.left && pt.x <= rect.right && pt.y >= rect.top && pt.y <= rect.bottom);
 	}
 
+	void SoundSetup();
+	void StartStageSound();
+	void StartBattleSound();
+	void FireSound();
+
 	//BoundingBox CalculateBoundingBox();
 
 	ComPtr<ID3D12RootSignature> CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
@@ -94,6 +99,14 @@ public:
 	int m_TitleError = -1;
 	int m_flag = ID;
 	float m_fPlayTime = 120.0f;
+
+	// fmod ¸â¹ö
+	FMOD_SYSTEM* m_SoundSystem;
+
+	FMOD_SOUND* m_Stage_soundFile;
+	FMOD_SOUND* m_Battle_soundFile;
+	FMOD_SOUND* m_Gun_soundFile;
+	FMOD_CHANNEL* m_sound_channel[2];
 
 	bool GetisEnd() { return isEnd; };
 

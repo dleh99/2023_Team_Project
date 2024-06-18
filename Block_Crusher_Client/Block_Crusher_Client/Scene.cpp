@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "Player.h"
 #include "Network.h"
+#include <fmod.h>
 
 extern int gameMode;
 
@@ -25,11 +26,16 @@ CScene::CScene()
 
 	m_xmf4GlobalAmbient = XMFLOAT4{};
 	::ZeroMemory(m_sTitleTexts, sizeof(std::wstring*) * 3);
+
+	SoundSetup();
 }
 
 CScene::~CScene()
 {
-
+	FMOD_Sound_Release(m_Stage_soundFile);
+	FMOD_Sound_Release(m_Battle_soundFile);
+	FMOD_Sound_Release(m_Gun_soundFile);
+	FMOD_System_Release(m_SoundSystem);
 }
 
 void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char mapkey)
@@ -109,6 +115,8 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pShadowMapToViewport->BuildObjects(pd3dDevice, pd3dCommandList, m_pDepthRenderShader->GetDepthTexture());
 
 	m_pInstanceShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pDepthRenderShader->GetDepthTexture());
+
+	StartStageSound();
 }
 
 void CScene::ReleaseObjects()
@@ -566,6 +574,38 @@ bool CScene::OnPrecessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	return false;
 }
 
+void CScene::SoundSetup()
+{
+	FMOD_System_Create(&m_SoundSystem, FMOD_VERSION);
+	FMOD_System_Init(m_SoundSystem, 10, FMOD_INIT_NORMAL, NULL);
+
+	FMOD_System_CreateSound(m_SoundSystem, "Sound\\Stage.mp3", FMOD_LOOP_NORMAL, 0, &m_Stage_soundFile);
+	FMOD_System_CreateSound(m_SoundSystem, "Sound\\Battle.mp3", FMOD_LOOP_NORMAL, 0, &m_Battle_soundFile);
+	FMOD_System_CreateSound(m_SoundSystem, "Sound\\Gun.mp3", FMOD_LOOP_OFF, 0, &m_Gun_soundFile);
+
+	cout << "사운드 설정 완료" << endl;
+}
+
+void CScene::StartStageSound()
+{
+	FMOD_Channel_Stop(m_sound_channel[0]);
+	FMOD_System_PlaySound(m_SoundSystem, m_Stage_soundFile, NULL, 0, &m_sound_channel[0]);
+	FMOD_Channel_SetVolume(m_sound_channel[0], 0.02);
+}
+
+void CScene::StartBattleSound()
+{
+	FMOD_Channel_Stop(m_sound_channel[0]);
+	FMOD_System_PlaySound(m_SoundSystem, m_Battle_soundFile, NULL, 0, &m_sound_channel[0]);
+	FMOD_Channel_SetVolume(m_sound_channel[0], 0.02);
+}
+
+void CScene::FireSound()
+{
+	FMOD_System_PlaySound(m_SoundSystem, m_Gun_soundFile, NULL, 0, &m_sound_channel[1]);
+	FMOD_Channel_SetVolume(m_sound_channel[1], 0.03);
+}
+
 bool CScene::ProcessInput(UCHAR* pKeyBuffer)
 {
 	return false;
@@ -661,7 +701,9 @@ void CScene::AddObjects(int type,XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector,
 	//pBulletObject->SetBoundingRadius(2.0f);
 
 	pBulletObject->SetPlayerId(p_id);
+#ifdef USE_SERVER
 	pBulletObject->SetUpgradeBulletSpeed(m_vPlayers[p_id]->GetUpgradeBulletSpeed());
+#endif
 	pBulletObject->SetBulletId(b_id);
 
 	//int index = FindEmptySlot();

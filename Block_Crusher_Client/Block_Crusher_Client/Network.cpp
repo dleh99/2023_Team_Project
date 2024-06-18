@@ -1,5 +1,6 @@
 #include "Network.h"
 #include "Scene.h"
+#include "GameFramework.h"
 
 WSADATA wsa;
 SOCKET g_socket;
@@ -233,6 +234,9 @@ void ProcessPacket(char* ptr)
 
 		NetScene->m_SceneState = 1;
 		cout << "시작 패킷 받음" << endl;
+
+		NetScene->StartBattleSound();
+		
 		break;
 	}
 	case SC_MOVE_PLAYER: {
@@ -351,6 +355,7 @@ void ProcessPacket(char* ptr)
 		//cout << "재시작 하래" << endl;
 		NetScene->m_SceneState = 2;
 		NetScene->m_fPlayTime = 120.0f;
+		NetScene->StartStageSound();
 
 		break;
 	}

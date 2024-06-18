@@ -131,6 +131,8 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 					m_fKeyDownTime = 0.f;
 
 					if (m_nBullet == 0) m_bReloading = true;
+
+					m_pScene->FireSound();
 				}
 			}
 		}
