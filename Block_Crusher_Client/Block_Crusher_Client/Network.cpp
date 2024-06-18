@@ -235,7 +235,7 @@ void ProcessPacket(char* ptr)
 		NetScene->m_SceneState = 1;
 		cout << "시작 패킷 받음" << endl;
 
-		NetScene->StartBattleSound();
+		SoundManager::GetInstance().StartBattleSound();
 		
 		break;
 	}
@@ -283,7 +283,7 @@ void ProcessPacket(char* ptr)
 	case SC_BULLET_COLLISION: {
 		SC_BULLET_COLLISION_PACKET* packet = reinterpret_cast<SC_BULLET_COLLISION_PACKET*>(ptr);
 		//cout << "총알 번호 : " << packet->bullet_id << ", 블록 번호 : " << packet->block_id << ", 총알 주인 : " << packet->player_id << endl;;
-		cout << packet->block_id << endl;
+		//cout << packet->block_id << endl;
 		NetScene->DisableObject(packet->bullet_id, packet->block_id, packet->player_id);
 
 		if (id == packet->player_id) {
@@ -301,7 +301,7 @@ void ProcessPacket(char* ptr)
 		//cout << packet->bullet_id << ", " << packet->player_id << endl;
 		NetScene->DisableBullet(packet->bullet_id, packet->player_id);
 
-		cout << packet->player_id << "가 " << packet->enemy_id << "를 " << packet->bullet_id << "번 총알로 맞춤, 데미지는 " << packet->bullet_damage << endl;
+		//cout << packet->player_id << "가 " << packet->enemy_id << "를 " << packet->bullet_id << "번 총알로 맞춤, 데미지는 " << packet->bullet_damage << endl;
 		if (id == packet->enemy_id) {
 			int UpdatedHP = Netplayers[id]->GetPlayerHP() - packet->bullet_damage; // (10 + Netplayers[hit]->GetUpgradeDamage());
 			Netplayers[id]->SetPlayerHP(UpdatedHP);
@@ -356,7 +356,7 @@ void ProcessPacket(char* ptr)
 		//cout << "재시작 하래" << endl;
 		NetScene->m_SceneState = 2;
 		NetScene->m_fPlayTime = 120.0f;
-		NetScene->StartStageSound();
+		SoundManager::GetInstance().StartStageSound();
 
 		break;
 	}

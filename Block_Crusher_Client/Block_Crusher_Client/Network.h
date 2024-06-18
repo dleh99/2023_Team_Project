@@ -7,6 +7,7 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include "Player.h"
+#include "SoundManager.h"
 #include <fstream>
 #pragma comment(lib, "ws2_32")
 

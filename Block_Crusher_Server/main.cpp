@@ -606,11 +606,11 @@ void Physics_Calculation_thread()
 					{
 						if (0 <= temp.x && temp.x < 50 && 0 <= temp.y && temp.y < 20 && 0 <= temp.z && temp.z < 50) {
 							if (true == r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetisActive()) {
-								cout << temp.x << ", " << temp.y << ", " << temp.z << endl;
+								//cout << temp.x << ", " << temp.y << ", " << temp.z << endl;
 								if (CollisionCheck_objects(clients[check_id].bullet[bullet_num].GetPosition(), r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetPosition(),
 									clients[check_id].bullet[bullet_num].GetRadius(), r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetRadius())) {
-									cout << r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetId() << endl;
-									cout << "충돌은 해?" << endl;
+									//cout << r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].GetId() << endl;
+									//cout << "충돌은 해?" << endl;
 									clients[check_id].bullet[bullet_num].SetisActive(false);
 									r.map_information.Map_B[temp.z + 50 * temp.x][temp.y].SetisActive(false);
 

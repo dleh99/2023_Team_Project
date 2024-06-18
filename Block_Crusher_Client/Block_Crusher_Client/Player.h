@@ -11,6 +11,7 @@
 #include "GameObject.h"
 #include "Scene.h"
 #include "Camera.h"
+#include "SoundManager.h"
 #include "..\..\Block_Crusher_Server\protocol.h"
 
 class CPlayer : public CGameObject
