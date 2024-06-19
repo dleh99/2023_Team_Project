@@ -230,6 +230,8 @@ void ProcessPacket(char* ptr)
 		id = packet->player_id;
 		cout << "게임을 시작했습니다. 제 아이디는 " << id << "입니다" << endl;
 
+		NetScene->m_pPlayer = Netplayers[id];
+
 		XMFLOAT3 pos = { packet->start_x ,packet->start_y ,packet->start_z };
 		Netplayers[id]->SetPosition(pos);
 

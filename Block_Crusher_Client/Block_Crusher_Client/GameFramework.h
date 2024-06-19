@@ -131,4 +131,3 @@ public:
 	POINT m_ptWinCursorMouse; 
 
 };
-
