@@ -233,6 +233,11 @@ void ProcessPacket(char* ptr)
 
 		NetGameFramework->m_pPlayer = Netplayers[id];
 		NetGameFramework->m_pCamera = NetGameFramework->m_pPlayer->GetCamera();
+		NetGameFramework->m_pPlayer->Update(NetGameFramework->GetGameTimer().GetTimeElapsed(), NULL);
+		for (int i = 0; i < Netplayers.size(); ++i) {
+			if (Netplayers[i])
+				Netplayers[i]->Update(NetGameFramework->GetGameTimer().GetTimeElapsed(), NULL);
+		}
 		NetScene->m_pPlayer = Netplayers[id];
 
 		XMFLOAT3 pos = { packet->start_x ,packet->start_y ,packet->start_z };

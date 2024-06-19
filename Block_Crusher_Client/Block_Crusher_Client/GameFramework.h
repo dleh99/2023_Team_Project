@@ -118,6 +118,7 @@ public:
 	void ChangeSwapChainState();
 
 	long long GetFrame() { return frame_num; };
+	CGameTimer GetGameTimer() { return m_GameTimer; };
 
 public:
 	void MoveToNextFrame();
