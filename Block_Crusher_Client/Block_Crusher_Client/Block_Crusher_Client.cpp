@@ -125,6 +125,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    }
 
    g_GameFramework.OnCreate(hInst, hMainWnd);
+   SetGameFramework(&g_GameFramework);
 
    ShowWindow(hMainWnd, nCmdShow);
    UpdateWindow(hMainWnd);

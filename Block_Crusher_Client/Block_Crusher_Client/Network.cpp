@@ -18,6 +18,7 @@ float otherPlayer_x, otherPlayer_y, otherPlayer_z;
 Pos otherPlayerPos[3];
 Mouse otherPlayerMouse[3];
 Animation otherPlayerAni[3];
+CGameFramework* NetGameFramework = NULL;
 CScene* NetScene = NULL;
 vector<CMainPlayer*> Netplayers;
 CCamera* GameCamera = NULL;
@@ -230,6 +231,8 @@ void ProcessPacket(char* ptr)
 		id = packet->player_id;
 		cout << "게임을 시작했습니다. 제 아이디는 " << id << "입니다" << endl;
 
+		NetGameFramework->m_pPlayer = Netplayers[id];
+		NetGameFramework->m_pCamera = NetGameFramework->m_pPlayer->GetCamera();
 		NetScene->m_pPlayer = Netplayers[id];
 
 		XMFLOAT3 pos = { packet->start_x ,packet->start_y ,packet->start_z };
@@ -640,6 +643,10 @@ void err_display(int errcode)
 		(char*)&lpMsgBuf, 0, NULL);
 	printf("[오류] %s\n", (char*)lpMsgBuf);
 	LocalFree(lpMsgBuf);
+}
+
+void SetGameFramework(CGameFramework* GameFramework) {
+	NetGameFramework = GameFramework;
 }
 
 void SetScene(CScene* Scene) {

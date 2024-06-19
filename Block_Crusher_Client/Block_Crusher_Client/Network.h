@@ -11,6 +11,8 @@
 #include <fstream>
 #pragma comment(lib, "ws2_32")
 
+class CGameFramework;
+
 using namespace std;
 
 struct Pos {
@@ -49,6 +51,7 @@ int GetNetworkPlayerId();
 Animation GetOtherAni(int id);
 Pos GetOtherPlayerPos(int id);
 Mouse GetOtherPlayerMouse(int id);
+void SetGameFramework(CGameFramework* GameFramework);
 void SetScene(CScene* Scene);
 void SetPlayers(vector<CMainPlayer*> players);
 void SetFrame(long long input);
