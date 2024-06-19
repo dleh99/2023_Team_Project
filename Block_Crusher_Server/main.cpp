@@ -113,7 +113,7 @@ void checking_room(int key)
 				clients[room_mambers[i]]._state = US_INGAME;
 			}
 			clients[room_mambers[i]]._room_id = i;
-			//cout << room_mambers[i] << "에게 id 보냄 : " << i << endl;
+			cout << room_mambers[i] << "에게 id 보냄 : " << i << endl;
 			XMFLOAT3 start_pos = physics_engine.StartPos(i);
 
 			clients[room_mambers[i]].send_start_packet(rooms[room_num].GetMapKey(), i, start_pos.x, start_pos.y, start_pos.z);
@@ -671,7 +671,7 @@ void Physics_Calculation_thread()
 							clients[check_id].bullet[bullet_num].SetisActive(false);
 							clients[other_id].hp -= clients[check_id].cl_damage;
 
-							cout << "[" << check_id << "] 가 [" << other_id << "]를 " << clients[check_id].cl_damage << "의 데미지로 때려서 " << clients[other_id].hp << "이 남음" << endl;
+							cout << "[" << clients[check_id]._room_id << "] 가 [" << clients[other_id]._room_id << "]를 " << clients[check_id].cl_damage << "의 데미지로 때려서 " << clients[other_id].hp << "이 남음" << endl;
 							
 							// hp가 0이면 죽었다고, 아니면 맞았다는 패킷 보냄
 							if (clients[other_id].hp > 0) {
