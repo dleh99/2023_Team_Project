@@ -1483,3 +1483,13 @@ void CInstancingShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignatu
 	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, m_ppd3dPipelineStates);
 
 }
+
+D3D12_SHADER_BYTECODE CPlanetShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
+{
+	return CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSPlanetDiffused", "vs_5_1", ppd3dShaderBlob);
+}
+
+D3D12_SHADER_BYTECODE CPlanetShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
+{
+	return CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSPlanetDiffused", "ps_5_1", ppd3dShaderBlob);
+}

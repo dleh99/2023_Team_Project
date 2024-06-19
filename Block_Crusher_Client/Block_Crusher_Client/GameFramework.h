@@ -79,9 +79,6 @@ private:
 
 	bool m_Buildingflag = false;
 
-	// fmod ¸â¹ö
-	FMOD_SYSTEM* m_SoundSystem;
-
 public:
 	CGameFramework();
 	~CGameFramework();
@@ -130,6 +127,10 @@ public:
 	CCamera* m_pCamera = NULL;
 	CMainPlayer* m_pPlayer = NULL;
 	vector<CMainPlayer*> m_vEnemyPlayers;
+	
+	CGameObject* m_pBackgroundObjects = NULL;
+	int m_nBackgroundObjects = 0;
+
 	wstring* m_sTitleTexts[3];
 	POINT m_ptOldCursorPos; 
 	POINT m_ptWinCursorMouse; 

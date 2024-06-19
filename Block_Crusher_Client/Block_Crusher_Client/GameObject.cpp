@@ -687,43 +687,65 @@ CLoadedModelInfo* CGameObject::LoadModelAndAnimationFromFile(ID3D12Device* pd3dD
 	pLoadedModel->m_pModelRootObject = CGameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
 		fPlayerModelFile, pPlayerMeshShader, pPlayerSkinnedMeshShader, &pLoadedModel->m_nSkinnedMeshes, pMaterial);
 
-	std::ifstream fPlayerAnimationFile{ pstrAnimationFileName, std::ios::binary };
-
-	if (!fPlayerAnimationFile) {
-		std::cout << "플레이어 애니메이션 파일 읽기 실패" << std::endl;
-		exit(-1);
-	}
-
-	CGameObject::LoadAnimationFromFile(fPlayerAnimationFile, pLoadedModel);
-	pLoadedModel->PrepareSkinning();
-
-	char token[64] = { 0, };
-	//strcpy(token, "ForwardAndShoot");
-
-	// Rifle
-	CAnimationSet* pShootAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[5];
-
-	for (int k = 0; k < 4; ++k)
+	if (pstrAnimationFileName)
 	{
-		CAnimationSet* pWalkAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[1 + k];
+		std::ifstream fPlayerAnimationFile{ pstrAnimationFileName, std::ios::binary };
 
-		float fLength = pWalkAnimationSet->m_fLength;
-		int nFramesPerSecond = pWalkAnimationSet->m_nFramePerSecond;
-		int nKeyFrames = pWalkAnimationSet->m_nKeyFrames;
+		if (!fPlayerAnimationFile) {
+			std::cout << "플레이어 애니메이션 파일 읽기 실패" << std::endl;
+			exit(-1);
+		}
 
-		pLoadedModel->m_pAnimationSets->m_pAnimationSets[15 + k] =
-			new CAnimationSet(fLength, nFramesPerSecond, nKeyFrames, pLoadedModel->m_pAnimationSets->m_nBoneFrames,
-				token);
+		CGameObject::LoadAnimationFromFile(fPlayerAnimationFile, pLoadedModel);
+		pLoadedModel->PrepareSkinning();
 
-		CAnimationSet* pAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[15 + k];		
+		char token[64] = { 0, };
+		//strcpy(token, "ForwardAndShoot");
 
-		for (int i = 0; i < nKeyFrames; ++i)
+		// Rifle
+		CAnimationSet* pShootAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[5];
+
+		for (int k = 0; k < 4; ++k)
 		{
-			pAnimationSet->m_pKeyFrameTimes[i] = pWalkAnimationSet->m_pKeyFrameTimes[i];
+			CAnimationSet* pWalkAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[1 + k];
 
-			for (int j = 0; j < 12; ++j)
+			float fLength = pWalkAnimationSet->m_fLength;
+			int nFramesPerSecond = pWalkAnimationSet->m_nFramePerSecond;
+			int nKeyFrames = pWalkAnimationSet->m_nKeyFrames;
+
+			pLoadedModel->m_pAnimationSets->m_pAnimationSets[15 + k] =
+				new CAnimationSet(fLength, nFramesPerSecond, nKeyFrames, pLoadedModel->m_pAnimationSets->m_nBoneFrames,
+					token);
+
+			CAnimationSet* pAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[15 + k];
+
+			for (int i = 0; i < nKeyFrames; ++i)
 			{
-				if (j == 2)			// Pelvis
+				pAnimationSet->m_pKeyFrameTimes[i] = pWalkAnimationSet->m_pKeyFrameTimes[i];
+
+				for (int j = 0; j < 12; ++j)
+				{
+					if (j == 2)			// Pelvis
+					{
+						if (i < pShootAnimationSet->m_nKeyFrames)
+						{
+							pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+								= pShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
+						}
+						else
+						{
+							pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+								= pShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 27][j];
+						}
+					}
+					else
+					{
+						pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+							= pWalkAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
+					}
+				}
+
+				for (int j = 12; j < pLoadedModel->m_pAnimationSets->m_nBoneFrames; ++j)
 				{
 					if (i < pShootAnimationSet->m_nKeyFrames)
 					{
@@ -736,53 +758,53 @@ CLoadedModelInfo* CGameObject::LoadModelAndAnimationFromFile(ID3D12Device* pd3dD
 							= pShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 27][j];
 					}
 				}
-				else
-				{
-					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
-						= pWalkAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
-				}
-			}
-
-			for (int j = 12; j < pLoadedModel->m_pAnimationSets->m_nBoneFrames; ++j)
-			{
-				if (i < pShootAnimationSet->m_nKeyFrames)
-				{
-					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
-						= pShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
-				}
-				else
-				{
-					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
-						= pShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 27][j];
-				}
 			}
 		}
-	}
 
-	// Rifle
-	CAnimationSet* pRifleShootAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[5];
+		// Rifle
+		CAnimationSet* pRifleShootAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[5];
 
-	for (int k = 0; k < 4; ++k)
-	{
-		CAnimationSet* pWalkAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[1 + k];
-
-		float fLength = pWalkAnimationSet->m_fLength;
-		int nFramesPerSecond = pWalkAnimationSet->m_nFramePerSecond;
-		int nKeyFrames = pWalkAnimationSet->m_nKeyFrames;
-
-		pLoadedModel->m_pAnimationSets->m_pAnimationSets[15 + k] =
-			new CAnimationSet(fLength, nFramesPerSecond, nKeyFrames, pLoadedModel->m_pAnimationSets->m_nBoneFrames,
-				token);
-
-		CAnimationSet* pAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[15 + k];		
-
-		for (int i = 0; i < nKeyFrames; ++i)
+		for (int k = 0; k < 4; ++k)
 		{
-			pAnimationSet->m_pKeyFrameTimes[i] = pWalkAnimationSet->m_pKeyFrameTimes[i];
+			CAnimationSet* pWalkAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[1 + k];
 
-			for (int j = 0; j < 12; ++j)
+			float fLength = pWalkAnimationSet->m_fLength;
+			int nFramesPerSecond = pWalkAnimationSet->m_nFramePerSecond;
+			int nKeyFrames = pWalkAnimationSet->m_nKeyFrames;
+
+			pLoadedModel->m_pAnimationSets->m_pAnimationSets[15 + k] =
+				new CAnimationSet(fLength, nFramesPerSecond, nKeyFrames, pLoadedModel->m_pAnimationSets->m_nBoneFrames,
+					token);
+
+			CAnimationSet* pAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[15 + k];
+
+			for (int i = 0; i < nKeyFrames; ++i)
 			{
-				if (j == 2)			// Pelvis
+				pAnimationSet->m_pKeyFrameTimes[i] = pWalkAnimationSet->m_pKeyFrameTimes[i];
+
+				for (int j = 0; j < 12; ++j)
+				{
+					if (j == 2)			// Pelvis
+					{
+						if (i < pRifleShootAnimationSet->m_nKeyFrames)
+						{
+							pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+								= pRifleShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
+						}
+						else
+						{
+							pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+								= pRifleShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 27][j];
+						}
+					}
+					else
+					{
+						pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+							= pWalkAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
+					}
+				}
+
+				for (int j = 12; j < pLoadedModel->m_pAnimationSets->m_nBoneFrames; ++j)
 				{
 					if (i < pRifleShootAnimationSet->m_nKeyFrames)
 					{
@@ -795,53 +817,53 @@ CLoadedModelInfo* CGameObject::LoadModelAndAnimationFromFile(ID3D12Device* pd3dD
 							= pRifleShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 27][j];
 					}
 				}
-				else
-				{
-					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
-						= pWalkAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
-				}
-			}
-
-			for (int j = 12; j < pLoadedModel->m_pAnimationSets->m_nBoneFrames; ++j)
-			{
-				if (i < pRifleShootAnimationSet->m_nKeyFrames)
-				{
-					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
-						= pRifleShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
-				}
-				else
-				{
-					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
-						= pRifleShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 27][j];
-				}
 			}
 		}
-	}
 
-	// Pistol
-	CAnimationSet* pPistolShootAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[14];
+		// Pistol
+		CAnimationSet* pPistolShootAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[14];
 
-	for (int k = 0; k < 4; ++k)
-	{
-		CAnimationSet* pWalkAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[10 + k];
-
-		float fLength = pWalkAnimationSet->m_fLength;
-		int nFramesPerSecond = pWalkAnimationSet->m_nFramePerSecond;
-		int nKeyFrames = pWalkAnimationSet->m_nKeyFrames;
-
-		pLoadedModel->m_pAnimationSets->m_pAnimationSets[19 + k] =
-			new CAnimationSet(fLength, nFramesPerSecond, nKeyFrames, pLoadedModel->m_pAnimationSets->m_nBoneFrames,
-				token);
-
-		CAnimationSet* pAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[19 + k];
-
-		for (int i = 0; i < nKeyFrames; ++i)
+		for (int k = 0; k < 4; ++k)
 		{
-			pAnimationSet->m_pKeyFrameTimes[i] = pWalkAnimationSet->m_pKeyFrameTimes[i];
+			CAnimationSet* pWalkAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[10 + k];
 
-			for (int j = 0; j < 12; ++j)
+			float fLength = pWalkAnimationSet->m_fLength;
+			int nFramesPerSecond = pWalkAnimationSet->m_nFramePerSecond;
+			int nKeyFrames = pWalkAnimationSet->m_nKeyFrames;
+
+			pLoadedModel->m_pAnimationSets->m_pAnimationSets[19 + k] =
+				new CAnimationSet(fLength, nFramesPerSecond, nKeyFrames, pLoadedModel->m_pAnimationSets->m_nBoneFrames,
+					token);
+
+			CAnimationSet* pAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[19 + k];
+
+			for (int i = 0; i < nKeyFrames; ++i)
 			{
-				if (j == 2)			// Pelvis
+				pAnimationSet->m_pKeyFrameTimes[i] = pWalkAnimationSet->m_pKeyFrameTimes[i];
+
+				for (int j = 0; j < 12; ++j)
+				{
+					if (j == 2)			// Pelvis
+					{
+						if (i < pPistolShootAnimationSet->m_nKeyFrames)
+						{
+							pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+								= pPistolShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
+						}
+						else
+						{
+							pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+								= pPistolShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 20][j];
+						}
+					}
+					else
+					{
+						pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
+							= pWalkAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
+					}
+				}
+
+				for (int j = 12; j < pLoadedModel->m_pAnimationSets->m_nBoneFrames; ++j)
 				{
 					if (i < pPistolShootAnimationSet->m_nKeyFrames)
 					{
@@ -853,25 +875,6 @@ CLoadedModelInfo* CGameObject::LoadModelAndAnimationFromFile(ID3D12Device* pd3dD
 						pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
 							= pPistolShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 20][j];
 					}
-				}
-				else
-				{
-					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
-						= pWalkAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
-				}
-			}
-
-			for (int j = 12; j < pLoadedModel->m_pAnimationSets->m_nBoneFrames; ++j)
-			{
-				if (i < pPistolShootAnimationSet->m_nKeyFrames)
-				{
-					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
-						= pPistolShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j];
-				}
-				else
-				{
-					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][j]
-						= pPistolShootAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 20][j];
 				}
 			}
 		}
@@ -918,7 +921,7 @@ CGameObject* CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, I
 			// Mesh Info
 			CMeshLoadInfo* pMeshInfo = pGameObject->LoadMeshInfoFromFile(fileStream, 20.0f);
 
-			if (pMeshInfo)
+			if (pMeshInfo && pMeshInfo->m_nPositions > 0)
 			{
 				CPlayerMesh* pMesh = NULL;
 				pMesh = new CPlayerMesh(pd3dDevice, pd3dCommandList, pMeshInfo);
@@ -1560,4 +1563,40 @@ void CLoadedModelInfo::PrepareSkinning()
 	m_pModelRootObject->FindAndSetSkinnedMesh(m_ppSkinnedMeshes, &nSkinnedMesh);
 
 	for (int i = 0; i < m_nSkinnedMeshes; i++) m_ppSkinnedMeshes[i]->PrepareSkinning(m_pModelRootObject);
+}
+
+CSatellite::CSatellite(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z,
+	CShader* pPlayerShader, CShader* pSkinnedPlayerShader, CMaterial* pMaterial)
+{
+	CLoadedModelInfo* pSatelliteModel = LoadModelAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+		"Models/satellite model data.bin", NULL, pPlayerShader, pSkinnedPlayerShader, pMaterial);
+	SetChild(pSatelliteModel->m_pModelRootObject);
+	
+	SetScale(20.0f);
+	SetPosition(XMFLOAT3(x, y, z));
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+void CSatellite::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	CGameObject::Render(pd3dCommandList, pCamera);
+}
+
+CAlienPlanet::CAlienPlanet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z, CShader* pPlayerShader, CShader* pSkinnedPlayerShader, CMaterial* pMaterial)
+{
+	CLoadedModelInfo* pSatelliteModel = LoadModelAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+		"Models/alien planet model data.bin", NULL, pPlayerShader, pSkinnedPlayerShader, pMaterial);
+	SetChild(pSatelliteModel->m_pModelRootObject);
+
+	SetScale(20.0f);
+	SetPosition(XMFLOAT3(x, y, z));
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+void CAlienPlanet::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	CGameObject::Render(pd3dCommandList, pCamera);
 }

@@ -564,6 +564,12 @@ void CGameFramework::FrameAdvance()
 	if (m_pPlayer)
 		m_pPlayer->Render(m_pd3dCommandList.Get(), m_pCamera);
 
+	m_pBackgroundObjects->Render(m_pd3dCommandList.Get(), m_pCamera);
+
+	/*for (int i = 0; i < m_nBackgroundObjects; ++i) {
+		m_ppBackgroundObjects[i]->Render(m_pd3dCommandList.Get(), m_pCamera);
+	}*/
+
 	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
 		if (m_pPlayer)
 			if (m_pPlayer->GetPlayerId() == i)
@@ -637,8 +643,15 @@ void CGameFramework::BuildObjects()
 	//pSkinnedPlayerShader->CreateShaderResourceViews(m_pd3dDevice.Get(), pTexture, 0, 4);
 	CScene::CreateShaderResourceViews(m_pd3dDevice.Get(), pTexture, 0, 4);
 
+	CTexture* pSatelliteTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pSatelliteTexture->LoadTextureFromDDSFile(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), L"Textures/magelan_map1.dds", RESOURCE_TEXTURE2D, 0);
+	//CScene::CreateShaderResourceViews(m_pd3dDevice.Get(), pSatelliteTexture, 0, 4);
+
 	CMaterial* pMat = new CMaterial();
 	pMat->SetTexture(pTexture);
+
+	CMaterial* pSatelliteMat = new CMaterial();
+	pSatelliteMat->SetTexture(pSatelliteTexture);
 
 #ifdef USE_SERVER
 	SetScene(m_pScene);
@@ -692,6 +705,26 @@ void CGameFramework::BuildObjects()
 		if (m_vEnemyPlayers[i])
 			m_vEnemyPlayers[i]->Update(m_GameTimer.GetTimeElapsed(), NULL);
 	}
+
+	CSatellite* pSatellite1 = new CSatellite(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 0.0f, pPlayerShader, pSkinnedPlayerShader, pMat);
+
+	m_pBackgroundObjects = pSatellite1;
+
+	CPlanetShader* pAlienPlanetShader = new CPlanetShader();
+	pAlienPlanetShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature().Get());
+	pAlienPlanetShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+	//CScene::CreateShaderResourceViews(m_pd3dDevice.Get(), NULL, 0, 4);
+
+	CMaterial* pAlienPlanetMat = new CMaterial();
+
+	CAlienPlanet* pAlienPlanet = new CAlienPlanet(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 0.0f, pAlienPlanetShader, pSkinnedPlayerShader, pAlienPlanetMat);
+
+	m_pBackgroundObjects = pAlienPlanet;
+
+	/*m_ppBackgroundObjects[m_nBackgroundObjects] = pSatellite1->m_pChild;
+	m_nBackgroundObjects++;*/
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList.Get() };
