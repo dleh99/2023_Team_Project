@@ -43,11 +43,13 @@ int set_client_id()
 
 void disconnect(int c_id)
 {
+#ifdef USE_DB
 	// DB에서 login_state 변경
 	if (clients[c_id].login_id != L"") {
 		DB_EVENT ev{ clients[c_id]._id, chrono::system_clock::now(), LOGIN_DISCONNECT, clients[c_id].login_id, L"" };
 		db_queue.push(ev);
 	}
+#endif
 
 	// 룸에서도 빠져나가게 해야함
 	short room_num = clients_room[c_id];
@@ -178,9 +180,13 @@ void packet_process(int c_id, char* packet)
 		*/
 
 		// DB에서 로그인 시도
+#ifdef USE_DB
 		clients[c_id].login_id = p->id;
 		DB_EVENT ev{ clients[c_id]._id, chrono::system_clock::now(), TRY_LOGIN, p->id, p->password };
 		db_queue.push(ev);
+#else
+		clients[c_id].send_login_success_packet(LS_LOGIN_SUCCESS);
+#endif
 
 		break;
 	}
@@ -266,9 +272,11 @@ void packet_process(int c_id, char* packet)
 		short room_num = clients_room[c_id];
 		clients[c_id].score = p->score;
 		cout << "받았냐?" << endl;
-		
+	
+#ifdef USE_DB
 		DB_EVENT ev{ clients[c_id]._id, chrono::system_clock::now(), UPDATE_SCORE, clients[c_id].login_id, clients[c_id].score };
 		db_queue.push(ev);
+#endif
 		
 		if (-1 != rooms[room_num].scoreCalculate(clients[c_id].score)) {
 			int* room_member = rooms[room_num].GetPlayerId();
@@ -824,12 +832,18 @@ int main()
 	g_over._overlapped_type = OT_ACCEPT;
 	AcceptEx(g_s_socket, g_c_socket, g_over._send_buf, 0, addr_size + 16, addr_size + 16, 0, &g_over._over);
 
+	int thread_num = thread::hardware_concurrency();
+	int possible_work_thread = thread_num - 3;
+#ifdef USE_DB
 	db_controll.InitDB();
+#else
+	possible_work_thread += 1;
+#endif
 	InitRoom();	
 
 	vector<thread> worker_threads;
-	int thread_num = thread::hardware_concurrency();
-	for (int i{}; i < thread_num - 3; ++i)
+
+	for (int i{}; i < possible_work_thread; ++i)
 		worker_threads.emplace_back(worker_thread, iocp_h);
 	
 	// 계산 스레드
@@ -838,17 +852,21 @@ int main()
 	// 타이머 스레드
 	thread timer_thread{ do_timer };
 
+#ifdef USE_DB
 	// DB 스레드
 	thread db_thread{ do_db };
 
 	db_thread.join();
+#endif
 	timer_thread.join();
 	physics_thread.join();
 	for (auto& thread : worker_threads) 
 		thread.join();
 
+#ifdef USE_DB
 	// DB 해제
 	db_controll.ReleaseDB();
+#endif
 
 	closesocket(g_s_socket);
 	WSACleanup();
