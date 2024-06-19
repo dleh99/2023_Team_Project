@@ -182,7 +182,7 @@ VS_PLANET_OUTPUT VSPlanetDiffused(VS_PLANET_INPUT input)
 float4 PSPlanetDiffused(VS_PLANET_OUTPUT input) : SV_TARGET
 {
 	//float4 cColor = gtxtAlbedoTexture.Sample(gSamplerState, input.uv);
-	float4 cColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
+	float4 cColor = float4(0.5f, 0.3f, 0.7f, 1.0f);
 	float3 normalW = normalize(input.normal);
 	float3 positionW = float3(input.position.x, input.position.y, input.position.z);
 	float4 shadowMapUVs[MAX_LIGHTS];
