@@ -265,6 +265,7 @@ void packet_process(int c_id, char* packet)
 		CS_SCORE_PACKET* p = reinterpret_cast<CS_SCORE_PACKET*>(packet);
 		short room_num = clients_room[c_id];
 		clients[c_id].score = p->score;
+		cout << "받았냐?" << endl;
 		
 		DB_EVENT ev{ clients[c_id]._id, chrono::system_clock::now(), UPDATE_SCORE, clients[c_id].login_id, clients[c_id].score };
 		db_queue.push(ev);
@@ -306,6 +307,7 @@ void packet_process(int c_id, char* packet)
 		else if (p->up_option == UP_HP) {
 			//cout << "[" << c_id << "] 의 체력을 강화해요" << endl;
 			clients[c_id].hp += 10;
+			clients[c_id].max_hp += 10;
 		}
 		break;
 	}
@@ -416,7 +418,7 @@ void worker_thread(HANDLE iocp_h)
 			case OT_RESPAWN:
 			{
 				// 타이머 큐에서 리스폰 하라는 메시지를 보낸다면 
-				clients[key].hp = 10;
+				clients[key].hp = clients[key].max_hp;
 				clients[key].isDeath = false;
 
 				XMFLOAT3 random_pos = physics_engine.PickPos();
@@ -428,7 +430,7 @@ void worker_thread(HANDLE iocp_h)
 					int player_id = same_room_player[round];
 					if (player_id == -1) continue;
 					//cout << player_id << "에게 " << key << "가 살아났음을 알림" << endl;
-					clients[player_id].send_respawn_packet(random_pos.x, random_pos.y, random_pos.z, clients[key]._room_id);
+					clients[player_id].send_respawn_packet(random_pos.x, random_pos.y, random_pos.z, clients[key]._room_id, clients[player_id].hp);
 				}
 				delete ex_over;
 				break;

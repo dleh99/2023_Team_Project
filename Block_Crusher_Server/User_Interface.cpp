@@ -9,6 +9,7 @@ User_Interface::User_Interface()
 	cx = cy = 0;
 	_player_radius = 7.f;
 	hp = 100;
+	max_hp = 100;
 	isinvincible = false;
 	invincible_time = 0.f;
 	isDeath = false;
@@ -45,6 +46,7 @@ void User_Interface::refresh()
 {
 	_state = US_CONNECTING;
 	hp = 100;
+	max_hp = 100;
 	isinvincible = false;
 	invincible_time = 0.f;
 	isDeath = false;
@@ -201,7 +203,7 @@ void User_Interface::send_dead_packet(int bullet_id, int player_id, int death_id
 	do_send(&p);
 }
 
-void User_Interface::send_respawn_packet(float x, float y, float z, int player_id)
+void User_Interface::send_respawn_packet(float x, float y, float z, int player_id, int player_hp)
 {
 	SC_RESPAWN_PACKET p;
 	p.size = sizeof(SC_RESPAWN_PACKET);
@@ -210,6 +212,7 @@ void User_Interface::send_respawn_packet(float x, float y, float z, int player_i
 	p.respawn_x = x;
 	p.respawn_y = y;
 	p.respawn_z = z;
+	p.player_hp = player_hp;
 	do_send(&p);
 }
 

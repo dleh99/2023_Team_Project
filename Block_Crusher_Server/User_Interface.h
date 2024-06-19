@@ -24,6 +24,7 @@ public:
 	float			_player_radius;				// 충돌처리에 사용될 바운딩 박스 radius 값
 
 	int				hp;							// hp값 어떻게 할거야?
+	int				max_hp;
 	bool			isinvincible;				// 맞아서 무적 타임인가?
 	float			invincible_time;			// 무적 시간
 
@@ -64,7 +65,7 @@ public:
 	void send_bullet_collision_packet(int id_1, int id_2, int c_id, int block_type);
 	void send_hit_packet(int bullet_id, int player_id, int enemy_id, int bullet_damage);
 	void send_dead_packet(int bullet_id, int player_id, int death_id);
-	void send_respawn_packet(float x, float y, float z, int player_id);
+	void send_respawn_packet(float x, float y, float z, int player_id, int player_hp);
 	void send_fall_packet(int fall_id);
 	void send_result_packet();
 	void send_add_block_packet(float input_x, float input_z, int input_id);

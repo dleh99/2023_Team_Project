@@ -206,7 +206,7 @@ void ProcessPacket(char* ptr)
 		cout << "Login 패킷" << endl;
 		// int id = packet->id
 		id = packet->id;
-		cout << packet->id << endl;
+		//cout << packet->id << endl;
 		start_x = packet->x;
 		start_y = packet->y;
 		start_z = packet->z;
@@ -228,6 +228,7 @@ void ProcessPacket(char* ptr)
 		m_mapKey = packet->map_key;
 		NetScene->AddBlocksByMapData(0, m_mapKey,false);
 		id = packet->player_id;
+		cout << "게임을 시작했습니다. 제 아이디는 " << id << "입니다" << endl;
 
 		XMFLOAT3 pos = { packet->start_x ,packet->start_y ,packet->start_z };
 		Netplayers[id]->SetPosition(pos);
@@ -329,7 +330,7 @@ void ProcessPacket(char* ptr)
 		Netplayers[packet->player_id]->SetIsActive(true);
 		Netplayers[packet->player_id]->SetDeath(false);
 		Netplayers[packet->player_id]->SetPosition(XMFLOAT3(packet->respawn_x, packet->respawn_y, packet->respawn_z));
-		Netplayers[packet->player_id]->SetPlayerHP(100);
+		Netplayers[packet->player_id]->SetPlayerHP(packet->player_hp);
 		break;
 	}
 	case SC_FALL: {

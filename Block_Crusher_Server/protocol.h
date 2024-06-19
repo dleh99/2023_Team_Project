@@ -1,5 +1,5 @@
 #pragma once
-//#define USE_SERVER
+#define USE_SERVER
 //#define USE_SOUND
 
 constexpr int SERVER_PORT = 4000;
@@ -252,6 +252,7 @@ struct SC_RESPAWN_PACKET {
 	float				respawn_x;
 	float				respawn_y;
 	float				respawn_z;
+	int					player_hp;
 };
 
 struct SC_FALL_PACKET {
