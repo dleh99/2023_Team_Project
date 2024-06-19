@@ -36,7 +36,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 5);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 6);
 
 	// 조명
 	BuildLightsAndMaterials();
@@ -51,15 +51,14 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	CCubeMeshDiffused* BulletMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 2.0f, 2.0f, 2.0f);
 	m_pBlockMesh = pCubeMesh;
 
-	CTexture* pTexture[2];
+	CTexture* pTexture;
 
-	pTexture[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTexture[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/rock1.dds", RESOURCE_TEXTURE2D, 0);
-	pTexture[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTexture[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/Ceiling.dds", RESOURCE_TEXTURE2D, 0);
+	pTexture = new CTexture(2, RESOURCE_TEXTURE2D, 0, 1);
+	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/rock1.dds", RESOURCE_TEXTURE2D, 0);
+	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/Ceiling.dds", RESOURCE_TEXTURE2D, 1);
 
-	CMaterial* pMaterial = new CMaterial();
-	pMaterial->SetTexture(pTexture[0]);
+	//CMaterial* pMaterial = new CMaterial();
+	//pMaterial->SetTexture(pTexture);
 
 	m_nObjects = 50 * 50 * 10 + 2000;
 	m_ppObjects = new CGameObject * [m_nObjects + 4000];
@@ -68,11 +67,13 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pInstanceShader = new CInstancingShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get(), m_pBlockMesh, sizeof(Instance), m_nBlock);
 	m_pInstanceShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
 	m_pInstanceShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	//m_pInstanceShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
-	//m_pInstanceShader->CreateShaderResourceViews(pd3dDevice, pTexture, 0, 2);
-	m_pInstanceShader->SetTexture(pTexture[0]);
-	CreateShaderResourceViews(pd3dDevice, pTexture[0], 0, 2);
-	CreateShaderResourceViews(pd3dDevice, pTexture[1], 0, 2);
+
+	m_pInstanceShader->SetTexture(pTexture);
+	
+	//pTexture[0]->SetTextures(2);
+
+	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 2);
+	//CreateShaderResourceViews(pd3dDevice, pTexture[1], 1, 2);
 
 	AddBlocksByMapData(0, mapkey,true);
 
@@ -343,29 +344,29 @@ ComPtr<ID3D12RootSignature> CScene::CreateGraphicsRootSignature(ID3D12Device* pd
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRange[4];
 	::ZeroMemory(pd3dDescriptorRange, sizeof(D3D12_DESCRIPTOR_RANGE) * 4);
 
-	pd3dDescriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRange[0].NumDescriptors = 2;
-	pd3dDescriptorRange[0].BaseShaderRegister = 0; //t0: gtxtTexture
-	pd3dDescriptorRange[0].RegisterSpace = 0;
-	pd3dDescriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	pd3dDescriptorRange[3].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRange[3].NumDescriptors = 2;
+	pd3dDescriptorRange[3].BaseShaderRegister = 3; //t0: gtxtTexture
+	pd3dDescriptorRange[3].RegisterSpace = 0;
+	pd3dDescriptorRange[3].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRange[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRange[1].NumDescriptors = 1;
-	pd3dDescriptorRange[1].BaseShaderRegister = 2; //t1: gtxtSkyCubeTexture
+	pd3dDescriptorRange[1].BaseShaderRegister = 1; //t1: gtxtSkyCubeTexture
 	pd3dDescriptorRange[1].RegisterSpace = 0;
 	pd3dDescriptorRange[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRange[2].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRange[2].NumDescriptors = 1;
-	pd3dDescriptorRange[2].BaseShaderRegister = 3; //t2: AlbedoTexture
+	pd3dDescriptorRange[2].BaseShaderRegister = 2; //t2: AlbedoTexture
 	pd3dDescriptorRange[2].RegisterSpace = 0;
 	pd3dDescriptorRange[2].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	pd3dDescriptorRange[3].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRange[3].NumDescriptors = MAX_DEPTH_TEXTURES;
-	pd3dDescriptorRange[3].BaseShaderRegister = 4; //t3: Depth Buffer
-	pd3dDescriptorRange[3].RegisterSpace = 0;
-	pd3dDescriptorRange[3].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	pd3dDescriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRange[0].NumDescriptors = MAX_DEPTH_TEXTURES;
+	pd3dDescriptorRange[0].BaseShaderRegister = 0; //t3: Depth Buffer
+	pd3dDescriptorRange[0].RegisterSpace = 0;
+	pd3dDescriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	D3D12_ROOT_PARAMETER pd3dRootParameter[11];
 	::ZeroMemory(&pd3dRootParameter, sizeof(pd3dRootParameter));
@@ -383,7 +384,7 @@ ComPtr<ID3D12RootSignature> CScene::CreateGraphicsRootSignature(ID3D12Device* pd
 
 	pd3dRootParameter[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameter[2].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameter[2].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRange[0];
+	pd3dRootParameter[2].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRange[3];
 	pd3dRootParameter[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	pd3dRootParameter[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
@@ -423,7 +424,7 @@ ComPtr<ID3D12RootSignature> CScene::CreateGraphicsRootSignature(ID3D12Device* pd
 
 	pd3dRootParameter[10].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameter[10].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameter[10].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRange[3];	// Depth Buffer
+	pd3dRootParameter[10].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRange[0];	// Depth Buffer
 	pd3dRootParameter[10].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =
@@ -1182,6 +1183,9 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 		XMFLOAT4X4 result;
 		XMStoreFloat4x4(&result, XMMatrixTranspose(XMLoadFloat4x4(&tmp)));
 		m_pInstance[i].worldMatrix = result;
+		m_pInstance[i].texIndex = 1;
+
+		
 	}
 
 	for (int i = 0; i < 50; ++i) {

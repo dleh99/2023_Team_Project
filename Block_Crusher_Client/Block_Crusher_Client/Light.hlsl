@@ -41,7 +41,7 @@ cbuffer cbLights : register(b5)
 };
 
 #define MAX_DEPTH_TEXTURES		MAX_LIGHTS
-Texture2D<float> gtxtDepthTextures[MAX_DEPTH_TEXTURES] : register(t3);
+Texture2D<float> gtxtDepthTextures[MAX_DEPTH_TEXTURES] : register(t0);
 SamplerComparisonState gssComparisonPCFShadow : register(s2);
 
 float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)

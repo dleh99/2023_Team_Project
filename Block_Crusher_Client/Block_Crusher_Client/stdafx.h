@@ -122,6 +122,7 @@ extern void SynchronizeResourceTransition(ID3D12GraphicsCommandList* pd3dCommand
 struct Instance
 {
 	XMFLOAT4X4 worldMatrix;
+	UINT texIndex;
 };
 
 namespace Vector3

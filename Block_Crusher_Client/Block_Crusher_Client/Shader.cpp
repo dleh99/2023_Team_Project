@@ -1348,7 +1348,7 @@ CInstancingShader::~CInstancingShader()
 
 D3D12_INPUT_LAYOUT_DESC CInstancingShader::CreateInputLayout()
 {
-	UINT nInputElementDescs = 7;
+	UINT nInputElementDescs = 8;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
@@ -1361,8 +1361,13 @@ D3D12_INPUT_LAYOUT_DESC CInstancingShader::CreateInputLayout()
 	pd3dInputElementDescs[4] = { "INSTANCE", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1,32, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
 	pd3dInputElementDescs[5] = { "INSTANCE", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
 
-	pd3dInputElementDescs[6] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20,
+	pd3dInputElementDescs[6] = { "TEXINDEX", 0, DXGI_FORMAT_R32_UINT, 0, 12,
+	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	pd3dInputElementDescs[7] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20,
 		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+
 
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
 	::ZeroMemory(&d3dInputLayoutDesc, sizeof(D3D12_INPUT_LAYOUT_DESC));
