@@ -564,7 +564,10 @@ void CGameFramework::FrameAdvance()
 	if (m_pPlayer)
 		m_pPlayer->Render(m_pd3dCommandList.Get(), m_pCamera);
 
-	m_pBackgroundObjects->Render(m_pd3dCommandList.Get(), m_pCamera);
+	for (int i = 0; i < m_nBackgroundObjects; ++i) {
+		if (m_pBackgroundObjects[i])
+			m_pBackgroundObjects[i]->Render(m_pd3dCommandList.Get(), m_pCamera);
+	}
 
 	/*for (int i = 0; i < m_nBackgroundObjects; ++i) {
 		m_ppBackgroundObjects[i]->Render(m_pd3dCommandList.Get(), m_pCamera);
@@ -709,7 +712,7 @@ void CGameFramework::BuildObjects()
 	CSatellite* pSatellite1 = new CSatellite(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
 		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 0.0f, pPlayerShader, pSkinnedPlayerShader, pMat);
 
-	m_pBackgroundObjects = pSatellite1;
+	m_pBackgroundObjects[m_nBackgroundObjects++] = pSatellite1;
 
 	CPlanetShader* pAlienPlanetShader = new CPlanetShader();
 	pAlienPlanetShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature().Get());
@@ -721,7 +724,7 @@ void CGameFramework::BuildObjects()
 	CAlienPlanet* pAlienPlanet = new CAlienPlanet(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
 		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 0.0f, pAlienPlanetShader, pSkinnedPlayerShader, pAlienPlanetMat);
 
-	m_pBackgroundObjects = pAlienPlanet;
+	m_pBackgroundObjects[m_nBackgroundObjects++] = pAlienPlanet;
 
 	/*m_ppBackgroundObjects[m_nBackgroundObjects] = pSatellite1->m_pChild;
 	m_nBackgroundObjects++;*/

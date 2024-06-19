@@ -128,7 +128,7 @@ public:
 	CMainPlayer* m_pPlayer = NULL;
 	vector<CMainPlayer*> m_vEnemyPlayers;
 	
-	CGameObject* m_pBackgroundObjects = NULL;
+	CGameObject* m_pBackgroundObjects[5];
 	int m_nBackgroundObjects = 0;
 
 	wstring* m_sTitleTexts[3];
