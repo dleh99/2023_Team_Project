@@ -256,7 +256,7 @@ void packet_process(int c_id, char* packet)
 				int player_id = same_room_player[round];
 				if (player_id == -1) continue;
 				if (player_id == c_id) continue;
-				clients[player_id].send_fall_packet(c_id);
+				clients[player_id].send_fall_packet(clients[player_id]._room_id);
 			}
 		}
 		break;
@@ -526,26 +526,26 @@ void Physics_Calculation_thread()
 			if (r.GetRoomState() != RS_INGAME) continue;
 
 			// 블록 생성하기
-			r.AddTime(server_timer.GetTimeElapsed());
-			if (r.GetTime() > 10.f) {
-				// 룸 블록 생성
-				r.SpawnBlock();
+			//r.AddTime(server_timer.GetTimeElapsed());
+			//if (r.GetTime() > 10.f) {
+			//	// 룸 블록 생성
+			//	r.SpawnBlock();
 
-				int* room_player_ids = r.GetPlayerId();
+			//	int* room_player_ids = r.GetPlayerId();
 
-				// 룸에 들어있는 플레이어들에게 생성 블록 좌표, id 주기
-				for (int i{}; i < MAX_PLAYER; ++i) {
-					int check_id = room_player_ids[i];
-					if (check_id == -1) continue;
-					int input_id = r.GetMapBlockNum();
-					for (const auto& pos : r.Block_Spawn_Pos) {
-						clients[check_id].send_add_block_packet(-pos.x * 12.0f + 20.0f, -(float)pos.z * 12.0f + 40.0f, input_id);
-						input_id++;
-					}
-				}
+			//	// 룸에 들어있는 플레이어들에게 생성 블록 좌표, id 주기
+			//	for (int i{}; i < MAX_PLAYER; ++i) {
+			//		int check_id = room_player_ids[i];
+			//		if (check_id == -1) continue;
+			//		int input_id = r.GetMapBlockNum();
+			//		for (const auto& pos : r.Block_Spawn_Pos) {
+			//			clients[check_id].send_add_block_packet(-pos.x * 12.0f + 20.0f, -(float)pos.z * 12.0f + 40.0f, input_id);
+			//			input_id++;
+			//		}
+			//	}
 
-				r.AddMapBlockNum(r.Block_Spawn_Pos.size());
-			}
+			//	r.AddMapBlockNum(r.Block_Spawn_Pos.size());
+			//}
 
 			// 블록 이동
 			/*

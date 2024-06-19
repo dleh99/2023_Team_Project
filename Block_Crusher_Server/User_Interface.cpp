@@ -150,7 +150,7 @@ void User_Interface::send_bullet_add_packet(User_Interface* clients, int c_id, i
 	p.b_x = clients[c_id].bullet[bullet_num].GetBulletVec().x;
 	p.b_y = clients[c_id].bullet[bullet_num].GetBulletVec().y;
 	p.b_z = clients[c_id].bullet[bullet_num].GetBulletVec().z;
-	p.player_id = c_id;
+	p.player_id = clients[c_id]._room_id;
 	p.bullet_id = clients[c_id].bullet[bullet_num].GetbulletId();
 	p.bullet_speed = clients[c_id].cl_bullet_speed;
 	do_send(&p);

@@ -111,7 +111,9 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	m_pInstanceShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pDepthRenderShader->GetDepthTexture());
 
+#ifdef USE_SOUND
 	SoundManager::GetInstance().StartStageSound();
+#endif
 }
 
 void CScene::ReleaseObjects()
