@@ -35,7 +35,7 @@ cbuffer cbToLightSpace : register(b6)
 	CB_TO_LIGHT_SPACE	gcbToLightSpaces[MAX_LIGHTS];
 };
 
-Texture2D gtxtTexture[2] : register(t3);
+Texture2D gtxtTexture[4] : register(t3);
 TextureCube gtxtSkyCubeTexture : register(t1);
 Texture2D gtxtAlbedoTexture : register(t2);
 
@@ -475,6 +475,7 @@ VS_OUTPUT_INSTANCE VSInstancing(VS_INPUT_INSTANCE input)
 float4 PSInstancing(VS_OUTPUT_INSTANCE input) : SV_TARGET
 {
 		float4 cColor = gtxtTexture[input.texindex].Sample(gSamplerState, input.uv);
+		//float4 cColor = gtxtTexture[0].Sample(gSamplerState, input.uv);
 		float3 normalW = normalize(input.normal);
 		//cColor = (float4)(1, 1, 1, 1);
 

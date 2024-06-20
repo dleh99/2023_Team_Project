@@ -36,7 +36,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 6);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 8);
 
 	// 조명
 	BuildLightsAndMaterials();
@@ -53,9 +53,11 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	CTexture* pTexture;
 
-	pTexture = new CTexture(2, RESOURCE_TEXTURE2D, 0, 1);
-	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/rock1.dds", RESOURCE_TEXTURE2D, 0);
-	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/Ceiling.dds", RESOURCE_TEXTURE2D, 1);
+	pTexture = new CTexture(4, RESOURCE_TEXTURE2D, 0, 1);
+	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/stoneWall.dds", RESOURCE_TEXTURE2D, 0);
+	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/ground.dds", RESOURCE_TEXTURE2D, 1);
+	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/mossBlock.dds", RESOURCE_TEXTURE2D, 2);
+	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/iceRock.dds", RESOURCE_TEXTURE2D, 3);
 
 	//CMaterial* pMaterial = new CMaterial();
 	//pMaterial->SetTexture(pTexture);
@@ -70,6 +72,8 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	m_pInstanceShader->SetTexture(pTexture);
 	
+
+
 	//pTexture[0]->SetTextures(2);
 
 	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 2);
@@ -345,7 +349,7 @@ ComPtr<ID3D12RootSignature> CScene::CreateGraphicsRootSignature(ID3D12Device* pd
 	::ZeroMemory(pd3dDescriptorRange, sizeof(D3D12_DESCRIPTOR_RANGE) * 4);
 
 	pd3dDescriptorRange[3].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRange[3].NumDescriptors = 2;
+	pd3dDescriptorRange[3].NumDescriptors = 4;
 	pd3dDescriptorRange[3].BaseShaderRegister = 3; //t0: gtxtTexture
 	pd3dDescriptorRange[3].RegisterSpace = 0;
 	pd3dDescriptorRange[3].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -1242,7 +1246,7 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 		XMFLOAT4X4 result;
 		XMStoreFloat4x4(&result, XMMatrixTranspose(XMLoadFloat4x4(&tmp)));
 		m_pInstance[i].worldMatrix = result;
-		m_pInstance[i].texIndex = 1;
+		m_pInstance[i].texIndex = rand() % 4;
 
 		
 	}
