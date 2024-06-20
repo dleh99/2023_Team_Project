@@ -3,9 +3,9 @@
 #include "Singleton.h"
 
 //constexpr int EFFECT_SOUND_NUM = 1;
-constexpr int CHANNEL_NUM = 20;
+constexpr int CHANNEL_NUM = 30;
 
-enum SOUND { GUN, DEATH, COUNT };
+enum SOUND { GUN, DEATH, BLOCK, COUNT };
 
 class SoundManager : public Singleton<SoundManager>
 {

@@ -292,7 +292,9 @@ void ProcessPacket(char* ptr)
 		if (id == packet->player_id) {
 			//if (gameMode == 1)
 			Netplayers[id]->IncreasePlayerBlockMoney();
-
+			
+			SoundManager::GetInstance().EffectSound(BLOCK);
+			
 			int UpdatedSocre = Netplayers[id]->GetPlayerScore() + 100;
 			Netplayers[id]->SetPlayerScore(UpdatedSocre);
 		}
@@ -337,6 +339,8 @@ void ProcessPacket(char* ptr)
 	case SC_FALL: {
 		SC_FALL_PACKET* packet = reinterpret_cast<SC_FALL_PACKET*>(ptr);
 		Netplayers[packet->fall_id]->SetDeath(true);
+		if(id == packet->fall_id)
+			SoundManager::GetInstance().EffectSound(DEATH);
 		break;
 	}
 	case SC_RESULT: {
