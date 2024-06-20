@@ -995,7 +995,7 @@ void CScene::RenderTitle(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, 
 	m_fBlinkTime += fTimeElapsed * 2.0f;
 
 	std::wstring karrotstr = *m_sTitleTexts[m_flag];
-	/*wchar_t lastChar = karrotstr.back();
+	wchar_t lastChar = karrotstr.back();
 	if ((int)m_fBlinkTime % 2 && lastChar != '|') {
 		karrotstr += '|';
 	}
@@ -1005,7 +1005,7 @@ void CScene::RenderTitle(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, 
 				karrotstr.pop_back();
 			}
 		}
-	}*/
+	}
 
 	// BackGround
 	//m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(0, 0));
