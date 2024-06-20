@@ -299,7 +299,7 @@ void ProcessPacket(char* ptr)
 			//if (gameMode == 1)
 			Netplayers[id]->IncreasePlayerBlockMoney();
 			
-			SoundManager::GetInstance().EffectSound(BLOCK);
+			//SoundManager::GetInstance().EffectSound(BLOCK);
 			
 			int UpdatedSocre = Netplayers[id]->GetPlayerScore() + 100;
 			Netplayers[id]->SetPlayerScore(UpdatedSocre);

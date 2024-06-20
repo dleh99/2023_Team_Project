@@ -500,6 +500,8 @@ void CGameFramework::FrameAdvance()
 		m_vEnemyPlayers[i]->Rotate(otherPlayerMouse.cx);
 		m_vEnemyPlayers[i]->SetPosition(XMFLOAT3(otherPlayerPos.x, otherPlayerPos.y, otherPlayerPos.z));
 	}
+#else
+	m_pScene->UpdateObjects();
 #endif
 
 	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
@@ -520,6 +522,7 @@ void CGameFramework::FrameAdvance()
 	// 그림자 맵 생성
 	m_pScene->PrepareLightingAndRender(m_pd3dCommandList.Get());
 	m_pScene->m_pDepthRenderShader->PrepareShadowMap(m_pd3dCommandList.Get(), m_pCamera, m_vEnemyPlayers);
+
 
 	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
 	::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
@@ -558,7 +561,7 @@ void CGameFramework::FrameAdvance()
 	//렌더링 코드는 여기에 추가될 것이다.
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList.Get(), m_pCamera);
 
-	if (m_pPlayer)
+	if (m_pPlayer && m_pScene ->m_SceneState != 0)
 		m_pPlayer->Render(m_pd3dCommandList.Get(), m_pCamera);
 
 	for (int i = 0; i < m_nBackgroundObjects; ++i) {
@@ -693,6 +696,10 @@ void CGameFramework::BuildObjects()
 	m_pPlayer->m_ppObjects = m_pScene->m_ppObjects;
 	m_pPlayer->SetBlockNum(m_pScene->m_nBlock);
 	m_pPlayer->m_pScene = m_pScene;
+	m_pPlayer->SetPlayerId(0);
+
+	XMFLOAT3 pos = { 0.0f, 110.0f, -500.0f };
+	m_pPlayer->SetPosition(pos);
 
 	m_pScene->m_pPlayer = m_pPlayer;
 	m_pScene->m_vPlayers = m_vEnemyPlayers;
@@ -1057,12 +1064,14 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			}
 			else if(m_pScene->m_SceneState == 2) {
 				m_pScene->m_SceneState = 1;
+				XMFLOAT3 pos = { 0,10,0 };
+				m_pPlayer->SetPosition(pos);
 				::ShowCursor(false);
 			}
-			else if (m_pScene->m_SceneState == 1) {
-				m_pScene->DisableBlock(bi);
-				bi++;
-			}
+			//else if (m_pScene->m_SceneState == 1) {
+			//	m_pScene->DisableBlock(bi);
+			//	bi++;
+			//}
 #endif
 			break;
 		}

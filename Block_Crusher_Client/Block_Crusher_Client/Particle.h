@@ -14,9 +14,11 @@ private:
 	XMFLOAT3 m_f3Direction;
 
 public:
+
 	CParticle();
 	~CParticle(){};
 
+	bool isDead() { return (m_fLifeTime < 0); };
 	void Animate(float time);
 	void SetDiretion(XMFLOAT3 dir);
 };
