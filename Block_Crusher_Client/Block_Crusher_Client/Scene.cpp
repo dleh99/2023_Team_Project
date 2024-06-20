@@ -37,7 +37,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 5);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 8);
 
 	// 조명
 	BuildLightsAndMaterials();
@@ -52,11 +52,16 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	CCubeMeshDiffused* BulletMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 2.0f, 2.0f, 2.0f);
 	m_pBlockMesh = pCubeMesh;
 
-	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/rock1.dds", RESOURCE_TEXTURE2D, 0);
+	CTexture* pTexture;
 
-	CMaterial* pMaterial = new CMaterial();
-	pMaterial->SetTexture(pTexture);
+	pTexture = new CTexture(4, RESOURCE_TEXTURE2D, 0, 1);
+	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/stoneWall.dds", RESOURCE_TEXTURE2D, 0);
+	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/ground.dds", RESOURCE_TEXTURE2D, 1);
+	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/mossBlock.dds", RESOURCE_TEXTURE2D, 2);
+	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/iceRock.dds", RESOURCE_TEXTURE2D, 3);
+
+	//CMaterial* pMaterial = new CMaterial();
+	//pMaterial->SetTexture(pTexture);
 
 	m_nObjects = 50 * 50 * 10 + 2000;
 	m_ppObjects = new CGameObject * [m_nObjects + 4000];
@@ -65,10 +70,15 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pInstanceShader = new CInstancingShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get(), m_pBlockMesh, sizeof(Instance), m_nBlock);
 	m_pInstanceShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
 	m_pInstanceShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	//m_pInstanceShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
-	//m_pInstanceShader->CreateShaderResourceViews(pd3dDevice, pTexture, 0, 2);
+
 	m_pInstanceShader->SetTexture(pTexture);
+	
+
+
+	//pTexture[0]->SetTextures(2);
+
 	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 2);
+	//CreateShaderResourceViews(pd3dDevice, pTexture[1], 1, 2);
 
 	AddBlocksByMapData(0, mapkey,true);
 
@@ -78,18 +88,6 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pSceneShader = pShader;
 
 	pBulletMesh = BulletMesh;
-
-	CParticle* pParticle = new CParticle();
-
-	pParticle->SetMesh(pBulletMesh);
-	pParticle->SetShader(m_pSceneShader);
-
-	pParticle->SetPosition(20, 20, 30);
-
-	pParticle->SetIsActive(true);
-
-	testobj = pParticle;
-
 
 	//AddBlocksByMapData(pCubeMesh, pTShader, pMaterial, 0, mapkey);
 
@@ -356,11 +354,11 @@ ComPtr<ID3D12RootSignature> CScene::CreateGraphicsRootSignature(ID3D12Device* pd
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRange[4];
 	::ZeroMemory(pd3dDescriptorRange, sizeof(D3D12_DESCRIPTOR_RANGE) * 4);
 
-	pd3dDescriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRange[0].NumDescriptors = 1;
-	pd3dDescriptorRange[0].BaseShaderRegister = 0; //t0: gtxtTexture
-	pd3dDescriptorRange[0].RegisterSpace = 0;
-	pd3dDescriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	pd3dDescriptorRange[3].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRange[3].NumDescriptors = 4;
+	pd3dDescriptorRange[3].BaseShaderRegister = 3; //t0: gtxtTexture
+	pd3dDescriptorRange[3].RegisterSpace = 0;
+	pd3dDescriptorRange[3].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRange[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRange[1].NumDescriptors = 1;
@@ -374,11 +372,11 @@ ComPtr<ID3D12RootSignature> CScene::CreateGraphicsRootSignature(ID3D12Device* pd
 	pd3dDescriptorRange[2].RegisterSpace = 0;
 	pd3dDescriptorRange[2].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	pd3dDescriptorRange[3].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRange[3].NumDescriptors = MAX_DEPTH_TEXTURES;
-	pd3dDescriptorRange[3].BaseShaderRegister = 3; //t3: Depth Buffer
-	pd3dDescriptorRange[3].RegisterSpace = 0;
-	pd3dDescriptorRange[3].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	pd3dDescriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRange[0].NumDescriptors = MAX_DEPTH_TEXTURES;
+	pd3dDescriptorRange[0].BaseShaderRegister = 0; //t3: Depth Buffer
+	pd3dDescriptorRange[0].RegisterSpace = 0;
+	pd3dDescriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	D3D12_ROOT_PARAMETER pd3dRootParameter[11];
 	::ZeroMemory(&pd3dRootParameter, sizeof(pd3dRootParameter));
@@ -396,7 +394,7 @@ ComPtr<ID3D12RootSignature> CScene::CreateGraphicsRootSignature(ID3D12Device* pd
 
 	pd3dRootParameter[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameter[2].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameter[2].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRange[0];
+	pd3dRootParameter[2].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRange[3];
 	pd3dRootParameter[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	pd3dRootParameter[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
@@ -436,7 +434,7 @@ ComPtr<ID3D12RootSignature> CScene::CreateGraphicsRootSignature(ID3D12Device* pd
 
 	pd3dRootParameter[10].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameter[10].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameter[10].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRange[3];	// Depth Buffer
+	pd3dRootParameter[10].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRange[0];	// Depth Buffer
 	pd3dRootParameter[10].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =
@@ -623,6 +621,16 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	//	}
 }
 
+void CScene::UpdateObjects()
+{
+	for (int i = 0; i < m_nBlock; i++) {
+		for (int i = m_nBlock; i < m_nObjects; i++)
+		{
+
+		}
+	}
+}
+
 void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 { 
 	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
@@ -638,13 +646,13 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	if (m_pInstanceShader)
 		m_pInstanceShader->Render(pd3dCommandList, pCamera);
 
-	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera);
-
 	for (int i = 0; i < m_nBlock; i++) {
 		if (m_ppObjects[i] && m_ppObjects[i]->m_bParticleActive) {
 			m_ppObjects[i]->RenderParticles(pd3dCommandList, pCamera);
 		}
 	}
+
+	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera);
 
 	/*if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
@@ -801,16 +809,28 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 			isEnd = true;
 		}
 	}
+
 	std::wstring str = min + sec;
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
 		pTextFormat[0].Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
 
 	// 점수
+	pTextFormat[0]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING);
+
 	str = std::to_wstring(m_pPlayer->GetPlayerScore());
 
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 00));
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
 		pTextFormat[0].Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
+
+	// 돈
+	str = std::to_wstring(m_pPlayer->GetPlayerBlockMoney());
+
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 50));
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat[0].Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
+
+	pTextFormat[0]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 
 	// 체력
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(50, 675));
@@ -858,8 +878,45 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 	str = L"연료";
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
 		pTextFormat[2].Get(), D2D1::RectF(0, 0, 50, 50), SolidColorBrush[6].Get());
-	//승리 패배 알림
 
+	// ===================================== RPG 모드 =====================================
+	int x = 20;
+	int yStart = 450;
+	int yStride = 30;
+	pTextFormat[3]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
+
+	// 이동속도 강화
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(x, yStart += yStride));
+	str = L"NUM5 이동속도";
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat[3].Get(), D2D1::RectF(0, 0, 200, 50), SolidColorBrush[0].Get());
+
+	// 총알 데미지 강화
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(x, yStart += yStride));
+	str = L"NUM6 총알 데미지";
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat[3].Get(), D2D1::RectF(0, 0, 200, 50), SolidColorBrush[0].Get());
+
+	// 총알 속도 강화
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(x, yStart += yStride));
+	str = L"NUM7 총알 속도";
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat[3].Get(), D2D1::RectF(0, 0, 200, 50), SolidColorBrush[0].Get());
+
+	// 장탄 수 강화
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(x, yStart += yStride));
+	str = L"NUM8 장탄 수";
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat[3].Get(), D2D1::RectF(0, 0, 200, 50), SolidColorBrush[0].Get());
+
+	// 플레이어 체력 강화
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(x, yStart += yStride));
+	str = L"NUM9 체력";
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat[3].Get(), D2D1::RectF(0, 0, 200, 50), SolidColorBrush[0].Get());
+
+	pTextFormat[3]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	//=================================승리 패배 알림=============================================
 	if (m_fPlayTime <= -1.5f) {
 		if (GetGameResult()) {
 			m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(400, 200));
@@ -1197,6 +1254,9 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 		XMFLOAT4X4 result;
 		XMStoreFloat4x4(&result, XMMatrixTranspose(XMLoadFloat4x4(&tmp)));
 		m_pInstance[i].worldMatrix = result;
+		m_pInstance[i].texIndex = rand() % 4;
+
+		
 	}
 
 	for (int i = 0; i < 50; ++i) {
