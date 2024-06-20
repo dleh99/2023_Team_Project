@@ -6,7 +6,7 @@ std::uniform_int_distribution<> dist(-200, 200);
 
 CParticle::CParticle() {
 
-	m_fLifeTime = 5.f;
+	m_fLifeTime = 3.f;
 	m_fspeed = abs(dist(gen)) % 50 + 100;
 	m_bStart = false;
 	m_f3Direction = {};
@@ -26,6 +26,9 @@ CParticle::CParticle() {
 
 void CParticle::Animate(float time) {
 	//std::cout << "이거맞나" << std::endl;
+	if (m_fLifeTime < 0) {
+		return;
+	}
 
 	XMFLOAT3 pos = GetPosition();
 
@@ -36,6 +39,8 @@ void CParticle::Animate(float time) {
 	m_f3Direction.y -= m_fGravity * time;
 
 	SetPosition(pos);
+
+	m_fLifeTime -= time;
 }
 
 void CParticle::SetDiretion(XMFLOAT3 dir) {

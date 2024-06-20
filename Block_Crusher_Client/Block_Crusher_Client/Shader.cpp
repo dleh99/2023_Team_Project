@@ -1222,11 +1222,11 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 
 	//UpdateShaderVariables(pd3dCommandList)
 
-	//for (int i = 0; i < m_pObjectsScene->m_nBlock; i++) {
-	//	if (m_pObjectsScene->m_ppObjects[i] && m_pObjectsScene->m_ppObjects[i]->m_bParticleActive) {
-	//		m_pObjectsScene->m_ppObjects[i]->RenderParticles(pd3dCommandList, pCamera);
-	//	}
-	//}
+	for (int i = 0; i < m_pObjectsScene->m_nBlock; i++) {
+		if (m_pObjectsScene->m_ppObjects[i] && m_pObjectsScene->m_ppObjects[i]->m_bParticleActive) {
+			m_pObjectsScene->m_ppObjects[i]->RenderParticles(pd3dCommandList, pCamera);
+		}
+	}
 
 	for (int i = m_pObjectsScene->m_nBlock; i < m_pObjectsScene->m_nObjects; i++)
 	{
@@ -1243,10 +1243,12 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 
 CTextureToViewportShader::CTextureToViewportShader()
 {
+
 }
 
 CTextureToViewportShader::~CTextureToViewportShader()
 {
+
 }
 
 D3D12_DEPTH_STENCIL_DESC CTextureToViewportShader::CreateDepthStencilState()

@@ -69,6 +69,7 @@ public:
 
 	int FindEmptySlot();
 	bool BSCollisionCheck(XMFLOAT3 Position1, XMFLOAT3 Position2, float Radius1, float Radius2);
+	bool BoxPointCollisionCheck(XMFLOAT3 Point, XMFLOAT3 box_center, float box_size);
 	int AddBlocksByMapData(int nindex, char mapkey, bool first);
 	int CCTitleUI();
 	bool IsPointInRectangle(POINT pt, RECT rect) {

@@ -167,6 +167,9 @@ void CScene::DisableObject(int bullet_id, int block_id, int p_id)
 	DisableBlock(block_id);
 	DisableBullet(bullet_id, p_id);
 
+	SoundManager::GetInstance().EffectSound(BLOCK);
+
+
 	//if (m_ppObjects[block_id]) {
 	//	m_ppObjects[block_id]->SetIsActive(false);
 	//	m_ppObjects[block_id]->SetPosition(99999, 99999, 99999);
@@ -606,6 +609,11 @@ void CScene::AnimateObjects(float fTimeElapsed)
 			m_ppObjects[j]->Animate(fTimeElapsed);
 		else
 			if (m_ppObjects[j]->m_bParticleActive) {
+				if (reinterpret_cast<CParticle*>(m_ppObjects[j]->m_pParticles[0])->isDead()) {
+					m_ppObjects[j]->m_bParticleActive = false;
+					continue;
+				}
+
 				m_ppObjects[j]->AnimateParticles(fTimeElapsed);
 				//cout << "파티클 움직임" << endl;
 			}
@@ -647,9 +655,13 @@ void CScene::AnimateObjects(float fTimeElapsed)
 void CScene::UpdateObjects()
 {
 	for (int i = 0; i < m_nBlock; i++) {
-		for (int i = m_nBlock; i < m_nObjects; i++)
-		{
+		for (int j = m_nBlock; j < m_nObjects; j++){
 
+			if (m_ppObjects[i]&& m_ppObjects[j])
+				if (m_ppObjects[i]->GetIsActive()&& m_ppObjects[j]->GetIsActive()) 
+					if (BoxPointCollisionCheck(m_ppObjects[j]->GetPosition(), m_ppObjects[i]->GetPosition(), 6.0f)){
+						DisableObject(((CBulletObject*)m_ppObjects[j])->GetBulletId(), i, 0);
+					}
 		}
 	}
 }
@@ -671,11 +683,12 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera);
 
-	for (int i = 0; i < m_nBlock; i++) {
-		if (m_ppObjects[i] && m_ppObjects[i]->m_bParticleActive) {
-			m_ppObjects[i]->RenderParticles(pd3dCommandList, pCamera);
-		}
-	}
+	//for (int i = 0; i < m_nBlock; i++) {
+	//	if (m_ppObjects[i] && m_ppObjects[i]->m_bParticleActive) {
+	//		m_ppObjects[i]->RenderParticles(pd3dCommandList, pCamera);
+	//	}
+	//}
+
 
 	/*if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
@@ -742,6 +755,21 @@ bool CScene::BSCollisionCheck(XMFLOAT3 Position1, XMFLOAT3 Position2,float Radiu
 	if (Radius1 + Radius2 - 4.0f> sqrt(x * x + y * y + z * z)) return true;
 
 	return false;
+}
+
+bool CScene::BoxPointCollisionCheck(XMFLOAT3 Point, XMFLOAT3 box_center, float box_size)
+{
+	XMFLOAT3 box_min = { box_center.x - box_size,box_center.y - box_size ,box_center.z - box_size };
+	XMFLOAT3 box_max = { box_center.x + box_size,box_center.y + box_size ,box_center.z + box_size };
+
+	if (Point.x >= box_min.x && Point.x <= box_max.x &&
+		Point.y >= box_min.y && Point.y <= box_max.y &&
+		Point.z >= box_min.z && Point.z <= box_max.z) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 void CScene::BuildText(ComPtr<ID2D1DeviceContext2> const m_d2dDeviceContext, ComPtr<ID2D1Factory3> m_d2dFactory, ComPtr<IDWriteFactory> m_dWriteFactory)
@@ -1064,8 +1092,8 @@ void CScene::RenderLobby(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, 
 	ComPtr<IDWriteFactory> m_dWriteFactory, float fTimeElapsed)
 {
 	// BackGround
-	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(0, 0));
-	m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT), SolidColorBrush[6].Get());
+	//m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(0, 0));
+	//m_d2dDeviceContext->FillRectangle(D2D1::RectF(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT), SolidColorBrush[6].Get());
 
 	// Matching Button
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(50, 650));
