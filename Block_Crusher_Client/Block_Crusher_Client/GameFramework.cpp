@@ -720,7 +720,7 @@ void CGameFramework::BuildObjects()
 		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 200.0f, -3000.0f, pPlayerShader, pSkinnedPlayerShader, pMat);
 
 	CSatellite* pSatellite2 = new CSatellite(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), -1500.0f, 250.0f, 1300.0f, pPlayerShader, pSkinnedPlayerShader, pMat);
+		m_pScene->GetGraphicsRootSignature().Get(), -1800.0f, 50.0f, 1300.0f, pPlayerShader, pSkinnedPlayerShader, pMat);
 
 	pSatellite2->Rotate(-90.0f, 0.0f, 0.0f);
 
@@ -735,20 +735,20 @@ void CGameFramework::BuildObjects()
 	CMaterial* pAlienPlanetMat = new CMaterial();
 
 	CAlienPlanet* pAlienPlanet1 = new CAlienPlanet(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), -1200.0f, 100.0f, -2000.0f, pAlienPlanetShader, pSkinnedPlayerShader, pAlienPlanetMat);
+		m_pScene->GetGraphicsRootSignature().Get(), -2000.0f, 100.0f, -2000.0f, pAlienPlanetShader, pSkinnedPlayerShader, pAlienPlanetMat);
 
-	CAlienPlanet* pAlienPlanet2 = new CAlienPlanet(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+	/*CAlienPlanet* pAlienPlanet2 = new CAlienPlanet(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
 		m_pScene->GetGraphicsRootSignature().Get(), -500.0f, 300.0f, 2000.0f, pAlienPlanetShader, pSkinnedPlayerShader, pAlienPlanetMat);
 
 	CAlienPlanet* pAlienPlanet3 = new CAlienPlanet(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 2000.0f, 0.0f, -800.0f, pAlienPlanetShader, pSkinnedPlayerShader, pAlienPlanetMat);
+		m_pScene->GetGraphicsRootSignature().Get(), 2000.0f, 0.0f, -800.0f, pAlienPlanetShader, pSkinnedPlayerShader, pAlienPlanetMat);*/
 
-	pAlienPlanet3->Rotate(0.0f, 180.0f, -90.0f);
-	pAlienPlanet3->Rotate(0.0f, 180.0f, 0.0f);
+	//pAlienPlanet3->Rotate(0.0f, 180.0f, -90.0f);
+	//pAlienPlanet3->Rotate(0.0f, 180.0f, 0.0f);
 
 	m_pBackgroundObjects[m_nBackgroundObjects++] = pAlienPlanet1;
-	m_pBackgroundObjects[m_nBackgroundObjects++] = pAlienPlanet2;
-	m_pBackgroundObjects[m_nBackgroundObjects++] = pAlienPlanet3;
+	//m_pBackgroundObjects[m_nBackgroundObjects++] = pAlienPlanet2;
+	//m_pBackgroundObjects[m_nBackgroundObjects++] = pAlienPlanet3;
 
 	CDesertPlanetShader* pDesertPlanetShader = new CDesertPlanetShader();
 	pDesertPlanetShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature().Get());
@@ -757,25 +757,31 @@ void CGameFramework::BuildObjects()
 	CMaterial* pDesertPlanetMat = new CMaterial();
 
 	CDesertPlanet* pDesertPlanet1 = new CDesertPlanet(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), -1500.0f, -100.0f, 1300.0f, pDesertPlanetShader, pSkinnedPlayerShader, pDesertPlanetMat);
+		m_pScene->GetGraphicsRootSignature().Get(), -2000.0f, -100.0f, 1500.0f, pDesertPlanetShader, pSkinnedPlayerShader, pDesertPlanetMat);
 
-	CDesertPlanet* pDesertPlanet2 = new CDesertPlanet(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 1000.0f, 0.0f, -2000.0f, pDesertPlanetShader, pSkinnedPlayerShader, pDesertPlanetMat);
+	/*CDesertPlanet* pDesertPlanet2 = new CDesertPlanet(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get(), 1000.0f, 0.0f, -2000.0f, pDesertPlanetShader, pSkinnedPlayerShader, pDesertPlanetMat);*/
 
 	m_pBackgroundObjects[m_nBackgroundObjects++] = pDesertPlanet1;
-	m_pBackgroundObjects[m_nBackgroundObjects++] = pDesertPlanet2;
+	//m_pBackgroundObjects[m_nBackgroundObjects++] = pDesertPlanet2;
 
 	CFrozenPlanetShader* pFrozenPlanetShader = new CFrozenPlanetShader();
 	pFrozenPlanetShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature().Get());
 	pFrozenPlanetShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
+	CRedPlanetShader* pRedPlanetShader = new CRedPlanetShader();
+	pRedPlanetShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature().Get());
+	pRedPlanetShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+
 	CMaterial* pFrozenPlanetMat = new CMaterial();
 
 	CFrozenPlanet* pFrozenPlanet1 = new CFrozenPlanet(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), -3000.0f, 40.0f, 0.0f, pFrozenPlanetShader, pSkinnedPlayerShader, pFrozenPlanetMat);
+		m_pScene->GetGraphicsRootSignature().Get(), 5000.0f, 1200.0f, 0.0f, pRedPlanetShader, pSkinnedPlayerShader, pFrozenPlanetMat);
 
 	CFrozenPlanet* pFrozenPlanet2 = new CFrozenPlanet(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 200.0f, -3500.0f, pFrozenPlanetShader, pSkinnedPlayerShader, pFrozenPlanetMat);
+		m_pScene->GetGraphicsRootSignature().Get(), 100.0f, 200.0f, -5000.0f, pFrozenPlanetShader, pSkinnedPlayerShader, pFrozenPlanetMat);
+
+	pFrozenPlanet1->SetScale(8.0f);
 
 	m_pBackgroundObjects[m_nBackgroundObjects++] = pFrozenPlanet1;
 	m_pBackgroundObjects[m_nBackgroundObjects++] = pFrozenPlanet2;

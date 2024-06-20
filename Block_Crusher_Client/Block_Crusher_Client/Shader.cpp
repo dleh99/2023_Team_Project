@@ -1513,3 +1513,13 @@ D3D12_SHADER_BYTECODE CFrozenPlanetShader::CreatePixelShader(ID3DBlob** ppd3dSha
 {
 	return CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSFrozenPlanetDiffused", "ps_5_1", ppd3dShaderBlob);
 }
+
+D3D12_SHADER_BYTECODE CRedPlanetShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
+{
+	return CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSRedPlanetDiffused", "vs_5_1", ppd3dShaderBlob);
+}
+
+D3D12_SHADER_BYTECODE CRedPlanetShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
+{
+	return CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSRedPlanetDiffused", "ps_5_1", ppd3dShaderBlob);
+}

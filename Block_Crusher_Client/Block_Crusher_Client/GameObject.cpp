@@ -1573,7 +1573,7 @@ CSatellite::CSatellite(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 		"Models/satellite model data.bin", NULL, pPlayerShader, pSkinnedPlayerShader, pMaterial);
 	SetChild(pSatelliteModel->m_pModelRootObject);
 	
-	SetScale(50.0f);
+	SetScale(30.0f);
 	SetPosition(XMFLOAT3(x, y, z));
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -1590,7 +1590,7 @@ CAlienPlanet::CAlienPlanet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		"Models/alien planet model data.bin", NULL, pPlayerShader, pSkinnedPlayerShader, pMaterial);
 	SetChild(pAlienPlanetModel->m_pModelRootObject);
 
-	SetScale(400.0f);
+	SetScale(200.0f);
 	SetPosition(XMFLOAT3(x, y, z));
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);

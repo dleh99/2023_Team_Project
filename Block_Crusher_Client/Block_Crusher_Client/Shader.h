@@ -194,6 +194,16 @@ public:
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
 };
 
+class CRedPlanetShader : public CPlayerShader
+{
+public:
+	CRedPlanetShader() {};
+	virtual ~CRedPlanetShader() {};
+
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct TOLIGHTSPACEINFO
