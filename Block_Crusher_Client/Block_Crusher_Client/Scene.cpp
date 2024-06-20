@@ -611,6 +611,16 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	//	}
 }
 
+void CScene::UpdateObjects()
+{
+	for (int i = 0; i < m_nBlock; i++) {
+		for (int i = m_nBlock; i < m_nObjects; i++)
+		{
+
+		}
+	}
+}
+
 void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 { 
 	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
@@ -626,13 +636,13 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	if (m_pInstanceShader)
 		m_pInstanceShader->Render(pd3dCommandList, pCamera);
 
-	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera);
-
 	for (int i = 0; i < m_nBlock; i++) {
 		if (m_ppObjects[i] && m_ppObjects[i]->m_bParticleActive) {
 			m_ppObjects[i]->RenderParticles(pd3dCommandList, pCamera);
 		}
 	}
+
+	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera);
 
 	/*if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
@@ -787,16 +797,28 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 			isEnd = true;
 		}
 	}
+
 	std::wstring str = min + sec;
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
 		pTextFormat[0].Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
 
 	// 점수
+	pTextFormat[0]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING);
+
 	str = std::to_wstring(m_pPlayer->GetPlayerScore());
 
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 00));
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
 		pTextFormat[0].Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
+
+	// 돈
+	str = std::to_wstring(m_pPlayer->GetPlayerBlockMoney());
+
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(800, 50));
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat[0].Get(), D2D1::RectF(0, 0, 200, 100), SolidColorBrush[0].Get());
+
+	pTextFormat[0]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 
 	// 체력
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(50, 675));
@@ -844,8 +866,45 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 	str = L"연료";
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
 		pTextFormat[2].Get(), D2D1::RectF(0, 0, 50, 50), SolidColorBrush[6].Get());
-	//승리 패배 알림
 
+	// ===================================== RPG 모드 =====================================
+	int x = 20;
+	int yStart = 450;
+	int yStride = 30;
+	pTextFormat[3]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
+
+	// 이동속도 강화
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(x, yStart += yStride));
+	str = L"NUM5 이동속도";
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat[3].Get(), D2D1::RectF(0, 0, 200, 50), SolidColorBrush[0].Get());
+
+	// 총알 데미지 강화
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(x, yStart += yStride));
+	str = L"NUM6 총알 데미지";
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat[3].Get(), D2D1::RectF(0, 0, 200, 50), SolidColorBrush[0].Get());
+
+	// 총알 속도 강화
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(x, yStart += yStride));
+	str = L"NUM7 총알 속도";
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat[3].Get(), D2D1::RectF(0, 0, 200, 50), SolidColorBrush[0].Get());
+
+	// 장탄 수 강화
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(x, yStart += yStride));
+	str = L"NUM8 장탄 수";
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat[3].Get(), D2D1::RectF(0, 0, 200, 50), SolidColorBrush[0].Get());
+
+	// 플레이어 체력 강화
+	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(x, yStart += yStride));
+	str = L"NUM9 체력";
+	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+		pTextFormat[3].Get(), D2D1::RectF(0, 0, 200, 50), SolidColorBrush[0].Get());
+
+	pTextFormat[3]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	//=================================승리 패배 알림=============================================
 	if (m_fPlayTime <= -1.5f) {
 		if (GetGameResult()) {
 			m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(400, 200));

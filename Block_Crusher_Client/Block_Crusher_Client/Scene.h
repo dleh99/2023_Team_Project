@@ -50,6 +50,7 @@ public:
 
 	bool ProcessInput(UCHAR* pKeyBuffer);
 	void AnimateObjects(float fTimeElapsed);
+	void UpdateObjects();
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	void AddObjects(int type, XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector, int p_id, int b_id);
 	void ReleaseUploadBuffers();
