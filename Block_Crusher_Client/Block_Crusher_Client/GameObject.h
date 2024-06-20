@@ -535,6 +535,28 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 };
 
+class CDesertPlanet : public CGameObject
+{
+public:
+	CDesertPlanet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z,
+		CShader* pPlayerShader, CShader* pSkinnedPlayerShader, CMaterial* pMaterial);
+	virtual ~CDesertPlanet() {};
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+};
+
+class CFrozenPlanet : public CGameObject
+{
+public:
+	CFrozenPlanet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z,
+		CShader* pPlayerShader, CShader* pSkinnedPlayerShader, CMaterial* pMaterial);
+	virtual ~CFrozenPlanet() {};
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+};
+
 class CSkyBox : public CGameObject
 {
 public:

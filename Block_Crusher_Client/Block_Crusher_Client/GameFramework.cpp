@@ -36,6 +36,8 @@ CGameFramework::CGameFramework()
 	m_sTitleTexts[ID] = id;
 	m_sTitleTexts[PW] = pw;
 	m_sTitleTexts[RoomNumber] = room;
+
+	m_pBackgroundObjects = new CGameObject*[m_nMaxBackgroundObjects];
 }
 
 CGameFramework::~CGameFramework()
@@ -43,6 +45,11 @@ CGameFramework::~CGameFramework()
 	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
 		delete m_vEnemyPlayers[i];
 	}
+
+	for (int i = 0; i < m_nMaxBackgroundObjects; ++i) {
+		delete[]m_pBackgroundObjects[i];
+	}
+	delete[]m_pBackgroundObjects;
 }
 
 bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hWnd)
@@ -74,10 +81,10 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hWnd)
 
 	//HANDLE hThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)do_recv, (LPVOID)NULL, 0, NULL);
 
-	if (gameMode == 0)
+	/*if (gameMode == 0)
 		cout << "서바이벌 모드로 시작합니다." << endl;
 	else if (gameMode == 1)
-		cout << "RPG 모드로 시작합니다." << endl;
+		cout << "RPG 모드로 시작합니다." << endl;*/
 
 	return true;
 }
@@ -710,9 +717,15 @@ void CGameFramework::BuildObjects()
 	}
 
 	CSatellite* pSatellite1 = new CSatellite(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 0.0f, pPlayerShader, pSkinnedPlayerShader, pMat);
+		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 200.0f, -3000.0f, pPlayerShader, pSkinnedPlayerShader, pMat);
+
+	CSatellite* pSatellite2 = new CSatellite(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get(), -1500.0f, 250.0f, 1300.0f, pPlayerShader, pSkinnedPlayerShader, pMat);
+
+	pSatellite2->Rotate(-90.0f, 0.0f, 0.0f);
 
 	m_pBackgroundObjects[m_nBackgroundObjects++] = pSatellite1;
+	m_pBackgroundObjects[m_nBackgroundObjects++] = pSatellite2;
 
 	CPlanetShader* pAlienPlanetShader = new CPlanetShader();
 	pAlienPlanetShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature().Get());
@@ -721,13 +734,51 @@ void CGameFramework::BuildObjects()
 
 	CMaterial* pAlienPlanetMat = new CMaterial();
 
-	CAlienPlanet* pAlienPlanet = new CAlienPlanet(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
-		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 10.0f, 0.0f, pAlienPlanetShader, pSkinnedPlayerShader, pAlienPlanetMat);
+	CAlienPlanet* pAlienPlanet1 = new CAlienPlanet(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get(), -1200.0f, 100.0f, -2000.0f, pAlienPlanetShader, pSkinnedPlayerShader, pAlienPlanetMat);
 
-	m_pBackgroundObjects[m_nBackgroundObjects++] = pAlienPlanet;
+	CAlienPlanet* pAlienPlanet2 = new CAlienPlanet(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get(), -500.0f, 300.0f, 2000.0f, pAlienPlanetShader, pSkinnedPlayerShader, pAlienPlanetMat);
 
-	/*m_ppBackgroundObjects[m_nBackgroundObjects] = pSatellite1->m_pChild;
-	m_nBackgroundObjects++;*/
+	CAlienPlanet* pAlienPlanet3 = new CAlienPlanet(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get(), 2000.0f, 0.0f, -800.0f, pAlienPlanetShader, pSkinnedPlayerShader, pAlienPlanetMat);
+
+	pAlienPlanet3->Rotate(0.0f, 180.0f, -90.0f);
+	pAlienPlanet3->Rotate(0.0f, 180.0f, 0.0f);
+
+	m_pBackgroundObjects[m_nBackgroundObjects++] = pAlienPlanet1;
+	m_pBackgroundObjects[m_nBackgroundObjects++] = pAlienPlanet2;
+	m_pBackgroundObjects[m_nBackgroundObjects++] = pAlienPlanet3;
+
+	CDesertPlanetShader* pDesertPlanetShader = new CDesertPlanetShader();
+	pDesertPlanetShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature().Get());
+	pDesertPlanetShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+
+	CMaterial* pDesertPlanetMat = new CMaterial();
+
+	CDesertPlanet* pDesertPlanet1 = new CDesertPlanet(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get(), -1500.0f, -100.0f, 1300.0f, pDesertPlanetShader, pSkinnedPlayerShader, pDesertPlanetMat);
+
+	CDesertPlanet* pDesertPlanet2 = new CDesertPlanet(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get(), 1000.0f, 0.0f, -2000.0f, pDesertPlanetShader, pSkinnedPlayerShader, pDesertPlanetMat);
+
+	m_pBackgroundObjects[m_nBackgroundObjects++] = pDesertPlanet1;
+	m_pBackgroundObjects[m_nBackgroundObjects++] = pDesertPlanet2;
+
+	CFrozenPlanetShader* pFrozenPlanetShader = new CFrozenPlanetShader();
+	pFrozenPlanetShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature().Get());
+	pFrozenPlanetShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+
+	CMaterial* pFrozenPlanetMat = new CMaterial();
+
+	CFrozenPlanet* pFrozenPlanet1 = new CFrozenPlanet(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get(), -3000.0f, 40.0f, 0.0f, pFrozenPlanetShader, pSkinnedPlayerShader, pFrozenPlanetMat);
+
+	CFrozenPlanet* pFrozenPlanet2 = new CFrozenPlanet(m_pd3dDevice.Get(), m_pd3dCommandList.Get(),
+		m_pScene->GetGraphicsRootSignature().Get(), 0.0f, 200.0f, -3500.0f, pFrozenPlanetShader, pSkinnedPlayerShader, pFrozenPlanetMat);
+
+	m_pBackgroundObjects[m_nBackgroundObjects++] = pFrozenPlanet1;
+	m_pBackgroundObjects[m_nBackgroundObjects++] = pFrozenPlanet2;
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList.Get() };
@@ -783,9 +834,9 @@ void CGameFramework::ProcessInput()
 				m_pPlayer->SetIsShoot(true);
 			}
 
-			if (pKeyBuffer[0x31] & 0xF0) m_pPlayer->ActiveRifle();				// 1
-			if (pKeyBuffer[0x32] & 0xF0) m_pPlayer->ActiveShotgun();			// 2
-			if (pKeyBuffer[0x33] & 0xF0) m_pPlayer->ActivePistol();				// 3
+			//if (pKeyBuffer[0x31] & 0xF0) m_pPlayer->ActiveRifle();				// 1
+			//if (pKeyBuffer[0x32] & 0xF0) m_pPlayer->ActiveShotgun();			// 2
+			//if (pKeyBuffer[0x33] & 0xF0) m_pPlayer->ActivePistol();				// 3
 
 			//if (pKeyBuffer[0x38] & 0xF0) m_pPlayer->UpgradePlayerBullet();		// 8
 			//if (pKeyBuffer[0x39] & 0xF0) m_pPlayer->UpgradePlayerHp();			// 9

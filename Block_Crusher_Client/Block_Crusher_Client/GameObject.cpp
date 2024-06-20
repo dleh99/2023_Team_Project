@@ -1573,7 +1573,7 @@ CSatellite::CSatellite(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 		"Models/satellite model data.bin", NULL, pPlayerShader, pSkinnedPlayerShader, pMaterial);
 	SetChild(pSatelliteModel->m_pModelRootObject);
 	
-	SetScale(20.0f);
+	SetScale(50.0f);
 	SetPosition(XMFLOAT3(x, y, z));
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -1586,17 +1586,51 @@ void CSatellite::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 
 CAlienPlanet::CAlienPlanet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z, CShader* pPlayerShader, CShader* pSkinnedPlayerShader, CMaterial* pMaterial)
 {
-	CLoadedModelInfo* pSatelliteModel = LoadModelAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+	CLoadedModelInfo* pAlienPlanetModel = LoadModelAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
 		"Models/alien planet model data.bin", NULL, pPlayerShader, pSkinnedPlayerShader, pMaterial);
-	SetChild(pSatelliteModel->m_pModelRootObject);
+	SetChild(pAlienPlanetModel->m_pModelRootObject);
 
-	SetScale(20.0f);
+	SetScale(400.0f);
 	SetPosition(XMFLOAT3(x, y, z));
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 void CAlienPlanet::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	CGameObject::Render(pd3dCommandList, pCamera);
+}
+
+CDesertPlanet::CDesertPlanet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z, CShader* pPlayerShader, CShader* pSkinnedPlayerShader, CMaterial* pMaterial)
+{
+	CLoadedModelInfo* pDesertPlanetModel = LoadModelAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+		"Models/desert planet model data.bin", NULL, pPlayerShader, pSkinnedPlayerShader, pMaterial);
+	SetChild(pDesertPlanetModel->m_pModelRootObject);
+
+	SetScale(300.0f);
+	SetPosition(XMFLOAT3(x, y, z));
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+void CDesertPlanet::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	CGameObject::Render(pd3dCommandList, pCamera);
+}
+
+CFrozenPlanet::CFrozenPlanet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z, CShader* pPlayerShader, CShader* pSkinnedPlayerShader, CMaterial* pMaterial)
+{
+	CLoadedModelInfo* pFrozenPlanetModel = LoadModelAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+		"Models/frozen planet model data.bin", NULL, pPlayerShader, pSkinnedPlayerShader, pMaterial);
+	SetChild(pFrozenPlanetModel->m_pModelRootObject);
+
+	SetScale(500.0f);
+	SetPosition(XMFLOAT3(x, y, z));
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+void CFrozenPlanet::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	CGameObject::Render(pd3dCommandList, pCamera);
 }

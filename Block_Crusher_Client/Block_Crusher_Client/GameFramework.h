@@ -128,7 +128,8 @@ public:
 	CMainPlayer* m_pPlayer = NULL;
 	vector<CMainPlayer*> m_vEnemyPlayers;
 	
-	CGameObject* m_pBackgroundObjects[5];
+	CGameObject** m_pBackgroundObjects;
+	int m_nMaxBackgroundObjects = 20;
 	int m_nBackgroundObjects = 0;
 
 	wstring* m_sTitleTexts[3];

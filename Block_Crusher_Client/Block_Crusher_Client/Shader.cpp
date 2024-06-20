@@ -1493,3 +1493,23 @@ D3D12_SHADER_BYTECODE CPlanetShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlo
 {
 	return CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSPlanetDiffused", "ps_5_1", ppd3dShaderBlob);
 }
+
+D3D12_SHADER_BYTECODE CDesertPlanetShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
+{
+	return CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSDesertPlanetDiffused", "vs_5_1", ppd3dShaderBlob);
+}
+
+D3D12_SHADER_BYTECODE CDesertPlanetShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
+{
+	return CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSDesertPlanetDiffused", "ps_5_1", ppd3dShaderBlob);
+}
+
+D3D12_SHADER_BYTECODE CFrozenPlanetShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
+{
+	return CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSFrozenPlanetDiffused", "vs_5_1", ppd3dShaderBlob);
+}
+
+D3D12_SHADER_BYTECODE CFrozenPlanetShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
+{
+	return CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSFrozenPlanetDiffused", "ps_5_1", ppd3dShaderBlob);
+}

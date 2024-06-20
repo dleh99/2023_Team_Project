@@ -192,6 +192,72 @@ float4 PSPlanetDiffused(VS_PLANET_OUTPUT input) : SV_TARGET
 	//return cColor;
 	return lerp(cColor, cIllumination, 0.4f);
 }
+
+VS_PLANET_OUTPUT VSDesertPlanetDiffused(VS_PLANET_INPUT input)
+{
+	VS_PLANET_OUTPUT output = (VS_PLANET_OUTPUT)0;
+
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	output.normal = mul(input.normal, (float3x3)gmtxWorld);
+	output.tangent = input.tangent;
+	output.uv = input.uv;
+
+	float4 positionW = mul(float4(input.position, 1.0f), gmtxWorld);
+	[unroll]
+	for (int i = 0; i < MAX_LIGHTS; i++)
+	{
+		if (gcbToLightSpaces[i].f4Position.w != 0.0f) output.shadowMapUVs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTextureSpace);
+	}
+
+	return output;
+}
+
+float4 PSDesertPlanetDiffused(VS_PLANET_OUTPUT input) : SV_TARGET
+{
+	//float4 cColor = gtxtAlbedoTexture.Sample(gSamplerState, input.uv);
+	float4 cColor = float4(0.9f, 0.6f, 0.4f, 1.0f);
+	float3 normalW = normalize(input.normal);
+	float3 positionW = float3(input.position.x, input.position.y, input.position.z);
+	float4 shadowMapUVs[MAX_LIGHTS];
+
+	float4 cIllumination = Lighting(positionW, normalW, false, shadowMapUVs);
+
+	//return cColor;
+	return lerp(cColor, cIllumination, 0.4f);
+}
+
+VS_PLANET_OUTPUT VSFrozenPlanetDiffused(VS_PLANET_INPUT input)
+{
+	VS_PLANET_OUTPUT output = (VS_PLANET_OUTPUT)0;
+
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	output.normal = mul(input.normal, (float3x3)gmtxWorld);
+	output.tangent = input.tangent;
+	output.uv = input.uv;
+
+	float4 positionW = mul(float4(input.position, 1.0f), gmtxWorld);
+	[unroll]
+	for (int i = 0; i < MAX_LIGHTS; i++)
+	{
+		if (gcbToLightSpaces[i].f4Position.w != 0.0f) output.shadowMapUVs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTextureSpace);
+	}
+
+	return output;
+}
+
+float4 PSFrozenPlanetDiffused(VS_PLANET_OUTPUT input) : SV_TARGET
+{
+	//float4 cColor = gtxtAlbedoTexture.Sample(gSamplerState, input.uv);
+	float4 cColor = float4(0.6f, 0.9f, 1.0f, 1.0f);
+	float3 normalW = normalize(input.normal);
+	float3 positionW = float3(input.position.x, input.position.y, input.position.z);
+	float4 shadowMapUVs[MAX_LIGHTS];
+
+	float4 cIllumination = Lighting(positionW, normalW, false, shadowMapUVs);
+
+	//return cColor;
+	return lerp(cColor, cIllumination, 0.4f);
+}
 /// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 

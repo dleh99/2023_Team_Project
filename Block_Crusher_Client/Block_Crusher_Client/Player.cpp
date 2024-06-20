@@ -622,13 +622,20 @@ void CPlayer::UpgradePlayerBulletSpeed()
 		cout << "플레이어의 돈이 부족합니다. 현재 돈: " << m_iPlayerMoney << endl;
 	else
 	{
-		m_fUpgradeBulletSpeed += 0.2f;
-		m_iPlayerMoney -= 10;
+		if (m_fUpgradeBulletSpeed < 2.0f)
+		{
+			m_fUpgradeBulletSpeed += 0.2f;
+			m_iPlayerMoney -= 10;
 
-		send_upgrade_packet(UP_BULLET_SPEED);
+			send_upgrade_packet(UP_BULLET_SPEED);
 
-		cout << "총알 속도 구매 성공!!! 현재 총알 속도: +" << int(m_fUpgradeBulletSpeed * 100)
-			<< "%, 현재 돈: " << m_iPlayerMoney << endl;
+			cout << "총알 속도 구매 성공!!! 현재 총알 속도: +" << int(m_fUpgradeBulletSpeed * 100)
+				<< "%, 현재 돈: " << m_iPlayerMoney << endl;
+		}
+		else
+		{
+			cout << "총알 속도 최대치 달성" << endl;
+		}
 	}
 }
 
