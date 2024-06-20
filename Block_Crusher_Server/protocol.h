@@ -1,6 +1,6 @@
 #pragma once
 #define USE_SERVER
-//#define USE_SOUND
+#define USE_SOUND
 //#define USE_DB
 
 constexpr int SERVER_PORT = 4000;

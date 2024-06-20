@@ -317,6 +317,7 @@ void ProcessPacket(char* ptr)
 		NetScene->DisableBullet(packet->bullet_id, packet->player_id);
 		if (id == packet->death_id) {
 			//int UpdatedHP = Netplayers[id]->GetPlayerHP() - 10; // (10 + Netplayers[hit]->GetUpgradeDamage());
+			SoundManager::GetInstance().EffectSound(DEATH);
 			int UpdatedHP = 0;
 			Netplayers[id]->SetPlayerHP(UpdatedHP);
 		}

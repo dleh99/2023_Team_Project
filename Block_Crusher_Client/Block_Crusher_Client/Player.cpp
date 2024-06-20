@@ -133,7 +133,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 					if (m_nBullet == 0) m_bReloading = true;
 
 #ifdef USE_SOUND
-					SoundManager::GetInstance().FireSound(GUN);
+					SoundManager::GetInstance().EffectSound(GUN);
 #endif
 				}
 			}
