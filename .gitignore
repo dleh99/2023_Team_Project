@@ -30,6 +30,10 @@ mono_crash.*
 *.prefab
 *.unity
 *.png
+*.dll
+*.hpp
+*.lib
+*.a
 
 # Build results
 [Dd]ebug/
