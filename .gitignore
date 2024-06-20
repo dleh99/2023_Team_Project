@@ -31,9 +31,15 @@ mono_crash.*
 *.unity
 *.png
 *.dll
+<<<<<<< Updated upstream
 *.lib
 *.a
 *.hpp
+=======
+*.hpp
+*.lib
+*.a
+>>>>>>> Stashed changes
 
 # Build results
 [Dd]ebug/
