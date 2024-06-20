@@ -558,17 +558,13 @@ bool CScene::OnPrecessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	case WM_KEYUP:
 		switch (wParam)
 		{
-		case 0x35:
+		case 0x36:
 			if (gameMode == 1)
 				m_pPlayer->UpgradePlayerSpeed();
 			break;
-		case 0x36:
-			if (gameMode == 1)
-			m_pPlayer->UpgradePlayerDamage();
-			break;
 		case 0x37:
 			if (gameMode == 1)
-				m_pPlayer->UpgradePlayerBulletSpeed();
+				m_pPlayer->UpgradePlayerDamage();
 			break;
 		case 0x38:
 			if (gameMode == 1)
