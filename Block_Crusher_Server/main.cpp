@@ -56,7 +56,7 @@ void disconnect(int c_id)
 	if (room_num != -1) {
 		if (rooms[room_num].PlayerOut(c_id)) {
 			if (rooms[room_num].clients_number == 0) rooms[room_num].SettingRoom();
-			cout << "[" << c_id << "] 룸에서 탈퇴 완료" << endl;
+			//cout << "[" << c_id << "] 룸에서 탈퇴 완료" << endl;
 		}
 	}
 
@@ -115,7 +115,7 @@ void checking_room(int key)
 				clients[room_mambers[i]]._state = US_INGAME;
 			}
 			clients[room_mambers[i]]._room_id = i;
-			cout << room_mambers[i] << "에게 id 보냄 : " << i << endl;
+			//cout << room_mambers[i] << "에게 id 보냄 : " << i << endl;
 			XMFLOAT3 start_pos = physics_engine.StartPos(i);
 
 			clients[room_mambers[i]].send_start_packet(rooms[room_num].GetMapKey(), i, start_pos.x, start_pos.y, start_pos.z);
@@ -130,7 +130,7 @@ void FindCrushEmptyRoom(int c_id)
 		if (false == r.PlayerIn(c_id)) continue;
 		clients_room[c_id] = r.GetRoomNum();
 		checking_room(c_id);
-		cout << clients_room[c_id] << "번 룸에 접속함" << endl;
+		//cout << clients_room[c_id] << "번 룸에 접속함" << endl;
 		break;
 	}
 }
@@ -142,7 +142,7 @@ void FindRpgEmptyRoom(int c_id)
 		if (false == rooms[rn].PlayerIn(c_id)) continue;
 		clients_room[c_id] = rooms[rn].GetRoomNum();
 		checking_room(c_id);
-		cout << clients_room[c_id] << "번 룸에 접속함" << endl;
+		//cout << clients_room[c_id] << "번 룸에 접속함" << endl;
 		break;
 	}
 }
@@ -192,13 +192,13 @@ void packet_process(int c_id, char* packet)
 	}
 	case CS_CRUSH_MATCH: {
 		// 비어 있는 방 찾기
-		cout << "crush에 들어옴" << endl;
+		//cout << "crush에 들어옴" << endl;
 		FindCrushEmptyRoom(c_id);
 		clients[c_id].send_crush_mode_match_finish_packet(clients_room[c_id]);
 		break;
 	}
 	case CS_RPG_MATCH: {
-		cout << "rpg에 들어옴" << endl;
+		//cout << "rpg에 들어옴" << endl;
 		FindRpgEmptyRoom(c_id);
 		clients[c_id].send_rpg_mode_match_finish_packet(clients_room[c_id]);
 		break;
@@ -271,7 +271,7 @@ void packet_process(int c_id, char* packet)
 		CS_SCORE_PACKET* p = reinterpret_cast<CS_SCORE_PACKET*>(packet);
 		short room_num = clients_room[c_id];
 		clients[c_id].score = p->score;
-		cout << "받았냐?" << endl;
+		//cout << "받았냐?" << endl;
 	
 #ifdef USE_DB
 		DB_EVENT ev{ clients[c_id]._id, chrono::system_clock::now(), UPDATE_SCORE, clients[c_id].login_id, clients[c_id].score };
@@ -498,7 +498,7 @@ void worker_thread(HANDLE iocp_h)
 			}
 			case OT_RESTART:
 			{
-				cout << "끝나고 10초 지나서 재시작 패킷 보냄" << endl;
+				//cout << "끝나고 10초 지나서 재시작 패킷 보냄" << endl;
 				{
 					//lock_guard<mutex> ll{ rooms[clients_room[key]]._r_lock };
 					rooms[clients_room[key]].SetRoomState(RS_END);
@@ -681,7 +681,7 @@ void Physics_Calculation_thread()
 							clients[check_id].bullet[bullet_num].SetisActive(false);
 							clients[other_id].hp -= clients[check_id].cl_damage;
 
-							cout << "[" << clients[check_id]._room_id << "] 가 [" << clients[other_id]._room_id << "]를 " << clients[check_id].cl_damage << "의 데미지로 때려서 " << clients[other_id].hp << "이 남음" << endl;
+							//cout << "[" << clients[check_id]._room_id << "] 가 [" << clients[other_id]._room_id << "]를 " << clients[check_id].cl_damage << "의 데미지로 때려서 " << clients[other_id].hp << "이 남음" << endl;
 							
 							// hp가 0이면 죽었다고, 아니면 맞았다는 패킷 보냄
 							if (clients[other_id].hp > 0) {

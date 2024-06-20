@@ -54,7 +54,7 @@ bool Room::PlayerIn(int p_id)
 			if (clients_id[i] == -1) {
 				clients_id[i] = p_id;
 				clients_number++;
-				std::cout << "[들어옴] - " << i << "를 바꿈. 현재원 : " << clients_number << std::endl;
+				//std::cout << "[들어옴] - " << i << "를 바꿈. 현재원 : " << clients_number << std::endl;
 				if (clients_number == MAX_PLAYER)
 				{
 					room_state = RS_READY;
@@ -69,7 +69,7 @@ bool Room::PlayerIn(int p_id)
 bool Room::PlayerOut(int p_id)
 {
 	int key = FindPlayer(p_id);
-	std::cout << key << std::endl;
+	//std::cout << key << std::endl;
 	// 여기 CAS 써야 할 것 같은데?
 	// CAS를 쓰던가 lock을 쓰던가 일단 lock 씀
 	std::lock_guard<std::mutex> ll{ _r_lock };
