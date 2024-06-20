@@ -941,21 +941,21 @@ void CScene::Render2D(const ComPtr<ID2D1DeviceContext2>& m_d2dDeviceContext, Com
 	int yStride = 30;
 	pTextFormat[3]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
 
-	// 이동속도 강화
-	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(x, yStart += yStride));
-	str = L"NUM5 이동속도";
-	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
-		pTextFormat[3].Get(), D2D1::RectF(0, 0, 200, 50), SolidColorBrush[0].Get());
+	//// 이동속도 강화
+	//m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(x, yStart += yStride));
+	//str = L"NUM5 이동속도";
+	//m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
+	//	pTextFormat[3].Get(), D2D1::RectF(0, 0, 200, 50), SolidColorBrush[0].Get());
 
 	// 총알 데미지 강화
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(x, yStart += yStride));
-	str = L"NUM6 총알 데미지";
+	str = L"NUM6 이동속도";
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
 		pTextFormat[3].Get(), D2D1::RectF(0, 0, 200, 50), SolidColorBrush[0].Get());
 
 	// 총알 속도 강화
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(x, yStart += yStride));
-	str = L"NUM7 총알 속도";
+	str = L"NUM7 총알 데미지";
 	m_d2dDeviceContext->DrawText(str.c_str(), static_cast<UINT32>(str.size()),
 		pTextFormat[3].Get(), D2D1::RectF(0, 0, 200, 50), SolidColorBrush[0].Get());
 
