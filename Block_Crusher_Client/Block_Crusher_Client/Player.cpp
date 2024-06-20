@@ -678,6 +678,20 @@ void CPlayer::ConfirmPlayerMoney()
 	cout << "ÇöÀç ³²Àº µ·: " << m_iPlayerMoney << endl;
 }
 
+void CPlayer::ResetPlayerUpgrade()
+{
+	m_iPlayerMoney = 100;
+	m_nUpgradeSpeed = 0;
+	m_nUpgradeDamage = 0;
+	m_fUpgradeBulletSpeed = 1.0f;
+	
+	m_nBullet = 30;
+	m_nUpgradeBullet = 0;
+	
+	m_iPlayerHP = 100;
+	m_nUpgradeHp = 0;
+}
+
 CCubePlayer::CCubePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z, int id)
 {

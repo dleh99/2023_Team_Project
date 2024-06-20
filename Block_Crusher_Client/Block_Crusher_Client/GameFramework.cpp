@@ -43,13 +43,16 @@ CGameFramework::CGameFramework()
 CGameFramework::~CGameFramework()
 {
 	for (int i = 0; i < m_vEnemyPlayers.size(); ++i) {
-		delete m_vEnemyPlayers[i];
+		if (m_vEnemyPlayers[i])
+			delete m_vEnemyPlayers[i];
 	}
 
 	for (int i = 0; i < m_nMaxBackgroundObjects; ++i) {
-		delete[]m_pBackgroundObjects[i];
+		if (m_pBackgroundObjects[i])
+			delete[]m_pBackgroundObjects[i];
 	}
-	delete[]m_pBackgroundObjects;
+	if (m_pBackgroundObjects)
+		delete[]m_pBackgroundObjects;
 }
 
 bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hWnd)
