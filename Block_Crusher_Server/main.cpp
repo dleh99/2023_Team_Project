@@ -262,7 +262,7 @@ void packet_process(int c_id, char* packet)
 				int player_id = same_room_player[round];
 				if (player_id == -1) continue;
 				if (player_id == c_id) continue;
-				clients[player_id].send_fall_packet(clients[player_id]._room_id);
+				clients[player_id].send_fall_packet(clients[c_id]._room_id);
 			}
 		}
 		break;

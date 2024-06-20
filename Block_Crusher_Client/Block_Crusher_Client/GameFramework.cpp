@@ -809,6 +809,7 @@ void CGameFramework::ProcessInput()
 		if (y < -150.f && false == m_pPlayer->GetDeath()) {
 			send_fall_packet();
 			m_pPlayer->SetDeath(true);
+			SoundManager::GetInstance().EffectSound(DEATH);
 		}
 		//cout << dwDirection << endl;
 #endif

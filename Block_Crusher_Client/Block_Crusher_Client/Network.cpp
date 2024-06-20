@@ -339,8 +339,6 @@ void ProcessPacket(char* ptr)
 	case SC_FALL: {
 		SC_FALL_PACKET* packet = reinterpret_cast<SC_FALL_PACKET*>(ptr);
 		Netplayers[packet->fall_id]->SetDeath(true);
-		if(id == packet->fall_id)
-			SoundManager::GetInstance().EffectSound(DEATH);
 		break;
 	}
 	case SC_RESULT: {
