@@ -244,6 +244,8 @@ public:
 	void UpgradePlayerBullet();
 
 	void ConfirmPlayerMoney();
+
+	void ResetPlayerUpgrade();
 };
 
 class CCubePlayer : public CPlayer

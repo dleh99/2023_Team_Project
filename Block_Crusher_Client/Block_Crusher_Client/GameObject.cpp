@@ -38,7 +38,8 @@ CTexture::~CTexture()
 	if (m_ppd3dTextures)
 	{
 		for (int i = 0; i < m_nTextures; i++) if (m_ppd3dTextures[i]) m_ppd3dTextures[i]->Release();
-		delete[] m_ppd3dTextures;
+		if (m_ppd3dTextures)
+			delete[] m_ppd3dTextures;
 	}
 
 	if (m_ppstrTextureNames) delete[] m_ppstrTextureNames;
@@ -122,7 +123,8 @@ void CTexture::ReleaseUploadBuffers()
 	if (m_ppd3dTextureUploadBuffers)
 	{
 		for (int i = 0; i < m_nTextures; i++) if (m_ppd3dTextureUploadBuffers[i]) m_ppd3dTextureUploadBuffers[i]->Release();
-		delete[] m_ppd3dTextureUploadBuffers;
+		if (m_ppd3dTextureUploadBuffers)
+			delete[] m_ppd3dTextureUploadBuffers;
 		m_ppd3dTextureUploadBuffers = NULL;
 	}
 }
@@ -928,7 +930,8 @@ CGameObject* CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, I
 				if (pMesh) pGameObject->SetMesh(pMesh);
 				pGameObject->SetShader(pPlayerMeshShader);
 
-				delete pMeshInfo;
+				if (pMeshInfo)
+					delete pMeshInfo;
 			}
 		}
 		else if ('S' == token)

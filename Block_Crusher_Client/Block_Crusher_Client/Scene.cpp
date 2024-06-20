@@ -144,7 +144,8 @@ void CScene::ReleaseObjects()
 	{
 		for (int j = 0; j < m_nObjects; ++j)
 			if (m_ppObjects[j]) delete m_ppObjects[j];
-		delete[] m_ppObjects;
+		if (m_ppObjects)
+			delete[] m_ppObjects;
 	}
 
 	if (m_pLights) delete m_pLights;
@@ -554,13 +555,13 @@ bool CScene::OnPrecessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	case WM_KEYUP:
 		switch (wParam)
 		{
-		case 0x30:
+		case 0x35:
 			if (gameMode == 1)
 				m_pPlayer->UpgradePlayerSpeed();
 			break;
-		case 0x35:
+		case 0x36:
 			if (gameMode == 1)
-				m_pPlayer->UpgradePlayerDamage();
+			m_pPlayer->UpgradePlayerDamage();
 			break;
 		case 0x37:
 			if (gameMode == 1)
@@ -574,10 +575,10 @@ bool CScene::OnPrecessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			if (gameMode == 1)
 				m_pPlayer->UpgradePlayerHp();
 			break;
-		case 0x4D:
+		/*case 0x4D:
 			if (gameMode == 1)
 				m_pPlayer->ConfirmPlayerMoney();
-			break;
+			break;*/
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
 			break;
@@ -1321,9 +1322,11 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 	}
 
 	for (int i = 0; i < 50; ++i) {
-		delete mapdata[i];
+		if (mapdata[i])
+			delete mapdata[i];
 	}
-	delete[] mapdata;
+	if (mapdata)
+		delete[] mapdata;
 
 	std::cout << m_nActiveBlock << "개 블럭 추가" << std::endl;
 

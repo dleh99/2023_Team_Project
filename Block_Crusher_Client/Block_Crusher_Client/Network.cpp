@@ -18,6 +18,7 @@ float otherPlayer_x, otherPlayer_y, otherPlayer_z;
 Pos otherPlayerPos[3];
 Mouse otherPlayerMouse[3];
 Animation otherPlayerAni[3];
+CGameFramework* NetGameFramework = NULL;
 CScene* NetScene = NULL;
 vector<CMainPlayer*> Netplayers;
 CCamera* GameCamera = NULL;
@@ -31,7 +32,7 @@ bool gameResult = false;
 char m_mapKey;
 
 // 게임 모드
-int gameMode = 1;		// 0: Survival Mode, 1: RPG Mode
+int gameMode = 0;		// 0: Survival Mode, 1: RPG Mode
 
 int NetworkInit()
 {
@@ -226,9 +227,25 @@ void ProcessPacket(char* ptr)
 		SC_START_PACKET* packet = reinterpret_cast<SC_START_PACKET*>(ptr);
 		m_gameStart = true;
 		m_mapKey = packet->map_key;
-		NetScene->AddBlocksByMapData(0, m_mapKey,false);
+		NetScene->AddBlocksByMapData(0, m_mapKey, false);
 		id = packet->player_id;
+		gameMode = 1;
 		cout << "게임을 시작했습니다. 제 아이디는 " << id << "입니다" << endl;
+
+		NetGameFramework->m_pPlayer = Netplayers[id];
+		NetScene->m_pPlayer = Netplayers[id];
+
+		NetGameFramework->m_pCamera = NetGameFramework->m_pPlayer->GetCamera();
+
+		NetGameFramework->BuildPlayer();
+
+		NetGameFramework->m_pPlayer->Update(NetGameFramework->GetGameTimer().GetTimeElapsed(), NULL);
+		for (int i = 0; i < Netplayers.size(); ++i) {
+			if (Netplayers[i])
+				Netplayers[i]->Update(NetGameFramework->GetGameTimer().GetTimeElapsed(), NULL);
+		}
+		NetGameFramework->m_pPlayer->ResetPlayerUpgrade();
+		NetGameFramework->m_pPlayer->SetPlayerId(id);
 
 		XMFLOAT3 pos = { packet->start_x ,packet->start_y ,packet->start_z };
 		Netplayers[id]->SetPosition(pos);
@@ -368,6 +385,7 @@ void ProcessPacket(char* ptr)
 		//cout << "재시작 하래" << endl;
 		NetScene->m_SceneState = 2;
 		NetScene->m_fPlayTime = 120.0f;
+		gameMode = 0;
 
 #ifdef USE_SOUND
 		SoundManager::GetInstance().StartStageSound();
@@ -647,6 +665,10 @@ void err_display(int errcode)
 		(char*)&lpMsgBuf, 0, NULL);
 	printf("[오류] %s\n", (char*)lpMsgBuf);
 	LocalFree(lpMsgBuf);
+}
+
+void SetGameFramework(CGameFramework* GameFramework) {
+	NetGameFramework = GameFramework;
 }
 
 void SetScene(CScene* Scene) {

@@ -1,5 +1,5 @@
 #pragma once
-//#define USE_SERVER
+#define USE_SERVER
 #define USE_SOUND
 //#define USE_DB
 

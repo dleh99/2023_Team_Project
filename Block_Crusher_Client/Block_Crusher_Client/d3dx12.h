@@ -4681,7 +4681,7 @@ private:
     {
     public:
         OWNED_HELPER(const SUBOBJECT_HELPER_BASE* pHelper) noexcept { m_pHelper = pHelper; }
-        ~OWNED_HELPER() { delete m_pHelper; }
+        ~OWNED_HELPER() { if (m_pHelper)delete m_pHelper; }
         const SUBOBJECT_HELPER_BASE* m_pHelper;
     };
 
