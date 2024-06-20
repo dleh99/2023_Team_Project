@@ -180,45 +180,63 @@ void CPlayerMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 void CPlayerMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	CMeshLoadInfo* pMeshInfo)
 {
-	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pMeshInfo->m_pxmf3Positions,
-		sizeof(XMFLOAT3) * pMeshInfo->m_nPositions,
-		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
-	m_pd3dNormalBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pMeshInfo->m_pxmf3Normals,
-		sizeof(XMFLOAT3) * pMeshInfo->m_nNormals,
-		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dNormalUploadBuffer);
-	m_pd3dTangentBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pMeshInfo->m_pxmf4Tangents,
-		sizeof(XMFLOAT4) * pMeshInfo->m_nTangents,
-		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dTangentUploadBuffer);
-	m_pd3dUvBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pMeshInfo->m_pxmf2Uvs,
-		sizeof(XMFLOAT2) * pMeshInfo->m_nUvs,
-		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dUvUploadBuffer);
-
 	m_nVertexBufferViews = 4;
 	m_pd3dPlayerVertexBufferViews = new D3D12_VERTEX_BUFFER_VIEW[m_nVertexBufferViews];
 
-	m_pd3dPlayerVertexBufferViews[0].BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
-	m_pd3dPlayerVertexBufferViews[0].StrideInBytes = sizeof(XMFLOAT3);
-	m_pd3dPlayerVertexBufferViews[0].SizeInBytes = sizeof(XMFLOAT3) * pMeshInfo->m_nPositions;
+	if (pMeshInfo->m_nPositions > 0)
+	{
+		m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pMeshInfo->m_pxmf3Positions,
+			sizeof(XMFLOAT3) * pMeshInfo->m_nPositions,
+			D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
 
-	m_pd3dPlayerVertexBufferViews[1].BufferLocation = m_pd3dNormalBuffer->GetGPUVirtualAddress();
-	m_pd3dPlayerVertexBufferViews[1].StrideInBytes = sizeof(XMFLOAT3);
-	m_pd3dPlayerVertexBufferViews[1].SizeInBytes = sizeof(XMFLOAT3) * pMeshInfo->m_nNormals;
+		m_pd3dPlayerVertexBufferViews[0].BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+		m_pd3dPlayerVertexBufferViews[0].StrideInBytes = sizeof(XMFLOAT3);
+		m_pd3dPlayerVertexBufferViews[0].SizeInBytes = sizeof(XMFLOAT3) * pMeshInfo->m_nPositions;
+	}
 
-	m_pd3dPlayerVertexBufferViews[2].BufferLocation = m_pd3dTangentBuffer->GetGPUVirtualAddress();
-	m_pd3dPlayerVertexBufferViews[2].StrideInBytes = sizeof(XMFLOAT3);
-	m_pd3dPlayerVertexBufferViews[2].SizeInBytes = sizeof(XMFLOAT3) * pMeshInfo->m_nTangents;
+	if (pMeshInfo->m_nNormals > 0)
+	{
+		m_pd3dNormalBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pMeshInfo->m_pxmf3Normals,
+			sizeof(XMFLOAT3) * pMeshInfo->m_nNormals,
+			D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dNormalUploadBuffer);
 
-	m_pd3dPlayerVertexBufferViews[3].BufferLocation = m_pd3dUvBuffer->GetGPUVirtualAddress();
-	m_pd3dPlayerVertexBufferViews[3].StrideInBytes = sizeof(XMFLOAT2);
-	m_pd3dPlayerVertexBufferViews[3].SizeInBytes = sizeof(XMFLOAT2) * pMeshInfo->m_nUvs;
+		m_pd3dPlayerVertexBufferViews[1].BufferLocation = m_pd3dNormalBuffer->GetGPUVirtualAddress();
+		m_pd3dPlayerVertexBufferViews[1].StrideInBytes = sizeof(XMFLOAT3);
+		m_pd3dPlayerVertexBufferViews[1].SizeInBytes = sizeof(XMFLOAT3) * pMeshInfo->m_nNormals;
+	}
 
-	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pMeshInfo->m_pIndices,
-		sizeof(UINT) * pMeshInfo->m_nIndices,
-		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
+	if (pMeshInfo->m_nTangents > 0)
+	{
+		m_pd3dTangentBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pMeshInfo->m_pxmf4Tangents,
+			sizeof(XMFLOAT4) * pMeshInfo->m_nTangents,
+			D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dTangentUploadBuffer);
 
-	m_pd3dPlayerIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
-	m_pd3dPlayerIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
-	m_pd3dPlayerIndexBufferView.SizeInBytes = sizeof(UINT) * pMeshInfo->m_nIndices;
+		m_pd3dPlayerVertexBufferViews[2].BufferLocation = m_pd3dTangentBuffer->GetGPUVirtualAddress();
+		m_pd3dPlayerVertexBufferViews[2].StrideInBytes = sizeof(XMFLOAT3);
+		m_pd3dPlayerVertexBufferViews[2].SizeInBytes = sizeof(XMFLOAT3) * pMeshInfo->m_nTangents;
+	}
+
+	if (pMeshInfo->m_nUvs > 0)
+	{
+		m_pd3dUvBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pMeshInfo->m_pxmf2Uvs,
+			sizeof(XMFLOAT2) * pMeshInfo->m_nUvs,
+			D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dUvUploadBuffer);
+
+		m_pd3dPlayerVertexBufferViews[3].BufferLocation = m_pd3dUvBuffer->GetGPUVirtualAddress();
+		m_pd3dPlayerVertexBufferViews[3].StrideInBytes = sizeof(XMFLOAT2);
+		m_pd3dPlayerVertexBufferViews[3].SizeInBytes = sizeof(XMFLOAT2) * pMeshInfo->m_nUvs;
+	}
+
+	if (pMeshInfo->m_nIndices > 0)
+	{
+		m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pMeshInfo->m_pIndices,
+			sizeof(UINT) * pMeshInfo->m_nIndices,
+			D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
+
+		m_pd3dPlayerIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+		m_pd3dPlayerIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+		m_pd3dPlayerIndexBufferView.SizeInBytes = sizeof(UINT) * pMeshInfo->m_nIndices;
+	}
 
 	m_nVertices = pMeshInfo->m_nPositions;
 	m_nIndices = pMeshInfo->m_nIndices;

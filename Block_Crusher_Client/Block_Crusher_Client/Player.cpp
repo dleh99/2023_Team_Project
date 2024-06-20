@@ -119,7 +119,10 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 					BP.x += LockVec.x * 10.0f + RightVec.x * 3.0f;
 					BP.z += LockVec.z * 10.0f + RightVec.z * 3.0f;
 
-					m_pScene->AddObjects(0, BP, LockVec, GetPlayerId(), b_id);
+					m_pScene->AddObjects(0, BP, LockVec, GetPlayerId(), b_id, GetUpgradeBulletSpeed());
+
+					cout << "나의 총알 속도: " << GetUpgradeBulletSpeed() << endl;
+
 					//cout << GetPlayerId() << "가 " << b_id <<  "를 쏴서 서버에 보내고, 저장했습니다." << endl;
 					XMFLOAT3 send_p = BP;
 					XMFLOAT3 send_v = LockVec;
@@ -623,13 +626,20 @@ void CPlayer::UpgradePlayerBulletSpeed()
 		cout << "플레이어의 돈이 부족합니다. 현재 돈: " << m_iPlayerMoney << endl;
 	else
 	{
-		m_fUpgradeBulletSpeed += 0.2f;
-		m_iPlayerMoney -= 10;
+		if (m_fUpgradeBulletSpeed < 2.0f)
+		{
+			m_fUpgradeBulletSpeed += 0.2f;
+			m_iPlayerMoney -= 10;
 
-		send_upgrade_packet(UP_BULLET_SPEED);
+			send_upgrade_packet(UP_BULLET_SPEED);
 
-		cout << "총알 속도 구매 성공!!! 현재 총알 속도: +" << int(m_fUpgradeBulletSpeed * 100)
-			<< "%, 현재 돈: " << m_iPlayerMoney << endl;
+			cout << "총알 속도 구매 성공!!! 현재 총알 속도: +" << int(m_fUpgradeBulletSpeed * 100)
+				<< "%, 현재 돈: " << m_iPlayerMoney << endl;
+		}
+		else
+		{
+			cout << "총알 속도 최대치 달성" << endl;
+		}
 	}
 }
 

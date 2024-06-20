@@ -20,6 +20,8 @@ User_Interface::User_Interface()
 	_room_id = -1;
 	cl_bullet_speed = 200.f;
 	cl_bullet_normal_speed = 200.f;
+	cl_bullet_upgrade_speed = 1.0f;
+	cl_bullet_upgrade_normal_speed = 1.0f;
 	cl_damage = 10;
 }
 
@@ -56,6 +58,8 @@ void User_Interface::refresh()
 	_room_id = -1;
 	cl_bullet_speed = 200.f;
 	cl_bullet_normal_speed = 200.f;
+	cl_bullet_upgrade_speed = 1.0f;
+	cl_bullet_upgrade_normal_speed = 1.0f;
 	cl_damage = 10;
 
 	for (int i{}; i < MAX_BULLET_NUM; ++i) {
@@ -154,7 +158,8 @@ void User_Interface::send_bullet_add_packet(User_Interface* clients, int c_id, i
 	p.b_z = clients[c_id].bullet[bullet_num].GetBulletVec().z;
 	p.player_id = clients[c_id]._room_id;
 	p.bullet_id = clients[c_id].bullet[bullet_num].GetbulletId();
-	p.bullet_speed = clients[c_id].cl_bullet_speed;
+	//p.bullet_speed = clients[c_id].cl_bullet_speed;
+	p.bullet_speed = clients[c_id].cl_bullet_upgrade_speed;
 	do_send(&p);
 }
 

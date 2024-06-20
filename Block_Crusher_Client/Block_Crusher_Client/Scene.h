@@ -53,7 +53,7 @@ public:
 	void AnimateObjects(float fTimeElapsed);
 	void UpdateObjects();
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-	void AddObjects(int type, XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector, int p_id, int b_id);
+	void AddObjects(int type, XMFLOAT3 BulletPosition, XMFLOAT3 BulletVector, int p_id, int b_id, float bulletSpeed);
 	void ReleaseUploadBuffers();
 
 	void DisableObject(int id_1, int id_2, int p_id);

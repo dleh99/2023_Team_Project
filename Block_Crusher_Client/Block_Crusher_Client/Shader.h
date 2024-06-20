@@ -164,6 +164,46 @@ public:
 	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 };
 
+class CPlanetShader : public CPlayerShader
+{
+public:
+	CPlanetShader() {};
+	virtual ~CPlanetShader() {};
+
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+};
+
+class CDesertPlanetShader : public CPlayerShader
+{
+public:
+	CDesertPlanetShader() {};
+	virtual ~CDesertPlanetShader() {};
+
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+};
+
+class CFrozenPlanetShader : public CPlayerShader
+{
+public:
+	CFrozenPlanetShader() {};
+	virtual ~CFrozenPlanetShader() {};
+
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+};
+
+class CRedPlanetShader : public CPlayerShader
+{
+public:
+	CRedPlanetShader() {};
+	virtual ~CRedPlanetShader() {};
+
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct TOLIGHTSPACEINFO

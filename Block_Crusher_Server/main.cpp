@@ -306,7 +306,8 @@ void packet_process(int c_id, char* packet)
 
 		if (p->up_option == UP_BULLET_SPEED) {
 			//cout << "[" << c_id << "] 의 총알 스피드를 강화해요" << endl;
-			clients[c_id].cl_bullet_speed += clients[c_id].cl_bullet_normal_speed * 0.2f;
+			//clients[c_id].cl_bullet_speed += clients[c_id].cl_bullet_normal_speed * 0.2f;
+			clients[c_id].cl_bullet_upgrade_speed += clients[c_id].cl_bullet_upgrade_normal_speed * 0.2f;
 		}
 		else if (p->up_option == UP_DAMAGE) {
 			//cout << "[" << c_id << "] 의 데미지를 강화해요" << endl;
@@ -526,6 +527,7 @@ void Physics_Calculation_thread()
 			if (cl._state != US_INGAME) continue;
 			for (int i{}; i < MAX_BULLET_NUM; ++i) {
 				if (cl.bullet[i].GetisActive()) {
+					cl.cl_bullet_speed *= cl.cl_bullet_upgrade_speed;
 					cl.bullet[i].Move(server_timer.GetTimeElapsed(), cl.cl_bullet_speed);
 					//cout << "이거 작동해?" << endl;
 				}

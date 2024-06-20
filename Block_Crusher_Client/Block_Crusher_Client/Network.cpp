@@ -31,7 +31,7 @@ bool gameResult = false;
 char m_mapKey;
 
 // 게임 모드
-int gameMode = 0;		// 0: Survival Mode, 1: RPG Mode
+int gameMode = 1;		// 0: Survival Mode, 1: RPG Mode
 
 int NetworkInit()
 {
@@ -270,10 +270,16 @@ void ProcessPacket(char* ptr)
 		SC_BULLET_ADD_PACKET* packet = reinterpret_cast<SC_BULLET_ADD_PACKET*>(ptr);
 		XMFLOAT3 BPos = { packet->s_x ,packet->s_y ,packet->s_z };
 		XMFLOAT3 BVec = { packet->b_x ,packet->b_y ,packet->b_z };
-		
-		// packet->bullet_speed
 
-		NetScene->AddObjects(0, BPos, BVec, packet->player_id, packet->bullet_id);
+		//float bulletSpeedAdjust = 199.0f;
+		NetScene->AddObjects(0, BPos, BVec, packet->player_id, packet->bullet_id, packet->bullet_speed);
+
+		cout << "################" << endl;
+		cout << "총을 쏘는 플레이어의 ID: " << packet->player_id << endl;
+		cout << "총알 ID: " << packet->bullet_id << endl;
+		cout << "다른 플레이어의 총알 속도: " << packet->bullet_speed << endl;
+		cout << "################" << endl << endl;
+
 		//cout << "총알을 받아 왔습니다. 위치 :" << packet->s_x << ", " << packet->s_y << ", " << packet->s_z << ", 발사 벡터 : " << packet->b_x << ", " << packet->b_y << ", " << packet->b_z << endl;
 		//cout << packet->player_id << "의 " << packet->bullet_id << "번 총알을 받아왔습니다" << endl;
 		break;
