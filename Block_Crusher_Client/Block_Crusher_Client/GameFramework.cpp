@@ -1041,6 +1041,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			// 타이틀일 때
 			if (m_pScene->m_SceneState == 0) { 
 				NetworkInit();
+				Sleep(100);
 				send_login_packet(*m_sTitleTexts[ID], *m_sTitleTexts[PW]);
 			}
 			// 로비일 때

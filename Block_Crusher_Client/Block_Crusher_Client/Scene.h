@@ -136,6 +136,10 @@ protected:
 	float m_fBlinkTime = 0;
 
 	CShader* m_pSceneShader = NULL;
+	CShader* m_pParticleShader = NULL;
+
+	CMaterial* m_pParticleMaterials[4];
+
 	CCubeMeshDiffused* pBulletMesh = NULL;
 
 	CSkyBox* m_pSkyBox = NULL;

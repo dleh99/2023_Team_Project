@@ -60,8 +60,24 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/mossBlock.dds", RESOURCE_TEXTURE2D, 2);
 	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/iceRock.dds", RESOURCE_TEXTURE2D, 3);
 
-	//CMaterial* pMaterial = new CMaterial();
-	//pMaterial->SetTexture(pTexture);
+	CTexture* pTextures[4];
+	pTextures[0] = new CTexture(4, RESOURCE_TEXTURE2D, 0, 1);
+	pTextures[1] = new CTexture(4, RESOURCE_TEXTURE2D, 0, 1);
+	pTextures[2] = new CTexture(4, RESOURCE_TEXTURE2D, 0, 1);
+	pTextures[3] = new CTexture(4, RESOURCE_TEXTURE2D, 0, 1);
+	
+	for (int i = 0; i < 4; ++i) {
+		pTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/stoneWall.dds", RESOURCE_TEXTURE2D, i);
+		pTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/ground.dds", RESOURCE_TEXTURE2D, i);
+		pTextures[2]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/mossBlock.dds", RESOURCE_TEXTURE2D, i);
+		pTextures[3]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Textures/iceRock.dds", RESOURCE_TEXTURE2D, i);
+	}
+
+	for (int i = 0; i < 4; ++i) {
+		m_pParticleMaterials[i] = new CMaterial();
+		m_pParticleMaterials[i]->SetTexture(pTextures[i]);
+		CreateShaderResourceViews(pd3dDevice, pTextures[i], 0, 2);
+	}
 
 	m_nObjects = 50 * 50 * 10 + 2000;
 	m_ppObjects = new CGameObject * [m_nObjects + 4000];
@@ -73,8 +89,6 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	m_pInstanceShader->SetTexture(pTexture);
 	
-
-
 	//pTexture[0]->SetTextures(2);
 
 	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 2);
@@ -86,6 +100,11 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	m_pSceneShader = pShader;
+
+	CTexturedShader* pParticleShader = new CTexturedShader();
+	pParticleShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature.Get());
+	pParticleShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	m_pParticleShader = pParticleShader;
 
 	pBulletMesh = BulletMesh;
 
@@ -649,13 +668,13 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	if (m_pInstanceShader)
 		m_pInstanceShader->Render(pd3dCommandList, pCamera);
 
+	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera);
+
 	for (int i = 0; i < m_nBlock; i++) {
 		if (m_ppObjects[i] && m_ppObjects[i]->m_bParticleActive) {
 			m_ppObjects[i]->RenderParticles(pd3dCommandList, pCamera);
 		}
 	}
-
-	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera);
 
 	/*if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
@@ -1163,7 +1182,7 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 					for (int p = 0; p < m_ppObjects[cnt]->m_nParticle; ++p) {
 						CParticle* pParticle = new CParticle();
 						pParticle->SetMesh(m_pBlockMesh);
-						pParticle->SetShader(m_pSceneShader);
+						pParticle->SetShader(m_pParticleShader);
 						pParticle->SetPosition(position);
 						pParticle->SetIsActive(true);
 						m_ppObjects[cnt]->m_pParticles[p] = pParticle;
@@ -1192,7 +1211,7 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 					for (int p = 0; p < m_ppObjects[cnt]->m_nParticle; ++p) {
 						CParticle* pParticle = new CParticle();
 						pParticle->SetMesh(m_pBlockMesh);
-						pParticle->SetShader(m_pSceneShader);
+						pParticle->SetShader(m_pParticleShader);
 						pParticle->SetPosition(position);
 						pParticle->SetIsActive(true);
 
@@ -1212,6 +1231,16 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 			pBlockObject->SetObjectType(TYPE_BLOCK);
 
 			m_ppObjects[i] = pBlockObject;
+
+			m_ppObjects[i]->m_pParticles = new CGameObject * [pBlockObject->m_nParticle];
+			for (int p = 0; p < m_ppObjects[i]->m_nParticle; ++p) {
+				CParticle* pParticle = new CParticle();
+				pParticle->SetMesh(m_pBlockMesh);
+				pParticle->SetShader(m_pParticleShader);
+				pParticle->SetIsActive(true);
+
+				m_ppObjects[i]->m_pParticles[p] = pParticle;
+			}
 		}
 	}
 	else {
@@ -1265,10 +1294,30 @@ int CScene::AddBlocksByMapData(int nindex, char mapkey,bool first)
 		auto tmp = m_ppObjects[i]->GetWorldMatrix();
 		XMFLOAT4X4 result;
 		XMStoreFloat4x4(&result, XMMatrixTranspose(XMLoadFloat4x4(&tmp)));
-		m_pInstance[i].worldMatrix = result;
-		m_pInstance[i].texIndex = rand() % 4;
 
-		
+		m_pInstance[i].worldMatrix = result;
+
+		int randint = rand() % 100;
+		int textureIndex = 0;
+
+		if (randint >= 0 && randint < 38) {
+			textureIndex = 0;
+		}
+		else if (randint >= 38 && randint < 68) {
+			textureIndex = 1;
+		}
+		else if (randint >= 68 && randint < 98) {
+			textureIndex = 2;
+		}
+		else if (randint >= 98 && randint < 100) {
+			textureIndex = 3;
+		}
+
+		m_pInstance[i].texIndex = textureIndex;
+
+		for (int p = 0; p < m_ppObjects[i]->m_nParticle; ++p) {
+			m_ppObjects[i]->m_pParticles[p]->SetMaterial(m_pParticleMaterials[textureIndex]);
+		}
 	}
 
 	for (int i = 0; i < 50; ++i) {
